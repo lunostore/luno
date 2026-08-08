@@ -16,13 +16,13 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    // Total duration: faster ~2.0 seconds
+    // Fast 1.8 seconds duration
     const timer = setTimeout(() => {
       setShow(false);
       setTimeout(() => {
         onCompleteRef.current();
-      }, 400);
-    }, 2000);
+      }, 350);
+    }, 1800);
 
     return () => clearTimeout(timer);
   }, []);
@@ -38,71 +38,70 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
     <AnimatePresence>
       {show && (
         <motion.div
-          key="luno-only-clean-intro"
+          key="luno-minimal-light-intro"
           onClick={handleSkip}
           className="fixed inset-0 z-[99999] bg-black text-white flex items-center justify-center overflow-hidden select-none cursor-pointer"
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            filter: "blur(8px)",
-            transition: { duration: 0.4, ease: [0.77, 0, 0.175, 1] },
+            filter: "blur(6px)",
+            transition: { duration: 0.35, ease: [0.77, 0, 0.175, 1] },
           }}
         >
-          {/* Main Container */}
-          <div className="relative flex items-center justify-center px-8 py-12 overflow-hidden">
-            {/* Sliding Entry: Right to Left (Faster 0.7s) */}
+          {/* Main Typography & Light Beam Container */}
+          <div className="relative flex flex-col items-center justify-center px-8 py-12 overflow-hidden">
             <motion.div
-              initial={{ x: 160, opacity: 0, filter: "blur(12px)" }}
-              animate={{ x: 0, opacity: 1, filter: "blur(0px)" }}
+              initial={{ scale: 0.9, opacity: 0, filter: "blur(10px)" }}
+              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
               transition={{
-                duration: 0.7,
+                duration: 0.6,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="relative flex items-center justify-center"
+              className="relative flex flex-col items-center justify-center"
             >
-              {/* Main Typography: ONLY "LUNO" */}
-              <h1 className="relative text-7xl sm:text-9xl md:text-[13rem] font-black tracking-[0.25em] text-white uppercase drop-shadow-[0_0_35px_rgba(255,255,255,0.6)] z-10 pl-[0.25em]">
+              {/* Main Brand Text: "LUNO" */}
+              <h1 className="relative text-7xl sm:text-9xl md:text-[13rem] font-[950] tracking-[0.25em] text-white uppercase drop-shadow-[0_0_40px_rgba(255,255,255,0.7)] z-10 pl-[0.25em]">
                 LUNO
               </h1>
 
-              {/* Shimmer Light Beam Effect Moving across the word from Right to Left (Faster 1.4s) */}
+              {/* Light Beam / Shimmer Effect Passing across the text */}
               <motion.div
-                className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-l from-transparent via-white to-transparent mix-blend-overlay opacity-90"
-                initial={{ x: "120%" }}
-                animate={{ x: "-120%" }}
+                className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-r from-transparent via-white/90 to-transparent mix-blend-overlay"
+                initial={{ x: "-120%" }}
+                animate={{ x: "120%" }}
                 transition={{
-                  duration: 1.4,
-                  delay: 0.2,
+                  duration: 1.2,
+                  delay: 0.15,
                   ease: "easeInOut",
                   repeat: Infinity,
-                  repeatDelay: 0.3,
+                  repeatDelay: 0.4,
                 }}
               />
 
-              {/* Light Laser Line Passing Right to Left */}
+              {/* Glowing Laser Light Bar Line Passing Left to Right */}
               <motion.div
-                className="absolute top-0 bottom-0 w-[4px] bg-white shadow-[0_0_25px_10px_rgba(255,255,255,0.9)] z-30"
-                initial={{ x: 250, opacity: 0 }}
+                className="absolute top-0 bottom-0 w-[6px] bg-white shadow-[0_0_30px_12px_rgba(255,255,255,0.95)] z-30 pointer-events-none"
+                initial={{ x: -280, opacity: 0 }}
                 animate={{
-                  x: [-250, 250],
+                  x: [280, -280],
                   opacity: [0, 1, 1, 0],
                 }}
                 transition={{
-                  duration: 1.2,
-                  delay: 0.25,
+                  duration: 1.1,
+                  delay: 0.2,
                   ease: "easeInOut",
                 }}
               />
             </motion.div>
           </div>
 
-          {/* Minimal Bottom Line Accent */}
+          {/* Minimalist Accent Bottom Progress Line */}
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900">
             <motion.div
               className="h-full bg-white shadow-[0_0_12px_white]"
-              initial={{ scaleX: 0, originX: 1 }}
+              initial={{ scaleX: 0, originX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 2.0, ease: "linear" }}
+              transition={{ duration: 1.8, ease: "easeInOut" }}
             />
           </div>
         </motion.div>

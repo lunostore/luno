@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LUNOIntro } from "@/components/intros/LUNOIntro";
+import { LUNOCleanIntro } from "@/components/intros/LUNOCleanIntro";
 
 // In-memory session flag: persists during SPA route navigation, resets on browser page reload (F5)
 let sessionIntroPlayed = false;
@@ -44,6 +44,6 @@ export function IntroScreen({ onComplete }: { onComplete?: () => void }) {
 
   if (!showIntro) return null;
 
-  return <LUNOIntro onComplete={handleComplete} />;
+  return <LUNOCleanIntro onComplete={handleComplete} />;
 }
 
