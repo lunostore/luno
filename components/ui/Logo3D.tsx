@@ -8,8 +8,8 @@ interface Logo3DProps {
   size?: number;
 }
 
-export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps) {
-  const actualLayers = Math.min(layers, 16);
+export function Logo3D({ className = "", layers = 16, size = 130 }: Logo3DProps) {
+  const actualLayers = Math.min(layers, 18);
 
   return (
     <div
@@ -27,18 +27,18 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
           willChange: "transform",
         }}
         animate={{
-          rotateY: [0, 360],
-          rotateX: [10, 10],
+          rotateY: [-45, 45, -45],
+          rotateX: [6, -6, 6],
         }}
         transition={{
           repeat: Infinity,
-          duration: 9,
-          ease: "linear",
+          duration: 5,
+          ease: "easeInOut",
         }}
       >
         {Array.from({ length: actualLayers }).map((_, i) => {
           const isFront = i === 0;
-          const zOffset = -i * 0.6;
+          const zOffset = -i * 0.45;
 
           return (
             <div
@@ -46,15 +46,15 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
               className="absolute inset-0 w-full h-full flex items-center justify-center"
               style={{
                 transform: `translateZ(${zOffset}px)`,
-                backfaceVisibility: "visible",
+                backfaceVisibility: "hidden",
                 filter: isFront
-                  ? "drop-shadow(0 4px 10px rgba(0,0,0,0.25))"
-                  : `brightness(${Math.max(0.35, 1 - (i / actualLayers) * 0.65)})`,
-                opacity: isFront ? 1 : 0.9,
+                  ? "drop-shadow(0 4px 12px rgba(0,0,0,0.3))"
+                  : `brightness(${Math.max(0.4, 1 - (i / actualLayers) * 0.6)})`,
+                opacity: isFront ? 1 : 0.95,
               }}
             >
-              <span className="font-black text-xl sm:text-2xl md:text-3xl tracking-[0.45em] uppercase text-zinc-950 dark:text-white whitespace-nowrap pl-[0.45em]">
-                L U N O
+              <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-widest uppercase text-zinc-950 dark:text-white whitespace-nowrap pl-1">
+                LUNO
               </span>
             </div>
           );
