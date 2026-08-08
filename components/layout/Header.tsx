@@ -111,7 +111,7 @@ export function Header() {
                   whileTap={{ scale: 0.95 }}
                   className="relative flex items-center justify-center py-1 transition-all duration-300 select-none"
                 >
-                  <Logo3D size={scrolled ? 110 : 145} />
+                  <Logo3D size={scrolled ? 140 : 180} />
                 </motion.div>
               </Link>
             </div>

@@ -157,9 +157,9 @@ export default function CheckoutPage() {
     try {
       const formData = new FormData();
       formData.append("file", screenshotFile);
-      formData.append("upload_preset", "nxt_transfers");
+      formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_transfers");
       formData.append("folder", "transfer_screenshots");
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         { method: "POST", body: formData }

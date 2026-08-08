@@ -8,7 +8,7 @@ interface Logo3DProps {
   size?: number;
 }
 
-export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps) {
+export function Logo3D({ className = "", layers = 18, size = 160 }: Logo3DProps) {
   const halfLayers = Math.floor(layers / 2);
 
   return (
@@ -16,7 +16,7 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
       className={`relative flex items-center justify-center select-none ${className}`}
       style={{
         width: size,
-        height: Math.round(size * 0.35),
+        height: Math.round(size * 0.45),
         perspective: "1000px",
       }}
     >
@@ -39,7 +39,7 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
         {/* Front 3D Extrusion Stack */}
         {Array.from({ length: halfLayers }).map((_, i) => {
           const isFront = i === 0;
-          const zOffset = (halfLayers - i) * 0.45;
+          const zOffset = (halfLayers - i) * 0.75;
 
           return (
             <div
@@ -50,11 +50,11 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
                 filter: isFront
-                  ? "drop-shadow(0 4px 10px rgba(0,0,0,0.3))"
-                  : `brightness(${Math.max(0.4, 1 - (i / halfLayers) * 0.5)})`,
+                  ? "drop-shadow(0 6px 16px rgba(0,0,0,0.35))"
+                  : `brightness(${Math.max(0.35, 1 - (i / halfLayers) * 0.55)})`,
               }}
             >
-              <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-widest uppercase text-zinc-950 dark:text-white whitespace-nowrap pl-1">
+              <span className="font-[950] text-3xl sm:text-4xl md:text-5xl tracking-[0.2em] uppercase text-zinc-950 dark:text-white whitespace-nowrap pl-2 [-webkit-text-stroke:1px_currentColor]">
                 LUNO
               </span>
             </div>
@@ -64,7 +64,7 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
         {/* Back 3D Extrusion Stack (Flipped 180° so text is 100% readable when rotated) */}
         {Array.from({ length: halfLayers }).map((_, i) => {
           const isBackFace = i === 0;
-          const zOffset = -(halfLayers - i) * 0.45;
+          const zOffset = -(halfLayers - i) * 0.75;
 
           return (
             <div
@@ -75,11 +75,11 @@ export function Logo3D({ className = "", layers = 14, size = 130 }: Logo3DProps)
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
                 filter: isBackFace
-                  ? "drop-shadow(0 4px 10px rgba(0,0,0,0.3))"
-                  : `brightness(${Math.max(0.4, 1 - (i / halfLayers) * 0.5)})`,
+                  ? "drop-shadow(0 6px 16px rgba(0,0,0,0.35))"
+                  : `brightness(${Math.max(0.35, 1 - (i / halfLayers) * 0.55)})`,
               }}
             >
-              <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-widest uppercase text-zinc-950 dark:text-white whitespace-nowrap pl-1">
+              <span className="font-[950] text-3xl sm:text-4xl md:text-5xl tracking-[0.2em] uppercase text-zinc-950 dark:text-white whitespace-nowrap pl-2 [-webkit-text-stroke:1px_currentColor]">
                 LUNO
               </span>
             </div>
