@@ -140,19 +140,23 @@ export function Footer() {
         {/* Bottom Credits */}
         <div className="mt-12 pt-6 border-t border-zinc-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-end gap-4 text-xs text-zinc-500 dark:text-zinc-400">
 
-          {/* Developer Credit & WhatsApp */}
+          {/* Developer Credit & Website Link */}
           <div className="flex flex-col md:items-end items-center gap-1">
-            <p className="font-bold text-zinc-800 dark:text-zinc-300">
-              Developed by Yousef
-            </p>
             <a
-              href="https://wa.me/201020451206"
+              href="https://nextgen-devs.online"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-mono transition-colors"
+              className="font-bold text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
             >
-              <MessageCircle size={14} />
-              <span>01020451206</span>
+              Developed by <span className="underline decoration-amber-500/50 underline-offset-4">NextGen Devs</span>
+            </a>
+            <a
+              href="https://nextgen-devs.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-mono transition-colors"
+            >
+              <span>nextgen-devs.online</span>
             </a>
           </div>
         </div>
