@@ -24,7 +24,7 @@ export default function ContactPage() {
   }, []);
 
   const storeEmail = settings?.storeEmail || "lunoegypt@gmail.com";
-  const storePhone = settings?.storePhone || "+20 101 234 5678";
+  const storePhone = settings?.storePhone || "01107108679";
   const instagramUrl =
     settings?.instagramUrl ||
     "https://www.instagram.com/lunos.store1?igsh=ajZvanBuYW0yMGtp";
@@ -104,9 +104,9 @@ export default function ContactPage() {
               },
               {
                 icon: Phone,
-                label: "Phone / WhatsApp",
+                label: "Phone / WhatsApp (For order 📥)",
                 value: storePhone,
-                href: `tel:${storePhone.replace(/\s+/g, "")}`,
+                href: `https://wa.me/201107108679`,
                 colorStyle: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400",
               },
               {
@@ -134,7 +134,7 @@ export default function ContactPage() {
               {
                 icon: MapPin,
                 label: "Location",
-                value: "Cairo, Egypt",
+                value: "Benha, Egypt",
                 href: null,
                 colorStyle: "bg-gray-100 dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-foreground",
               },

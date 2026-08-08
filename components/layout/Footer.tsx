@@ -49,12 +49,6 @@ export function Footer() {
       bgClass: "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-lg shadow-rose-500/25 hover:shadow-rose-500/50 ring-2 ring-rose-500/30",
     },
     {
-      icon: Facebook,
-      label: "Facebook",
-      href: settings?.facebookUrl || "https://www.facebook.com/share/1D4P25PPrn/?mibextid=wwXIfr",
-      bgClass: "bg-blue-600 text-white shadow-lg shadow-blue-600/25 hover:shadow-blue-600/50 ring-2 ring-blue-600/30",
-    },
-    {
       icon: TiktokIcon,
       label: "TikTok",
       href: settings?.tiktokUrl || "https://www.tiktok.com/@lunostore4?_r=1&_t=ZS-98ilUuI7eZG",
@@ -63,7 +57,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-black text-white font-sans">
+    <footer className="bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-900 transition-colors duration-300 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
@@ -72,9 +66,9 @@ export function Footer() {
             <img
               src="/logo.png"
               alt="Luno Store Brand Logo"
-              className="h-8 w-auto object-contain invert"
+              className="h-8 w-auto object-contain dark:invert"
             />
-            <p className="mt-4 text-gray-400 text-sm leading-relaxed max-w-sm">
+            <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed max-w-sm">
               {settings?.footerDescription ||
                 "Premium fashion for modern people. Elevate your style with our curated collections of high-quality clothing and accessories."}
             </p>
@@ -99,17 +93,17 @@ export function Footer() {
 
           {/* Shop */}
           <div>
-            <h4 className="font-bold text-sm tracking-widest uppercase mb-4">
+            <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
               Shop
             </h4>
-            <ul className="space-y-3 text-sm text-gray-400">
+            <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
               {[
                 { href: "/#products", label: "Our Collection" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="hover:text-white transition-colors"
+                    className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -120,10 +114,10 @@ export function Footer() {
 
           {/* Info */}
           <div>
-            <h4 className="font-bold text-sm tracking-widest uppercase mb-4">
+            <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
               Info
             </h4>
-            <ul className="space-y-3 text-sm text-gray-400">
+            <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
               {[
                 { href: "/about", label: "About Us" },
                 { href: "/contact", label: "Contact Us" },
@@ -133,7 +127,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="hover:text-white transition-colors"
+                    className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -144,19 +138,18 @@ export function Footer() {
         </div>
 
         {/* Bottom Credits */}
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-          <p>© {new Date().getFullYear()} Luno Store. All rights reserved.</p>
+        <div className="mt-12 pt-6 border-t border-zinc-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-end gap-4 text-xs text-zinc-500 dark:text-zinc-400">
 
           {/* Developer Credit & WhatsApp */}
           <div className="flex flex-col md:items-end items-center gap-1">
-            <p className="font-bold text-zinc-300">
+            <p className="font-bold text-zinc-800 dark:text-zinc-300">
               Developed by Yousef
             </p>
             <a
               href="https://wa.me/201020451206"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-mono transition-colors"
+              className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-mono transition-colors"
             >
               <MessageCircle size={14} />
               <span>01020451206</span>

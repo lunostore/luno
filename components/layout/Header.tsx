@@ -107,16 +107,21 @@ export function Header() {
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-auto transition-all duration-300">
               <Link href="/">
                 <motion.div
-                  whileHover={{ scale: 1.08 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative flex items-center justify-center py-1 transition-all duration-300"
+                  className="relative flex items-center justify-center py-1 transition-all duration-300 select-none"
                 >
-                  <div className="block md:hidden">
-                    <Logo3D size={scrolled ? 65 : 80} layers={14} className={theme === "dark" ? "invert" : "invert-0"} />
-                  </div>
-                  <div className="hidden md:block">
-                    <Logo3D size={scrolled ? 85 : 115} layers={14} className={theme === "dark" ? "invert" : "invert-0"} />
-                  </div>
+                  <span
+                    className={cn(
+                      "font-black tracking-[0.45em] uppercase transition-all duration-300 text-center pl-[0.45em]",
+                      scrolled ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl md:text-4xl",
+                      scrolled || theme === "light"
+                        ? "text-zinc-950 dark:text-white"
+                        : "text-white dark:text-white"
+                    )}
+                  >
+                    L U N O
+                  </span>
                 </motion.div>
               </Link>
             </div>
