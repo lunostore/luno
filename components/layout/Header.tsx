@@ -111,17 +111,7 @@ export function Header() {
                   whileTap={{ scale: 0.95 }}
                   className="relative flex items-center justify-center py-1 transition-all duration-300 select-none"
                 >
-                  <span
-                    className={cn(
-                      "font-black tracking-[0.45em] uppercase transition-all duration-300 text-center pl-[0.45em]",
-                      scrolled ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl md:text-4xl",
-                      scrolled || theme === "light"
-                        ? "text-zinc-950 dark:text-white"
-                        : "text-white dark:text-white"
-                    )}
-                  >
-                    L U N O
-                  </span>
+                  <Logo3D size={scrolled ? 110 : 145} />
                 </motion.div>
               </Link>
             </div>
