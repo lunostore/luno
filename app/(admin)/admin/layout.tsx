@@ -73,7 +73,7 @@ export default function AdminLayout({
 
     return () => {
       // Restore user storefront theme when leaving admin panel
-      const savedTheme = localStorage.getItem("nxt-theme");
+      const savedTheme = localStorage.getItem("luno-theme") || localStorage.getItem("nxt-theme");
       if (savedTheme === "dark") {
         html.classList.add("dark");
       }
@@ -115,8 +115,9 @@ export default function AdminLayout({
       <div className="px-6 py-6 border-b border-zinc-900 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="NXT Logo" className="h-6 w-auto object-contain invert group-hover:scale-105 transition-transform" />
+          <img src="/logo.png" alt="Luno Store Logo" className="h-6 w-auto object-contain invert group-hover:scale-105 transition-transform" />
         </Link>
+
         <button
           onClick={() => setMobileSidebarOpen(false)}
           className="lg:hidden p-1 text-zinc-400 hover:text-white"

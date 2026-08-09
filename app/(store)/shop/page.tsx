@@ -70,7 +70,7 @@ function ShopContent() {
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
-          تشكيلة منتجات NXT
+          تشكيلة منتجات LUNO
         </h1>
         <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
           تصفح أحدث تصاميم الملابس والأزياء الفاخرة المصممة بعناية لتعكس أسلوبك الخاص.

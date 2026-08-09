@@ -30,7 +30,7 @@ export async function uploadToCloudinary(file: File, folder = "products"): Promi
       process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products",
       "ml_default",
       "unsigned",
-      "nxt_products",
+      "luno_products",
     ])
   );
 

@@ -525,7 +525,7 @@ export default function AdminOrdersPage() {
                               className="object-contain"
                             />
                           ) : (
-                            <div className="text-[10px] font-black text-zinc-300">NXT</div>
+                            <div className="text-[10px] font-black text-zinc-300">LUNO</div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">

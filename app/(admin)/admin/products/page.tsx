@@ -170,7 +170,7 @@ export default function AdminProductsPage() {
                                 />
                               ) : (
                                 <div className="text-[10px] text-zinc-300 font-black tracking-tighter">
-                                  NXT
+                                  LUNO
                                 </div>
                               )}
                             </div>

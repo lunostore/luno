@@ -218,12 +218,13 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   };
 
   // Update specific size stock input
-  const updateSizeStock = (variantIndex: number, sizeIndex: number, stock: number) => {
+  const updateSizeStock = (variantIndex: number, sizeIndex: number, rawStock: string) => {
     const updatedVariants = [...watchedVariants];
     const variant = updatedVariants[variantIndex];
     const sizes = [...variant.sizes];
     
-    sizes[sizeIndex] = { ...sizes[sizeIndex], stock: Math.max(0, stock) };
+    const stockVal = rawStock === "" ? ("" as any) : Math.max(0, parseInt(rawStock) || 0);
+    sizes[sizeIndex] = { ...sizes[sizeIndex], stock: stockVal };
     updatedVariants[variantIndex] = { ...variant, sizes };
     
     setValue("variants", updatedVariants, { shouldValidate: true });
@@ -232,11 +233,27 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   const onSubmit = async (data: ProductFormData) => {
     setSaving(true);
     try {
+      const sanitizedVariants = data.variants.map((v) => ({
+        ...v,
+        sizes: v.sizes.map((s) => ({
+          ...s,
+          stock: typeof s.stock === "number" && !isNaN(s.stock) ? s.stock : (parseInt(String(s.stock)) || 0),
+        })),
+      }));
+      const sanitizedData: ProductFormData = {
+        ...data,
+        price: typeof data.price === "number" && !isNaN(data.price) ? data.price : (parseFloat(String(data.price)) || 0),
+        salePrice: data.salePrice !== undefined && data.salePrice !== null && String(data.salePrice) !== ""
+          ? parseFloat(String(data.salePrice)) || 0
+          : undefined,
+        variants: sanitizedVariants,
+      };
+
       if (productId) {
-        await updateProduct(productId, data);
+        await updateProduct(productId, sanitizedData);
         toast.success("Product updated successfully!");
       } else {
-        await createProduct(data);
+        await createProduct(sanitizedData);
         toast.success("Product created successfully!");
       }
       router.push("/admin/products");
@@ -246,6 +263,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       setSaving(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 max-w-4xl font-sans">
@@ -701,10 +719,12 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                               <span className="text-[8px] font-bold text-zinc-400 uppercase">Stock</span>
                               <input 
                                 type="number"
-                                value={sizeStock.stock}
-                                onChange={(e) => updateSizeStock(variantIdx, sizeIdx, parseInt(e.target.value) || 0)}
+                                min="0"
+                                value={sizeStock.stock ?? ""}
+                                onChange={(e) => updateSizeStock(variantIdx, sizeIdx, e.target.value)}
                                 className="w-full text-xs font-bold text-zinc-900 border-none outline-none focus:ring-0 p-0 text-right"
                               />
+
                             </div>
                             <button
                               type="button"

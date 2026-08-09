@@ -61,8 +61,8 @@ export default function CartPage() {
                   const pColorHex = item.selectedColor?.hex || "#000000";
                   const pColorName = item.selectedColor?.name || "افتراضي";
                   const pImage = item.selectedColor?.image || item.product?.mainImage || "/placeholder.jpg";
-                  const pName = item.product?.name || "منتج NXT";
-                  const pBrand = item.product?.brand || "NXT";
+                  const pName = item.product?.name || "منتج Luno";
+                  const pBrand = item.product?.brand || "Luno Store";
                   const price = item.product?.salePrice ?? item.product?.price ?? 0;
                   const qty = item.quantity || 1;
                   const key = `${pId}-${pSize}-${pColorHex}`;

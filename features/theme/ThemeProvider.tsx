@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Read theme from localStorage or system preferences
-    const savedTheme = localStorage.getItem("nxt-theme") as Theme | null;
+    const savedTheme = (localStorage.getItem("luno-theme") || localStorage.getItem("nxt-theme")) as Theme | null;
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const initialTheme = savedTheme || systemTheme;
     
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
-    localStorage.setItem("nxt-theme", nextTheme);
+    localStorage.setItem("luno-theme", nextTheme);
 
     if (nextTheme === "dark") {
       document.documentElement.classList.add("dark");

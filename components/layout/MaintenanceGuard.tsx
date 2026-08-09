@@ -16,6 +16,23 @@ interface TimeLeft {
   isExpired: boolean;
 }
 
+function TiktokIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
+
 export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { settings, loading } = useSiteSettings();
@@ -82,6 +99,7 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
 
   const whatsappPhone = settings?.storePhone || "01107108679";
   const instagramUrl = settings?.instagramUrl || "https://www.instagram.com/lunos.store1";
+  const tiktokUrl = settings?.tiktokUrl || "https://www.tiktok.com/@lunostore4";
   const storeName = settings?.storeName || "LUNO STORE";
 
   return (
@@ -102,14 +120,7 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
         {/* Logo / Brand Header */}
         <div className="flex flex-col items-center space-y-3">
           <div className="w-20 h-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center p-3 shadow-2xl shadow-emerald-500/10 relative">
-            <Image
-              src="/logo.png"
-              alt={storeName}
-              width={60}
-              height={60}
-              className="object-contain"
-              priority
-            />
+            <span className="font-black text-sm tracking-widest text-white uppercase">LUNO</span>
             <span className="absolute -top-1 -right-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
@@ -120,6 +131,7 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
             وضع الصيانة والتحديثات
           </span>
         </div>
+
 
         {/* Title & Description */}
         <div className="space-y-3">
@@ -187,11 +199,17 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
               تابعنا على الإنستجرام
             </a>
           )}
-        </div>
-
-        {/* Footer info */}
-        <div className="pt-6 border-t border-zinc-900 text-[11px] text-zinc-600 font-medium">
-          {storeName} &copy; {new Date().getFullYear()} — جميع الحقوق محفوظة
+          {tiktokUrl && (
+            <a
+              href={tiktokUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold transition-all active:scale-95"
+            >
+              <TiktokIcon size={16} />
+              تابعنا على التيك توك
+            </a>
+          )}
         </div>
       </motion.div>
     </div>

@@ -138,7 +138,7 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var saved = localStorage.getItem('nxt-theme') || localStorage.getItem('luno-theme');
+                  var saved = localStorage.getItem('luno-theme') || localStorage.getItem('nxt-theme');
                   var system = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (saved === 'dark' || (!saved && system)) {
                     document.documentElement.classList.add('dark');

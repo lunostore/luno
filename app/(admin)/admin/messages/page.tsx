@@ -299,7 +299,7 @@ export default function AdminMessagesPage() {
               {/* Quick Reply Button */}
               <div className="mt-4 flex justify-end">
                 <a
-                  href={`mailto:${msg.email}?subject=RE: NXT Inquiry Response&body=Hi ${encodeURIComponent(msg.name)},\n\nThank you for reaching out to NXT.\n\n`}
+                  href={`mailto:${msg.email}?subject=RE: Luno Store Inquiry Response&body=Hi ${encodeURIComponent(msg.name)},\n\nThank you for reaching out to Luno Store.\n\n`}
                   className="inline-flex items-center gap-1.5 text-xs font-bold bg-zinc-900 text-white px-4 py-2.5 rounded-xl hover:bg-zinc-800 transition-all shadow-md shadow-zinc-900/10"
                 >
                   <Mail size={14} />

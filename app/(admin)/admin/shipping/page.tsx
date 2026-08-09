@@ -30,9 +30,16 @@ export default function AdminShippingPage() {
     loadRates();
   }, []);
 
-  const handlePriceChange = (id: string, newPrice: number) => {
+  const handlePriceChange = (id: string, rawVal: string) => {
     setRates((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, price: Math.max(0, newPrice) } : r))
+      prev.map((r) => {
+        if (r.id !== id) return r;
+        if (rawVal === "") {
+          return { ...r, price: "" as any };
+        }
+        const parsed = parseFloat(rawVal);
+        return { ...r, price: isNaN(parsed) ? ("" as any) : Math.max(0, parsed) };
+      })
     );
   };
 
@@ -45,7 +52,11 @@ export default function AdminShippingPage() {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      await updateShippingRates(rates);
+      const sanitized = rates.map((r) => ({
+        ...r,
+        price: typeof r.price === "number" && !isNaN(r.price) ? r.price : (parseFloat(String(r.price)) || 0),
+      }));
+      await updateShippingRates(sanitized);
       toast.success("Shipping rates for all Egyptian governorates saved successfully!");
     } catch (err) {
       console.error(err);
@@ -141,13 +152,14 @@ export default function AdminShippingPage() {
                         <input
                           type="number"
                           min="0"
-                          value={rate.price}
-                          onChange={(e) => handlePriceChange(rate.id, parseFloat(e.target.value) || 0)}
+                          value={rate.price ?? ""}
+                          onChange={(e) => handlePriceChange(rate.id, e.target.value)}
                           className="w-24 px-3 py-1.5 border border-zinc-200 rounded-xl text-xs font-black text-zinc-900 focus:outline-none focus:border-zinc-900 bg-white"
                         />
                         <span className="text-xs font-bold text-zinc-400">EGP</span>
                       </div>
                     </td>
+
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => handleToggleActive(rate.id)}
