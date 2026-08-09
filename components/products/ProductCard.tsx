@@ -169,7 +169,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   }}
                   className={`w-4 h-4 rounded-full transition-all duration-200 shadow-sm border ${
                     selectedVariantIdx === vIdx
-                      ? "ring-2 ring-white scale-125 z-10"
+                      ? "ring-2 ring-zinc-900 dark:ring-white scale-125 z-10"
                       : "opacity-80 hover:opacity-100 hover:scale-110"
                   }`}
                   style={{ backgroundColor: variant.colorHex }}
@@ -177,23 +177,23 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 />
               ))}
               {product.variants.length > 6 && (
-                <span className="text-[10px] text-zinc-400 font-bold">
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold">
                   +{product.variants.length - 6}
                 </span>
               )}
             </div>
           )}
 
-          <h3 className="text-sm sm:text-base md:text-lg font-black text-white dark:text-white tracking-wide leading-tight group-hover:text-amber-400 transition-colors drop-shadow-sm">
+          <h3 className="text-sm sm:text-base md:text-lg font-black text-zinc-900 dark:text-white tracking-wide leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
             {product.name}
           </h3>
 
           <div className="flex items-center justify-center gap-2">
-            <span className="text-sm sm:text-base font-black text-white dark:text-white">
+            <span className="text-sm sm:text-base font-black text-zinc-900 dark:text-white">
               {formatPrice(displayPrice)}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-zinc-400 line-through font-semibold">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 line-through font-semibold">
                 {formatPrice(product.price)}
               </span>
             )}

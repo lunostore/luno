@@ -160,6 +160,23 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
     router.push("/", { scroll: false });
   };
 
+  // Auto-slideshow every 5 seconds if active color/product has multiple images
+  useEffect(() => {
+    if (galleryImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % galleryImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [galleryImages.length, activeImage]);
+
+  const handleNextImage = () => {
+    if (galleryImages.length > 1) {
+      setActiveImage((prev) => (prev + 1) % galleryImages.length);
+    }
+  };
+
   return (
     <div className="pt-14 sm:pt-16 pb-20 min-h-screen relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
@@ -187,18 +204,21 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="space-y-3">
             <motion.div
-              className="aspect-square relative overflow-hidden rounded-2xl bg-background border border-zinc-200/50 dark:border-zinc-800/40"
+              onClick={handleNextImage}
+              className={`aspect-square relative overflow-hidden rounded-2xl bg-background border border-zinc-200/50 dark:border-zinc-800/40 select-none ${
+                galleryImages.length > 1 ? "cursor-pointer group" : ""
+              }`}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
             >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeImage}
+                  key={activeImage + (galleryImages[activeImage] || "")}
                   className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.04 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <Image
                     src={galleryImages[activeImage] || "/placeholder.jpg"}
@@ -206,7 +226,7 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
                     fill
                     quality={95}
                     crossOrigin="anonymous"
-                    className="object-contain p-4"
+                    className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                     priority
                   />
                 </motion.div>
@@ -214,23 +234,32 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
 
               {galleryImages.length > 1 && (
                 <>
+                  <span className="absolute bottom-3 right-3 z-20 text-[10px] font-bold bg-black/60 text-white dark:bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity shadow-sm">
+                    {activeImage + 1} / {galleryImages.length} (اضغط للتالي)
+                  </span>
+
                   <button
-                    onClick={() =>
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setActiveImage((i) =>
                         i === 0 ? galleryImages.length - 1 : i - 1
-                      )
-                    }
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 dark:bg-zinc-800/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-zinc-700 transition-colors"
+                      );
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 dark:bg-zinc-800/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-zinc-700 transition-colors shadow-md z-20"
                   >
                     <ChevronLeft size={16} />
                   </button>
+
                   <button
-                    onClick={() =>
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setActiveImage((i) =>
                         i === galleryImages.length - 1 ? 0 : i + 1
-                      )
-                    }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 dark:bg-zinc-800/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-zinc-700 transition-colors"
+                      );
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 dark:bg-zinc-800/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-zinc-700 transition-colors shadow-md z-20"
                   >
                     <ChevronRight size={16} />
                   </button>
