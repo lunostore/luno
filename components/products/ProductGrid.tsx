@@ -30,7 +30,7 @@ export function ProductGrid({ products, columns = 4 }: ProductGridProps) {
           },
         },
       }}
-      className={`grid ${colClasses[columns]} gap-x-4 gap-y-10 md:gap-x-8`}
+      className={`grid ${colClasses[columns]} gap-x-4 gap-y-10 md:gap-x-8 items-stretch`}
     >
       {products.map((product, i) => (
         <ProductCard key={product.id} product={product} index={i} />
