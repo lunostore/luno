@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <!-- High Contrast Dark Luxe Container -->
-  <rect width="512" height="512" rx="110" fill="#000000" />
-  
-  <!-- Subtle inner ambient border -->
-  <rect x="12" y="12" width="488" height="488" rx="98" fill="none" stroke="#3F3F46" stroke-width="4" opacity="0.5" />
-
-  <!-- Crisp Geometric Monogram L / LUNO Emblem for Favicon -->
-  <g fill="#FFFFFF">
-    <!-- Stylized Geometric L Monogram -->
-    <path d="M 155 120 L 225 120 L 225 330 L 357 330 L 357 390 L 155 390 Z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 180" width="100%" height="100%">
+  <!-- High Contrast Solid Black LUNO Vector Typography -->
+  <g fill="#000000">
+    <!-- Letter L -->
+    <path d="M 40 30 L 78 30 L 78 115 L 140 115 L 140 145 L 40 145 Z" />
     
-    <!-- Accent Dot / Slash for Luxury Aesthetic -->
-    <rect x="305" y="120" width="52" height="52" rx="12" fill="#FFFFFF" />
+    <!-- Letter U -->
+    <path d="M 165 30 L 203 30 L 203 105 C 203 118 212 124 225 124 C 238 124 247 118 247 105 L 247 30 L 285 30 L 285 106 C 285 133 260 148 225 148 C 190 148 165 133 165 106 Z" />
+    
+    <!-- Letter N -->
+    <path d="M 310 30 L 347 30 L 400 102 L 400 30 L 438 30 L 438 145 L 401 145 L 348 73 L 348 145 L 310 145 Z" />
+    
+    <!-- Letter O -->
+    <path d="M 522 27 C 561 27 588 53 588 88 C 588 123 561 149 522 149 C 483 149 456 123 456 88 C 456 53 483 27 522 27 Z M 522 57 C 504 57 493 70 493 88 C 493 106 504 119 522 119 C 540 119 551 106 551 88 C 551 70 540 57 522 57 Z" />
   </g>
 </svg>

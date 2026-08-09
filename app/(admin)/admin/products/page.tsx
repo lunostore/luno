@@ -11,7 +11,7 @@ import {
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-import { getProducts, deleteProduct } from "@/lib/firebase/firestore";
+import { deleteProduct, subscribeToProducts } from "@/lib/firebase/firestore";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import { Spinner } from "@/components/ui/Spinner";
@@ -26,18 +26,15 @@ export default function AdminProductsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const loadProducts = () => {
+  useEffect(() => {
     setLoading(true);
-    getProducts()
-      .then((data) => {
-        setProducts(data);
-        setFiltered(data);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(loadProducts, []);
+    const unsubscribe = subscribeToProducts((data) => {
+      setProducts(data);
+      setFiltered(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const q = search.toLowerCase();
@@ -58,7 +55,6 @@ export default function AdminProductsPage() {
       await deleteProduct(deleteId);
       toast.success("Product deleted successfully");
       setDeleteId(null);
-      loadProducts();
     } catch {
       toast.error("Failed to delete product");
     } finally {

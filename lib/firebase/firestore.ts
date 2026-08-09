@@ -69,6 +69,36 @@ export async function getProducts(filters?: {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Product);
 }
 
+export function subscribeToProducts(
+  callback: (products: Product[]) => void,
+  filters?: {
+    featured?: boolean;
+    bestSeller?: boolean;
+    category?: string;
+    limitCount?: number;
+  }
+): () => void {
+  const constraints: QueryConstraint[] = [orderBy("createdAt", "desc")];
+
+  if (filters?.featured) constraints.push(where("featured", "==", true));
+  if (filters?.bestSeller) constraints.push(where("bestSeller", "==", true));
+  if (filters?.category) constraints.push(where("category", "==", filters.category));
+  if (filters?.limitCount) constraints.push(limit(filters.limitCount));
+
+  const q = query(collection(db, "products"), ...constraints);
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Product);
+      callback(products);
+    },
+    (error) => {
+      console.error("Realtime products subscription error:", error);
+    }
+  );
+}
+
 export async function getProductBySlug(slugParam: string): Promise<Product | null> {
   if (!slugParam) return null;
 

@@ -2,12 +2,12 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { getProducts, getCategories } from "@/lib/firebase/firestore";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Spinner } from "@/components/ui/Spinner";
 import type { Product } from "@/types/product";
 import type { Category } from "@/types/category";
 
+import { getCategories, subscribeToProducts } from "@/lib/firebase/firestore";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 function ShopContent() {
@@ -29,21 +29,14 @@ function ShopContent() {
   }, [categoryParam]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [allProds, allCats] = await Promise.all([
-          getProducts(),
-          getCategories(),
-        ]);
-        setProducts(allProds);
-        setCategories(allCats);
-      } catch (err) {
-        console.error("Failed to load shop data:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
+    getCategories().then(setCategories).catch(console.error);
+
+    // Realtime subscription — product updates appear instantly
+    const unsubscribe = subscribeToProducts((data) => {
+      setProducts(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   const filteredProducts = products.filter((prod) => {
