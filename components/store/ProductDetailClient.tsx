@@ -68,6 +68,38 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
       .finally(() => setLoading(false));
   }, [targetSlug]);
 
+  const hasVariants = Boolean(product?.variants && product.variants.length > 0);
+  const activeVariant = hasVariants && product?.variants
+    ? product.variants.find((v) => v.colorHex === selectedColor?.hex) || product.variants[0]
+    : null;
+
+  const galleryImages = Array.from(
+    new Set(
+      [
+        ...(activeVariant?.images || []),
+        activeVariant?.image,
+        product?.mainImage,
+        product?.hoverImage,
+        ...(product?.images || []),
+        ...(product?.variants?.flatMap((v) => [v.image, ...(v.images || [])]) || []),
+      ].filter(Boolean) as string[]
+    )
+  );
+  if (galleryImages.length === 0) {
+    galleryImages.push("/placeholder.jpg");
+  }
+
+  // Auto-slideshow every 5 seconds if active color/product has multiple images
+  useEffect(() => {
+    if (galleryImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % galleryImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [galleryImages.length, activeImage]);
+
   if (loading) {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
@@ -96,27 +128,6 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   const discountPct = hasDiscount
     ? getDiscountPercentage(product.price, product.salePrice!)
     : 0;
-
-  const hasVariants = Boolean(product.variants && product.variants.length > 0);
-  const activeVariant = hasVariants
-    ? product.variants.find((v) => v.colorHex === selectedColor?.hex) || product.variants[0]
-    : null;
-  
-  const galleryImages = Array.from(
-    new Set(
-      [
-        ...(activeVariant?.images || []),
-        activeVariant?.image,
-        product.mainImage,
-        product.hoverImage,
-        ...(product.images || []),
-        ...(product.variants?.flatMap((v) => [v.image, ...(v.images || [])]) || []),
-      ].filter(Boolean) as string[]
-    )
-  );
-  if (galleryImages.length === 0) {
-    galleryImages.push("/placeholder.jpg");
-  }
 
   const availableSizes = activeVariant?.sizes || [];
   const sizeStock = hasVariants
@@ -159,17 +170,6 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   const handleClose = () => {
     router.push("/", { scroll: false });
   };
-
-  // Auto-slideshow every 5 seconds if active color/product has multiple images
-  useEffect(() => {
-    if (galleryImages.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setActiveImage((prev) => (prev + 1) % galleryImages.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [galleryImages.length, activeImage]);
 
   const handleNextImage = () => {
     if (galleryImages.length > 1) {
