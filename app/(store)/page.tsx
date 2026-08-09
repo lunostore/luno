@@ -7,8 +7,12 @@ import { IntroScreen } from "@/components/home/IntroScreen";
 import type { Product } from "@/types/product";
 import { getProducts } from "@/lib/firebase/firestore";
 
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
+
+  useScrollRestoration();
 
   useEffect(() => {
     // Load products

@@ -11,6 +11,8 @@ import { formatPrice, getDiscountPercentage } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
 
+import { saveScrollAndReferrer } from "@/hooks/useScrollRestoration";
+
 interface ProductCardProps {
   product: Product;
   index?: number;
@@ -30,9 +32,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const staggerDelay = (index % 4) * 0.08;
 
-  // Selected Variant state
-  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
-  const activeVariant = product.variants?.[selectedVariantIdx] || null;
+  // Selected Color Variant state (null initially so product.mainImage is always default)
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
+  const activeVariant =
+    selectedVariantIdx !== null && product.variants?.[selectedVariantIdx]
+      ? product.variants[selectedVariantIdx]
+      : null;
 
   // Compute available gallery images for thumbnails:
   // 1. Explicit detailImages (3 images: logo detail, fabric detail, back/extra detail)
@@ -41,16 +46,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     ? product.detailImages
     : (function () {
         const list: string[] = [];
-        if (activeVariant?.images && activeVariant.images.length > 0) {
-          list.push(...activeVariant.images);
-        } else if (activeVariant?.image) {
-          list.push(activeVariant.image);
-        }
-        if (product.mainImage && !list.includes(product.mainImage)) list.push(product.mainImage);
-        if (product.hoverImage && !list.includes(product.hoverImage)) list.push(product.hoverImage);
+        if (product.hoverImage) list.push(product.hoverImage);
         if (product.images) {
           product.images.forEach((img) => {
-            if (img && !list.includes(img)) list.push(img);
+            if (img && !list.includes(img) && img !== product.mainImage) list.push(img);
+          });
+        }
+        if (product.variants) {
+          product.variants.forEach((v) => {
+            if (v.image && !list.includes(v.image) && v.image !== product.mainImage) list.push(v.image);
+            if (v.images) {
+              v.images.forEach((img) => {
+                if (img && !list.includes(img) && img !== product.mainImage) list.push(img);
+              });
+            }
           });
         }
         return list;
@@ -59,21 +68,39 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   // Thumbnail list for the right vertical stack (maximum 3 thumbnails)
   const stackThumbnails = detailImages.slice(0, 3);
 
-  // Primary base image (main cover image of product or selected color variant)
+  // Second Image for hover effect over the main image area
+  const secondImage =
+    product.hoverImage ||
+    (product.images && product.images.length > 0 ? product.images[0] : null) ||
+    stackThumbnails[0] ||
+    null;
+
+  // Base primary image (ALWAYS product.mainImage initially unless user selected a specific color)
   const basePrimaryImage =
-    activeVariant?.image || product.mainImage || stackThumbnails[0] || "/placeholder.jpg";
+    (activeVariant && activeVariant.image) || product.mainImage || "/placeholder.jpg";
+
+  // Mouse hover state over main image container
+  const [isHoveringMain, setIsHoveringMain] = useState(false);
 
   // Hovered thumbnail preview state (resets to null onMouseLeave)
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
 
-  // Explicit clicked thumbnail override state (resets onMouseLeave or when another color is clicked)
+  // Explicit clicked thumbnail override state
   const [clickedImage, setClickedImage] = useState<string | null>(null);
 
-  // Active display image priority: hoveredImage > clickedImage > basePrimaryImage
-  const currentDisplayImage = hoveredImage || clickedImage || basePrimaryImage;
+  // Active display image priority:
+  // 1. hoveredImage (hovering right thumbnails)
+  // 2. clickedImage (explicit thumbnail click)
+  // 3. secondImage (hovering main image area)
+  // 4. basePrimaryImage (product.mainImage)
+  const currentDisplayImage =
+    hoveredImage ||
+    clickedImage ||
+    (isHoveringMain && secondImage ? secondImage : basePrimaryImage);
 
-  // Navigate to product page
+  // Navigate to product page with scroll & referrer tracking
   const navigateToProduct = () => {
+    saveScrollAndReferrer();
     router.push(`/products?id=${encodeURIComponent(product.id)}`);
   };
 
@@ -88,14 +115,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           image: activeVariant.image || product.mainImage,
         }
       : {
-          name: "Standard",
-          hex: "#000000",
+          name: product.variants?.[0]?.colorName || "Standard",
+          hex: product.variants?.[0]?.colorHex || "#000000",
           image: product.mainImage,
         };
 
     const firstAvailableSize =
       activeVariant?.sizes?.find((s) => s.stock > 0)?.size ||
-      activeVariant?.sizes?.[0]?.size ||
+      product.variants?.[0]?.sizes?.find((s) => s.stock > 0)?.size ||
       "M";
 
     addItem(product, 1, firstAvailableSize, selectedColor);
@@ -127,6 +154,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <div
         onClick={navigateToProduct}
         onMouseLeave={() => {
+          setIsHoveringMain(false);
           setHoveredImage(null);
           setClickedImage(null);
         }}
@@ -172,7 +200,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* ── PRODUCT IMAGES DISPLAY SECTION ── */}
           <div className="grid grid-cols-12 gap-3 mb-4">
             {/* Main Large Image Container (Left - Col 8/9) */}
-            <div className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900/90 border border-zinc-800/60 shadow-inner flex items-center justify-center">
+            <div
+              onMouseEnter={() => setIsHoveringMain(true)}
+              onMouseLeave={() => setIsHoveringMain(false)}
+              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900/90 border border-zinc-800/60 shadow-inner flex items-center justify-center"
+            >
               <motion.div
                 className="w-full h-full relative"
                 whileHover={{ scale: 1.04 }}

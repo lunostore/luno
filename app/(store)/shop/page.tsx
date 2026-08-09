@@ -8,6 +8,8 @@ import { Spinner } from "@/components/ui/Spinner";
 import type { Product } from "@/types/product";
 import type { Category } from "@/types/category";
 
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+
 function ShopContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") || "all";
@@ -19,6 +21,8 @@ function ShopContent() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useScrollRestoration();
 
   useEffect(() => {
     setSelectedCategory(categoryParam);

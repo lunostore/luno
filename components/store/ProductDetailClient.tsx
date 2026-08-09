@@ -168,7 +168,16 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   };
 
   const handleClose = () => {
-    router.push("/", { scroll: false });
+    if (typeof window !== "undefined" && window.history.length > 2) {
+      router.back();
+    } else {
+      const savedReferrer = typeof window !== "undefined" ? sessionStorage.getItem("luno_referrer") : null;
+      if (savedReferrer && savedReferrer !== window.location.pathname) {
+        router.push(savedReferrer, { scroll: false });
+      } else {
+        router.push("/", { scroll: false });
+      }
+    }
   };
 
   const handleNextImage = () => {
