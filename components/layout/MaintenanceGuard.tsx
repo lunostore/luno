@@ -141,40 +141,50 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-center p-6 overflow-hidden select-none"
+      className="fixed inset-0 z-[9999] bg-[#030304] text-white flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto select-none"
       dir="rtl"
     >
-      {/* Background glow animations */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-600/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Dynamic Background Glow Lighting */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-emerald-600/20 via-teal-500/10 to-indigo-600/20 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
 
+      {/* Main Glassmorphism Container */}
       <motion.div
-        className="relative z-10 max-w-xl w-full text-center space-y-8"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative z-10 max-w-lg w-full p-6 sm:p-10 rounded-[2.5rem] bg-zinc-950/75 border border-zinc-800/80 backdrop-blur-2xl shadow-[0_0_90px_rgba(0,0,0,0.95)] text-center space-y-7 my-auto"
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Logo / Brand Header */}
-        <div className="flex flex-col items-center space-y-3">
-          <div className="w-20 h-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center p-3 shadow-2xl shadow-emerald-500/10 relative">
-            <span className="font-black text-sm tracking-widest text-white uppercase">LUNO</span>
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
-            </span>
+        <div className="flex flex-col items-center space-y-3.5">
+          <div className="relative group">
+            {/* Holographic Glowing Ring */}
+            <div className="absolute -inset-1 rounded-[1.8rem] bg-gradient-to-r from-emerald-500 via-teal-400 to-indigo-500 opacity-60 blur-md group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
+            
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-[1.7rem] bg-zinc-950 border border-zinc-800 flex items-center justify-center shadow-2xl p-3">
+              <span className="font-black text-base sm:text-lg tracking-[0.25em] text-white uppercase drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+                LUNO
+              </span>
+              {/* Online Pulse Dot */}
+              <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 shadow-[0_0_10px_#10b981]" />
+              </span>
+            </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold tracking-widest uppercase">
-            <Sparkles size={13} />
+
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-extrabold tracking-widest uppercase shadow-sm backdrop-blur-md">
+            <Sparkles size={13} className="animate-spin-slow" />
             وضع الصيانة والتحديثات
           </span>
         </div>
 
         {/* Title & Description */}
-        <div className="space-y-3">
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+        <div className="space-y-2.5">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-zinc-100 to-zinc-400 leading-tight">
             {settings?.maintenanceTitle || "الموقع قيد الصيانة والتحديث 🚀"}
           </h1>
-          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
+          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-sm mx-auto font-normal">
             {settings?.maintenanceReason ||
               "نقوم الآن بتحديث المخزون وتنزيل التشكيلة الجديدة لنقدم لكم أفضل تجربة تسوق. سنعود قريباً جداً!"}
           </p>
@@ -182,13 +192,13 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
 
         {/* Live Countdown Timer */}
         {timeLeft && !timeLeft.isExpired && (
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 flex items-center justify-center gap-1.5">
+          <div className="space-y-3 pt-1">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-zinc-400 flex items-center justify-center gap-1.5">
               <Clock size={13} className="text-emerald-400 animate-pulse" />
               الوقت المتبقي حتى الافتتاح
             </p>
 
-            <div className="grid grid-cols-4 gap-3 max-w-md mx-auto">
+            <div className="grid grid-cols-4 gap-2.5 max-w-xs sm:max-w-sm mx-auto">
               {[
                 { label: "أيام", value: timeLeft.days },
                 { label: "ساعات", value: timeLeft.hours },
@@ -197,12 +207,13 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
               ].map((unit, idx) => (
                 <div
                   key={idx}
-                  className="bg-zinc-900/90 border border-zinc-800/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 text-center shadow-lg"
+                  className="relative overflow-hidden bg-zinc-900/90 border border-zinc-800/90 rounded-2xl p-2.5 sm:p-3.5 text-center shadow-lg group hover:border-emerald-500/40 transition-colors"
                 >
-                  <span className="block font-mono text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+                  <span className="block font-mono text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight drop-shadow-[0_0_12px_rgba(16,185,129,0.5)]">
                     {String(unit.value).padStart(2, "0")}
                   </span>
-                  <span className="text-[10px] sm:text-xs font-bold text-zinc-500 mt-1 block">
+                  <span className="text-[10px] font-bold text-zinc-400 mt-0.5 block">
                     {unit.label}
                   </span>
                 </div>
@@ -211,8 +222,8 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* Luxury Social Action Cards Grid */}
-        <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-lg mx-auto">
+        {/* Luxury Social Action Buttons Grid */}
+        <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* WhatsApp */}
           <a
             href={`https://wa.me/${whatsappPhone.replace(/^0/, "20")}?text=${encodeURIComponent(
@@ -220,14 +231,14 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
             )}`}
             target="_blank"
             rel="noreferrer"
-            className="group relative flex items-center sm:flex-col justify-start sm:justify-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-zinc-900/80 border border-emerald-500/25 hover:border-emerald-500/70 hover:bg-zinc-900 transition-all duration-300 shadow-xl hover:shadow-[0_0_25px_rgba(16,185,129,0.25)] active:scale-95 text-right sm:text-center"
+            className="group relative flex sm:flex-col items-center justify-center gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-zinc-900/80 border border-emerald-500/25 hover:border-emerald-500/70 hover:bg-emerald-950/20 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] active:scale-95 text-center"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform shrink-0">
-              <MessageCircle size={20} />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform shrink-0">
+              <MessageCircle size={18} />
             </div>
             <div>
               <p className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">الواتساب</p>
-              <p className="text-[10px] text-zinc-400 font-medium">تواصل معنا مباشرة</p>
+              <p className="text-[9px] text-zinc-400 font-medium">تواصل مباشر</p>
             </div>
           </a>
 
@@ -237,14 +248,14 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
               href={instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="group relative flex items-center sm:flex-col justify-start sm:justify-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-zinc-900/80 border border-pink-500/25 hover:border-pink-500/70 hover:bg-zinc-900 transition-all duration-300 shadow-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.25)] active:scale-95 text-right sm:text-center"
+              className="group relative flex sm:flex-col items-center justify-center gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-zinc-900/80 border border-pink-500/25 hover:border-pink-500/70 hover:bg-pink-950/20 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] active:scale-95 text-center"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform shrink-0">
-                <Instagram size={20} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-500 text-white flex items-center justify-center shadow-md shadow-pink-500/30 group-hover:scale-110 transition-transform shrink-0">
+                <Instagram size={18} />
               </div>
               <div>
                 <p className="text-xs font-black text-white group-hover:text-pink-400 transition-colors">الإنستجرام</p>
-                <p className="text-[10px] text-zinc-400 font-medium">شاهد الكولكشن</p>
+                <p className="text-[9px] text-zinc-400 font-medium">شاهد المعرض</p>
               </div>
             </a>
           )}
@@ -255,14 +266,14 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
               href={tiktokUrl}
               target="_blank"
               rel="noreferrer"
-              className="group relative flex items-center sm:flex-col justify-start sm:justify-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-zinc-900/80 border border-cyan-500/25 hover:border-cyan-500/70 hover:bg-zinc-900 transition-all duration-300 shadow-xl hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] active:scale-95 text-right sm:text-center"
+              className="group relative flex sm:flex-col items-center justify-center gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-zinc-900/80 border border-cyan-500/25 hover:border-cyan-500/70 hover:bg-cyan-950/20 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] active:scale-95 text-center"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-zinc-900 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-transform shrink-0">
-                <TiktokIcon size={20} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-400 via-zinc-900 to-pink-500 text-white flex items-center justify-center shadow-md shadow-cyan-500/30 group-hover:scale-110 transition-transform shrink-0">
+                <TiktokIcon size={18} />
               </div>
               <div>
                 <p className="text-xs font-black text-white group-hover:text-cyan-400 transition-colors">التيك توك</p>
-                <p className="text-[10px] text-zinc-400 font-medium">تابع الفيديوهات</p>
+                <p className="text-[9px] text-zinc-400 font-medium">تابع الفيديوهات</p>
               </div>
             </a>
           )}
