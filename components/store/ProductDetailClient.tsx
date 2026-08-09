@@ -33,6 +33,10 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   const { addItem, openCart } = useCart();
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
     getProductBySlug(targetSlug)
       .then((data) => {
         if (data) {
@@ -101,9 +105,12 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   const galleryImages = Array.from(
     new Set(
       [
+        ...(activeVariant?.images || []),
         activeVariant?.image,
         product.mainImage,
-        ...(product.variants?.map((v) => v.image) || []),
+        product.hoverImage,
+        ...(product.images || []),
+        ...(product.variants?.flatMap((v) => [v.image, ...(v.images || [])]) || []),
       ].filter(Boolean) as string[]
     )
   );
@@ -150,11 +157,7 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   };
 
   const handleClose = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
+    router.push("/", { scroll: false });
   };
 
   return (

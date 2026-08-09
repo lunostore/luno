@@ -24,7 +24,8 @@ export interface Product {
 export interface ProductVariant {
   colorName: string;
   colorHex: string;
-  image: string; // Cloudinary URL for this specific color
+  image: string; // Primary Cloudinary URL for this specific color
+  images?: string[]; // Multiple Cloudinary URLs for this specific color variant
   sizes: SizeStock[]; // Specific sizes and stock levels for this color
 }
 

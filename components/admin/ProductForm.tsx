@@ -109,20 +109,39 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     }
   };
 
-  // Upload color-specific variant image
+  // Upload color-specific variant images (multiple images supported per color)
   const handleVariantImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const loadingToast = toast.loading("Uploading color image...");
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const loadingToast = toast.loading(`Uploading ${files.length} image(s)...`);
     try {
-      const url = await uploadToCloudinary(file);
+      const urls = await Promise.all(files.map((file) => uploadToCloudinary(file)));
       const current = [...watchedVariants];
-      current[index] = { ...current[index], image: url };
+      const existingImages = current[index].images || (current[index].image ? [current[index].image] : []);
+      const newImages = Array.from(new Set([...existingImages, ...urls]));
+      current[index] = {
+        ...current[index],
+        image: newImages[0] || "",
+        images: newImages,
+      };
       setValue("variants", current, { shouldValidate: true });
-      toast.success("Color image uploaded successfully", { id: loadingToast });
+      toast.success("Color images uploaded successfully", { id: loadingToast });
     } catch {
-      toast.error("Failed to upload image", { id: loadingToast });
+      toast.error("Failed to upload images", { id: loadingToast });
     }
+  };
+
+  const removeVariantImage = (variantIdx: number, imgIdx: number) => {
+    const current = [...watchedVariants];
+    const variant = current[variantIdx];
+    const existingImages = variant.images || (variant.image ? [variant.image] : []);
+    const updatedImages = existingImages.filter((_, idx) => idx !== imgIdx);
+    current[variantIdx] = {
+      ...variant,
+      image: updatedImages[0] || "",
+      images: updatedImages,
+    };
+    setValue("variants", current, { shouldValidate: true });
   };
 
   // Add new color variant card
@@ -563,23 +582,49 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               {/* Card Body */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                 
-                {/* Variant Image upload */}
-                <div className="md:col-span-4 flex flex-col items-center justify-center border border-dashed border-zinc-100 rounded-2xl p-4 bg-zinc-50/50">
-                  <div className="w-24 h-24 rounded-xl bg-white border border-zinc-100 flex items-center justify-center overflow-hidden p-1 relative mb-3">
-                    {variant.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={variant.image} alt="Color Preview" className="object-contain w-full h-full" />
-                    ) : (
-                      <Palette size={18} className="text-zinc-300" />
-                    )}
+                {/* Variant Images upload (Multiple photos per color supported) */}
+                <div className="md:col-span-5 flex flex-col items-center justify-center border border-dashed border-zinc-200 rounded-2xl p-4 bg-zinc-50/50 space-y-3">
+                  <div className="w-full">
+                    <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-2 text-center">
+                      Color Variant Photos ({(variant.images && variant.images.length > 0) ? variant.images.length : (variant.image ? 1 : 0)})
+                    </span>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2 max-h-36 overflow-y-auto p-1">
+                      {(variant.images && variant.images.length > 0
+                        ? variant.images
+                        : variant.image
+                        ? [variant.image]
+                        : []
+                      ).map((imgUrl, imgIdx) => (
+                        <div key={imgIdx} className="w-16 h-16 rounded-xl bg-white border border-zinc-200 relative overflow-hidden group shadow-sm flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={imgUrl} alt={`Variant ${variant.colorName} ${imgIdx + 1}`} className="w-full h-full object-contain p-0.5" />
+                          <button
+                            type="button"
+                            onClick={() => removeVariantImage(variantIdx, imgIdx)}
+                            className="absolute top-0.5 right-0.5 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-110"
+                            title="Remove image"
+                          >
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))}
+
+                      {(!variant.images || variant.images.length === 0) && !variant.image && (
+                        <div className="w-16 h-16 rounded-xl bg-white border border-dashed border-zinc-200 flex items-center justify-center text-zinc-300">
+                          <Palette size={20} />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  
-                  <label className="inline-flex items-center gap-1.5 bg-white text-zinc-700 border border-zinc-200 px-3.5 py-2 rounded-lg font-bold text-[10px] hover:bg-zinc-50 transition-all cursor-pointer">
-                    <Upload size={10} />
-                    Upload Image
+
+                  <label className="inline-flex items-center gap-1.5 bg-zinc-900 text-white px-3.5 py-2 rounded-xl font-bold text-[10px] hover:bg-zinc-800 transition-all cursor-pointer shadow-sm active:scale-95">
+                    <Upload size={12} />
+                    Upload Color Photos
                     <input 
                       type="file" 
                       accept="image/*" 
+                      multiple
                       className="hidden" 
                       onChange={(e) => handleVariantImageUpload(variantIdx, e)}
                     />

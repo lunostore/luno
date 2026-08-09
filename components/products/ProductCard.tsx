@@ -33,6 +33,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     (product.variants && product.variants.length > 1 ? product.variants[1]?.image : null) ||
     null;
 
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
+  const activeVariant = product.variants?.[selectedVariantIdx] || null;
+
+  // Get active images array for the active variant or product
+  const activeColorImages = activeVariant?.images && activeVariant.images.length > 0
+    ? activeVariant.images
+    : activeVariant?.image
+    ? [activeVariant.image]
+    : [product.mainImage, product.hoverImage, ...(product.images || [])].filter(Boolean) as string[];
+
+  const primaryDisplayImage = activeColorImages[0] || product.mainImage || "/placeholder.jpg";
+  const secondaryDisplayImage = activeColorImages[1] || secondImage || null;
+
   // Navigate by Firestore Document ID (always unique — never use slug)
   const navigateToProduct = () => {
     router.push(`/products?id=${encodeURIComponent(product.id)}`);
@@ -97,7 +110,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* Product Image Container */}
           <div className="aspect-[3/4] relative overflow-hidden rounded-2xl">
-            {product.mainImage ? (
+            {primaryDisplayImage ? (
               <motion.div
                 className="w-full h-full relative"
                 whileHover={{ scale: 1.04 }}
@@ -105,7 +118,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               >
                 {/* Main Primary Image */}
                 <Image
-                  src={product.mainImage}
+                  key={primaryDisplayImage}
+                  src={primaryDisplayImage}
                   alt={product.name}
                   fill
                   priority={index < 4}
@@ -113,14 +127,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   crossOrigin="anonymous"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className={`object-contain object-top transition-all duration-500 ease-in-out ${
-                    secondImage ? "group-hover:opacity-0" : ""
+                    secondaryDisplayImage ? "group-hover:opacity-0" : ""
                   }`}
                 />
 
                 {/* Second Hover Image (if available) */}
-                {secondImage && (
+                {secondaryDisplayImage && (
                   <Image
-                    src={secondImage}
+                    key={secondaryDisplayImage}
+                    src={secondaryDisplayImage}
                     alt={`${product.name} hover view`}
                     fill
                     quality={95}
@@ -139,36 +154,45 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <div className="pt-4 text-center space-y-1.5 px-1">
+        <div className="pt-4 text-center space-y-2 px-1">
           {/* Color swatches */}
           {product.variants && product.variants.length > 0 && (
-            <div className="flex items-center justify-center gap-1.5 mb-1">
-              {product.variants.slice(0, 5).map((variant) => (
-                <div
-                  key={variant.colorHex}
-                  className="w-3 h-3 rounded-full shadow-sm ring-1 ring-black/10 dark:ring-white/10"
+            <div className="flex items-center justify-center gap-2 mb-1.5">
+              {product.variants.slice(0, 6).map((variant, vIdx) => (
+                <button
+                  key={variant.colorHex + vIdx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedVariantIdx(vIdx);
+                  }}
+                  className={`w-4 h-4 rounded-full transition-all duration-200 shadow-sm border ${
+                    selectedVariantIdx === vIdx
+                      ? "ring-2 ring-white scale-125 z-10"
+                      : "opacity-80 hover:opacity-100 hover:scale-110"
+                  }`}
                   style={{ backgroundColor: variant.colorHex }}
                   title={variant.colorName}
                 />
               ))}
-              {product.variants.length > 5 && (
-                <span className="text-[10px] text-gray-400 font-bold">
-                  +{product.variants.length - 5}
+              {product.variants.length > 6 && (
+                <span className="text-[10px] text-zinc-400 font-bold">
+                  +{product.variants.length - 6}
                 </span>
               )}
             </div>
           )}
 
-          <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
+          <h3 className="text-sm sm:text-base md:text-lg font-black text-white dark:text-white tracking-wide leading-tight group-hover:text-amber-400 transition-colors drop-shadow-sm">
             {product.name}
           </h3>
 
           <div className="flex items-center justify-center gap-2">
-            <span className="text-sm sm:text-base font-black text-foreground">
+            <span className="text-sm sm:text-base font-black text-white dark:text-white">
               {formatPrice(displayPrice)}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through font-semibold">
+              <span className="text-xs text-zinc-400 line-through font-semibold">
                 {formatPrice(product.price)}
               </span>
             )}
