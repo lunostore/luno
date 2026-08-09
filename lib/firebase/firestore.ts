@@ -279,6 +279,12 @@ export interface SiteSettings {
   // Legal & Privacy CMS
   privacyPolicyText?: string;
   termsOfServiceText?: string;
+
+  // Maintenance & Restock System
+  maintenanceEnabled?: boolean;
+  maintenanceTitle?: string;
+  maintenanceReason?: string;
+  maintenanceEndTime?: string; // ISO String (e.g. 2026-08-09T21:00:00.000Z)
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
@@ -293,12 +299,34 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
   }
 }
 
+/** Real-time subscription to site settings. Calls callback immediately and on every update (< 1s) */
+export function subscribeSiteSettings(
+  callback: (settings: SiteSettings | null) => void
+): () => void {
+  const docRef = doc(db, "site_settings", "general");
+  return onSnapshot(
+    docRef,
+    (snapshot) => {
+      if (snapshot.exists()) {
+        callback(snapshot.data() as SiteSettings);
+      } else {
+        callback(null);
+      }
+    },
+    (err) => {
+      console.error("Failed to subscribe to site settings:", err);
+      callback(null);
+    }
+  );
+}
+
 export async function updateSiteSettings(
   data: Partial<SiteSettings>
 ): Promise<void> {
   const docRef = doc(db, "site_settings", "general");
   await setDoc(docRef, cleanUndefined(data), { merge: true });
 }
+
 
 // ─── Shipping Rates (Governorates) ──────────────────────
 

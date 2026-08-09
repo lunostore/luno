@@ -6,8 +6,10 @@ import { CartProvider } from "@/features/cart/CartProvider";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { WishlistProvider } from "@/features/wishlist/WishlistProvider";
+import { SiteSettingsProvider } from "@/features/settings/SiteSettingsProvider";
 import { ErrorTrackerProvider } from "@/components/ui/ErrorTrackerProvider";
 import { Toaster } from "sonner";
+
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID || process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-Y9G4D0TC9L";
 
@@ -185,27 +187,30 @@ export default function RootLayout({
           </>
         )}
         <ErrorTrackerProvider>
-          <AuthProvider>
-            <ThemeProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  {children}
-                  <Toaster
-                    position="bottom-right"
-                    toastOptions={{
-                      style: {
-                        background: "#000",
-                        color: "#fff",
-                        borderRadius: "12px",
-                        border: "none",
-                      },
-                    }}
-                  />
-                </WishlistProvider>
-              </CartProvider>
-            </ThemeProvider>
-          </AuthProvider>
+          <SiteSettingsProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    {children}
+                    <Toaster
+                      position="bottom-right"
+                      toastOptions={{
+                        style: {
+                          background: "#000",
+                          color: "#fff",
+                          borderRadius: "12px",
+                          border: "none",
+                        },
+                      }}
+                    />
+                  </WishlistProvider>
+                </CartProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </SiteSettingsProvider>
         </ErrorTrackerProvider>
+
       </body>
     </html>
   );

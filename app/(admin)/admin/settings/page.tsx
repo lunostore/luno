@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Video, Image as ImageIcon, Save, Sparkles, Sliders, Type, CreditCard, Share2, Info, FileText, Shield } from "lucide-react";
+import { Trash2, Video, Image as ImageIcon, Save, Sparkles, Sliders, Type, CreditCard, Share2, Info, FileText, Shield, ShieldAlert, Clock, Power } from "lucide-react";
+
 import { getSiteSettings, updateSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Spinner } from "@/components/ui/Spinner";
@@ -139,7 +140,170 @@ Luno Store is not responsible for delays caused by courier services or events be
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
+        {/* SECTION 0: MAINTENANCE & RESTOCK MODE */}
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-zinc-800 space-y-6" dir="rtl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <ShieldAlert size={20} />
+              </div>
+              <div>
+                <h2 className="font-black text-base text-white tracking-tight flex items-center gap-2">
+                  وضع الصيانة وإضافة الاستوك (Restock & Maintenance)
+                </h2>
+                <p className="text-zinc-400 text-xs mt-0.5">
+                  عند تفعيل هذا الوضع يظهر لجميع زوار الموقع عداد تنازلي وسبب الصيانة، ويعود الموقع للعمل فور انتهاء العداد تلقائياً.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setSettings({
+                  ...settings,
+                  maintenanceEnabled: !settings.maintenanceEnabled,
+                })
+              }
+              className={`flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl font-bold text-xs transition-all shadow-md ${
+                settings.maintenanceEnabled
+                  ? "bg-amber-500 hover:bg-amber-600 text-black shadow-amber-500/20"
+                  : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+              }`}
+            >
+              <Power size={15} />
+              {settings.maintenanceEnabled ? "وضع الصيانة: مفصَّل (نشط ⚠️)" : "وضع الصيانة: مغلَق (الموقع يعمل 🟢)"}
+            </button>
+          </div>
+
+          {/* Maintenance Details Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-zinc-300">
+                عنوان الصيانة الرئيسي (Title)
+              </label>
+              <input
+                type="text"
+                placeholder="الموقع قيد الصيانة والتحديث 🚀"
+                value={settings.maintenanceTitle || ""}
+                onChange={(e) => setSettings({ ...settings, maintenanceTitle: e.target.value })}
+                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-zinc-300">
+                سبب الصيانة المكتوب للعملاء (Reason / Description)
+              </label>
+              <input
+                type="text"
+                placeholder="جاري إضافة تشكيلة جديدة وتحديث الاستوك... سنعود خلال دقائق!"
+                value={settings.maintenanceReason || ""}
+                onChange={(e) => setSettings({ ...settings, maintenanceReason: e.target.value })}
+                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Timer Setup */}
+          <div className="space-y-3 pt-4 border-t border-zinc-800/80">
+            <label className="block text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+              <Clock size={14} className="text-amber-400" />
+              تحديد مدة الصيانة والعداد التنازلي (Countdown Timer Presets)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "15 دقيقة", mins: 15 },
+                { label: "30 دقيقة", mins: 30 },
+                { label: "ساعة واحدة", mins: 60 },
+                { label: "ساعتين", mins: 120 },
+                { label: "6 ساعات", mins: 360 },
+                { label: "12 ساعة", mins: 720 },
+                { label: "24 ساعة", mins: 1440 },
+              ].map((preset) => {
+                const isSelected =
+                  settings.maintenanceEndTime &&
+                  Math.abs(
+                    new Date(settings.maintenanceEndTime).getTime() -
+                      (Date.now() + preset.mins * 60 * 1000)
+                  ) < 120000;
+                return (
+                  <button
+                    key={preset.mins}
+                    type="button"
+                    onClick={() => {
+                      const endTime = new Date(Date.now() + preset.mins * 60 * 1000).toISOString();
+                      setSettings({
+                        ...settings,
+                        maintenanceEnabled: true,
+                        maintenanceEndTime: endTime,
+                      });
+                      toast.success(`تم ضبط العداد لـ ${preset.label} وتفعيل الصيانة`);
+                    }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      isSelected
+                        ? "bg-amber-500 text-black border-amber-400 shadow-md"
+                        : "bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white"
+                    }`}
+                  >
+                    +{preset.label}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    maintenanceEndTime: "",
+                  })
+                }
+                className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-900 border border-zinc-800 text-red-400 hover:bg-red-500/10 hover:border-red-500/30"
+              >
+                إلغاء التايمر (صيانة بدون وقت محدد)
+              </button>
+            </div>
+
+            {/* Custom End Time Picker */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+              <label className="text-xs text-zinc-400 font-medium whitespace-nowrap">
+                أو اختر تاريخ ووقت الانتهاء بدقة:
+              </label>
+              <input
+                type="datetime-local"
+                value={
+                  settings.maintenanceEndTime
+                    ? new Date(
+                        new Date(settings.maintenanceEndTime).getTime() -
+                          new Date().getTimezoneOffset() * 60000
+                      )
+                        .toISOString()
+                        .slice(0, 16)
+                    : ""
+                }
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const iso = new Date(e.target.value).toISOString();
+                    setSettings({
+                      ...settings,
+                      maintenanceEnabled: true,
+                      maintenanceEndTime: iso,
+                    });
+                  }
+                }}
+                className="px-3.5 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500"
+              />
+              {settings.maintenanceEndTime && (
+                <p className="text-[11px] font-mono text-amber-400 font-bold">
+                  ينتهي في: {new Date(settings.maintenanceEndTime).toLocaleString("ar-EG")}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* SECTION 1: HOMEPAGE HERO MEDIA */}
+
         <div className="bg-white rounded-2xl border border-zinc-100 p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.015)] space-y-6">
           <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div className="flex items-center gap-2">
