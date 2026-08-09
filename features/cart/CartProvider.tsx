@@ -128,7 +128,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = "nxt_cart_items_v2";
+const LOCAL_STORAGE_KEY = "luno_cart_items_v2";
+
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, {

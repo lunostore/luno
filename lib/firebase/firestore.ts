@@ -285,6 +285,7 @@ export interface SiteSettings {
   maintenanceTitle?: string;
   maintenanceReason?: string;
   maintenanceEndTime?: string; // ISO String (e.g. 2026-08-09T21:00:00.000Z)
+  maintenancePin?: string; // Secret PIN to bypass maintenance mode (e.g. "1234")
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {

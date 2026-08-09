@@ -110,4 +110,3 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
   );
 }
 
-export { LUNOCleanIntro as NXTCleanIntro };

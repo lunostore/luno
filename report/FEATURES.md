@@ -1,11 +1,12 @@
 # Luno Store — Core Features
 
-This document provides a detailed breakdown of all the premium features and interactive capabilities implemented inside the **NXT** fashion store.
+This document provides a detailed breakdown of all the premium features and interactive capabilities implemented inside the **Luno Store** fashion store.
 
 ---
 
 ## 🌓 Dynamic Light & Dark Mode
-NXT features a comprehensive, system-aware dark mode that allows users to seamlessly switch themes without any page refresh:
+Luno Store features a comprehensive, system-aware dark mode that allows users to seamlessly switch themes without any page refresh:
+
 * **Zero-Flash Reload**: Injected a blocking script inside the HTML `<head>` which reads the theme from `localStorage` or OS settings and applies the `.dark` class to `document.documentElement` before the browser starts rendering, preventing the ugly white flash during page reloads in dark mode.
 * **Smart Contrast Header**: When the header is scrolled, it changes styles dynamically:
   * **Light Mode**: White translucent background (`bg-white/95`) with charcoal gray text.

@@ -16,7 +16,7 @@ export function IntroFastStreetwear({ onComplete }: { onComplete: () => void }) 
     const t1 = setTimeout(() => {
       clearInterval(flashInterval);
       setPhase("logo");
-    }, 2600); // 2.6s: Cuts stop, NXT Logo appears with bass impact
+    }, 2600); // 2.6s: Cuts stop, LUNO Logo appears with bass impact
 
     const t2 = setTimeout(() => setPhase("exit"), 5200); // 5.2s: Transition to homepage
     const t3 = setTimeout(() => onComplete(), 6000);   // 6.0s: Finish
@@ -88,7 +88,7 @@ export function IntroFastStreetwear({ onComplete }: { onComplete: () => void }) 
             </div>
           )}
 
-          {/* Phase 2: All Motion Stops -> NXT Logo & Slogan */}
+          {/* Phase 2: All Motion Stops -> LUNO Logo & Slogan */}
           <AnimatePresence>
             {phase === "logo" && (
               <motion.div

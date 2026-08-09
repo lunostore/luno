@@ -1,1 +1,2 @@
-export { LUNOCleanIntro as LUNOLuxuryIntro, LUNOCleanIntro as NXTLuxuryIntro } from "./LUNOCleanIntro";
+export { LUNOCleanIntro as LUNOLuxuryIntro } from "./LUNOCleanIntro";
+

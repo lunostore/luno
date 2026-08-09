@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     });
 
     const response = NextResponse.json({ success: true });
-    response.cookies.set("nxt-admin-session", sessionCookie, {
+    response.cookies.set("luno-admin-session", sessionCookie, {
       maxAge: SESSION_DURATION_MS / 1000,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -34,6 +34,6 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ success: true });
-  response.cookies.delete("nxt-admin-session");
+  response.cookies.delete("luno-admin-session");
   return response;
 }

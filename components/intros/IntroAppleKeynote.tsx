@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function IntroAppleKeynote({ onComplete }: { onComplete: () => void }) {
-  const [step, setStep] = useState<"silence" | "nxt" | "statement1" | "statement2" | "exit">("silence");
+  const [step, setStep] = useState<"silence" | "luno" | "statement1" | "statement2" | "exit">("silence");
 
   useEffect(() => {
-    const t0 = setTimeout(() => setStep("nxt"), 1000);         // 1.0s: Silence then NXT fades in
+    const t0 = setTimeout(() => setStep("luno"), 1000);         // 1.0s: Silence then LUNO fades in
     const t1 = setTimeout(() => setStep("statement1"), 2300);   // 2.3s: "Not Just Clothing."
     const t2 = setTimeout(() => setStep("statement2"), 3600);   // 3.6s: "A Statement."
     const t3 = setTimeout(() => setStep("exit"), 4400);         // 4.4s: Shrinks to navbar

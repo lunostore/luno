@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
               </label>
               <input
                 type="email"
-                placeholder="nxteraa953@gmail.com"
+                placeholder="lunoegypt@gmail.com"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
                 {...register("email")}
               />

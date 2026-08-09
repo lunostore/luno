@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Video, Image as ImageIcon, Save, Sparkles, Sliders, Type, CreditCard, Share2, Info, FileText, Shield, ShieldAlert, Clock, Power } from "lucide-react";
+import { Trash2, Video, Image as ImageIcon, Save, Sparkles, Sliders, Type, CreditCard, Share2, Info, FileText, Shield, ShieldAlert, Clock, Power, Key } from "lucide-react";
+
 
 import { getSiteSettings, updateSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
 import { ImageUploader } from "@/components/admin/ImageUploader";
@@ -176,7 +177,7 @@ Luno Store is not responsible for delays caused by courier services or events be
           </div>
 
           {/* Maintenance Details Inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
             <div className="space-y-2">
               <label className="block text-xs font-bold text-zinc-300">
                 عنوان الصيانة الرئيسي (Title)
@@ -192,7 +193,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div className="space-y-2">
               <label className="block text-xs font-bold text-zinc-300">
-                سبب الصيانة المكتوب للعملاء (Reason / Description)
+                سبب الصيانة المكتوب للعملاء (Reason)
               </label>
               <input
                 type="text"
@@ -200,6 +201,20 @@ Luno Store is not responsible for delays caused by courier services or events be
                 value={settings.maintenanceReason || ""}
                 onChange={(e) => setSettings({ ...settings, maintenanceReason: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <Key size={13} className="text-amber-400" />
+                كود التجربة والتخطي السري (Bypass PIN)
+              </label>
+              <input
+                type="text"
+                placeholder="مثال: 1234"
+                value={settings.maintenancePin || ""}
+                onChange={(e) => setSettings({ ...settings, maintenancePin: e.target.value })}
+                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-colors font-mono font-bold"
               />
             </div>
           </div>

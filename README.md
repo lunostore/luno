@@ -30,7 +30,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Firebase Setup
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project named `nxt`
+2. Create a new project named `luno`
 3. Enable **Authentication** → Email/Password
 4. Enable **Firestore Database**
 5. Copy your config to `.env.local`
@@ -53,7 +53,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Cloudinary Setup
 1. Create account at [cloudinary.com](https://cloudinary.com)
 2. Go to Settings → Upload → Add upload preset
-3. Set name to `nxt_products`, mode = **Unsigned**
+3. Set name to `luno_products`, mode = **Unsigned**
 4. Copy your Cloud Name to `.env.local`
 
 ---
@@ -61,7 +61,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ## 📁 Project Structure
 
 ```
-nxt/
+luno/
 ├── app/
 │   ├── (store)/           # Public store pages
 │   │   ├── page.tsx       # Home
@@ -191,8 +191,8 @@ Product images are transparent PNGs that blend seamlessly on the white backgroun
 ```bash
 git init
 git add .
-git commit -m "feat: initial NXT platform"
-git remote add origin https://github.com/yourusername/nxt.git
+git commit -m "feat: initial Luno Store platform"
+git remote add origin https://github.com/yourusername/lunostore.git
 git push -u origin main
 ```
 
@@ -263,6 +263,7 @@ git push -u origin main
 
 ## 📞 Support
 
-For any issues, contact: nxteraa953@gmail.com
+For any issues, contact: lunoegypt@gmail.com
 
-© 2026 NXT — All rights reserved.
+© 2026 Luno Store — All rights reserved.
+

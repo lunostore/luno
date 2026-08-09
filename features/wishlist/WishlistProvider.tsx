@@ -29,7 +29,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   // Load wishlist from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("nxt-wishlist");
+      const stored = localStorage.getItem("luno-wishlist") || localStorage.getItem("nxt-wishlist");
       if (stored) {
         setWishlist(JSON.parse(stored));
       }
@@ -47,7 +47,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       } else {
         next = [...prev, product];
       }
-      localStorage.setItem("nxt-wishlist", JSON.stringify(next));
+      localStorage.setItem("luno-wishlist", JSON.stringify(next));
       return next;
     });
   }, []);

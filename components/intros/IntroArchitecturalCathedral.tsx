@@ -53,7 +53,7 @@ export function IntroArchitecturalCathedral({ onComplete }: { onComplete: () => 
 
   // Storyboard Scene Transitions
   useEffect(() => {
-    const t1 = setTimeout(() => setScene(2), 1200);   // 1.2s: Reveal Brand Title & NXT Logo
+    const t1 = setTimeout(() => setScene(2), 1200);   // 1.2s: Reveal Brand Title & LUNO Logo
     const t2 = setTimeout(() => setScene(3), 3600);   // 3.6s: Photos Reveal
     const t3 = setTimeout(() => setScene(4), 6200);   // 6.2s: Exit & Complete
     const t4 = setTimeout(() => onComplete(), 7000);  // 7.0s: Complete
@@ -136,7 +136,7 @@ export function IntroArchitecturalCathedral({ onComplete }: { onComplete: () => 
             </motion.div>
           )}
 
-          {/* SCENE 02: CENTRAL MAIN NXT BRAND LOGO REVEAL */}
+          {/* SCENE 02: CENTRAL MAIN LUNO BRAND LOGO REVEAL */}
           {scene === 2 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.75, filter: "blur(18px)" }}

@@ -1,6 +1,7 @@
-# NXT Store — Technologies Stack
+# Luno Store — Technologies Stack
 
-NXT leverages modern frontend paradigms, client-side animations, and serverless database providers to ensure extremely fast loading times, complete type safety, and zero deployment friction.
+Luno Store leverages modern frontend paradigms, client-side animations, and serverless database providers to ensure extremely fast loading times, complete type safety, and zero deployment friction.
+
 
 ---
 

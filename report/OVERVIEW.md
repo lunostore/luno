@@ -1,6 +1,6 @@
 # Luno Store — Project Overview
 
-Welcome to **NXT**, a state-of-the-art, premium fashion e-commerce platform designed for modern minimalism and luxury. The website features an ultra-responsive single-page shopping interface, fluid 3D cinematic animations, complete dark/light mode compatibility, and a fully integrated Firebase backend.
+Welcome to **Luno Store**, a state-of-the-art, premium fashion e-commerce platform designed for modern minimalism and luxury. The website features an ultra-responsive single-page shopping interface, fluid 3D cinematic animations, complete dark/light mode compatibility, and a fully integrated Firebase backend.
 
 ---
 
@@ -9,7 +9,7 @@ Welcome to **NXT**, a state-of-the-art, premium fashion e-commerce platform desi
 The project is built on **Next.js 15 (App Router)** and follows a structured, clean, and modular folder layout:
 
 ```text
-nxt/
+lunostore/
 ├── app/                        # Next.js App Router root
 │   ├── (admin)/                # Administrative routes (Dashboard, settings)
 │   │   └── admin/              # Admin dashboard pages

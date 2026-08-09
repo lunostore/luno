@@ -241,4 +241,3 @@ export function LUNOIntro({ onComplete }: LUNOIntroProps) {
   );
 }
 
-export { LUNOIntro as NXTIntro };

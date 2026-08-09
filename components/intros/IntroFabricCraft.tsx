@@ -8,7 +8,7 @@ export function IntroFabricCraft({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("details"), 2000);  // 2.0s: Macro stitching details
-    const t2 = setTimeout(() => setPhase("logo"), 4200);     // 4.2s: Fabric fades to black, NXT logo appears
+    const t2 = setTimeout(() => setPhase("logo"), 4200);     // 4.2s: Fabric fades to black, LUNO logo appears
     const t3 = setTimeout(() => setPhase("slogan"), 5400);   // 5.4s: "Modern Luxury" slogan
     const t4 = setTimeout(() => setPhase("exit"), 6300);     // 6.3s: Transition
     const t5 = setTimeout(() => onComplete(), 7000);        // 7.0s: Complete
@@ -76,7 +76,7 @@ export function IntroFabricCraft({ onComplete }: { onComplete: () => void }) {
             )}
           </AnimatePresence>
 
-          {/* Phase 3 & 4: NXT Logo & Modern Luxury Slogan with Emerald Highlights */}
+          {/* Phase 3 & 4: LUNO Logo & Modern Luxury Slogan with Emerald Highlights */}
           <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4">
             {(phase === "logo" || phase === "slogan") && (
               <motion.div

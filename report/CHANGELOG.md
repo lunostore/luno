@@ -1,6 +1,6 @@
-# NXT Store — Changelog & Mod Log
+# Luno Store — Changelog & Mod Log
 
-This document lists all modifications, fixes, and improvements applied to the **NXT** codebase during this development session.
+This document lists all modifications, fixes, and improvements applied to the **Luno Store** codebase during this development session.
 
 ---
 
@@ -22,7 +22,7 @@ This document lists all modifications, fixes, and improvements applied to the **
 ### 🌀 3D Logo & Branding
 * **Asset Automation**: Updated `push_to_github.bat` and `push_to_github.sh` to automatically copy logo assets (`12-removebg-preview.png` and banners) from Desktop into the `/public` workspace folder.
 * **3D Extrusion Component**: Built `<Logo3D />` that stacks 15 transparent PNG layers with Z-axis offset to form a physical 3D rotated logo.
-* **Header/Footer Graphics**: Swapped out plain text "NXT" for the brand logo `/logo.png`, incorporating a dynamic `invert` filter to remain white on dark backgrounds and black on light backgrounds.
+* **Header/Footer Graphics**: Swapped out plain text "LUNO" for the brand logo `/logo.png`, incorporating a dynamic `invert` filter to remain white on dark backgrounds and black on light backgrounds.
 
 ### 📐 SPA Catalog Restructuring
 * **Scroll Action**: Modified the Hero "Shop Now" scroll button to smoothly glide down to the products list instead of redirecting pages.
@@ -34,5 +34,5 @@ This document lists all modifications, fixes, and improvements applied to the **
 
 ## 🔒 Configuration Credentials
 Set default fallback configuration values to the active Firebase project:
-* **Firebase Project ID**: `nxt1-a4254`
-* **Admin Email**: `nxteraa953@gmail.com`
+* **Admin Email**: `lunoegypt@gmail.com`
+
