@@ -128,41 +128,49 @@ export function HeroSection() {
           {settings?.heroTagline || "LUNO IS YOURS • MODERN STREETWEAR & LUXURY FASHION"}
         </motion.p>
 
-        {/* 21st.dev Magic UI Shimmer 3D CTA Button */}
+        {/* 21st.dev Metallic Dark Gold Halo Shimmer SHOP NOW Button */}
         <motion.div
           initial={{ opacity: 0, y: 25, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.6, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="relative group mt-10"
         >
-          {/* Ambient Glow Backing Flare */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-zinc-900 via-zinc-400 to-zinc-900 rounded-full blur-md opacity-30 group-hover:opacity-70 group-hover:blur-lg transition-all duration-500" />
+          {/* Ambient Warm Golden Halo Glow Flare (Behind Button) */}
+          <div className="absolute -inset-2 bg-gradient-to-r from-amber-600/30 via-yellow-500/50 to-amber-600/30 rounded-full blur-xl opacity-60 group-hover:opacity-100 group-hover:blur-2xl transition-all duration-500 pointer-events-none" />
 
-          {/* Main Shimmer Button */}
+          {/* Secondary Outer Gold Ring Flare */}
+          <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-amber-500/40 via-amber-300/60 to-amber-500/40 opacity-70 group-hover:opacity-100 blur-[2px] transition-all duration-300 pointer-events-none" />
+
+          {/* Main Metallic Dark Pill Button */}
           <motion.button
             onClick={handleScroll}
             whileHover={{ scale: 1.06, y: -2 }}
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 350, damping: 22 }}
-            className="relative inline-flex items-center gap-3.5 bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-10 py-4 rounded-full font-black text-sm tracking-wider uppercase shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-zinc-800 dark:border-white/20 overflow-hidden transition-colors cursor-pointer"
+            className="relative inline-flex items-center gap-3.5 px-9 py-4 rounded-full font-black text-sm sm:text-base tracking-widest uppercase text-white bg-gradient-to-r from-[#0a0a0a] via-[#1a1a1c] to-[#3a3a3d] border border-white/25 shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_25px_rgba(217,178,112,0.35)] overflow-hidden transition-all cursor-pointer select-none"
           >
-            {/* Moving Shimmer Light Ray */}
+            {/* Shimmer Light Ray Moving Across Button */}
             <motion.div
-              className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 dark:via-black/20 to-transparent skew-x-[-25deg]"
+              className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-25deg] pointer-events-none"
               initial={{ x: "-150%" }}
               animate={{ x: "250%" }}
-              transition={{ repeat: Infinity, duration: 2.8, ease: "linear", repeatDelay: 1 }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: "linear", repeatDelay: 1 }}
             />
 
-            <ShoppingBag size={18} className="relative z-10 text-white dark:text-zinc-950 group-hover:scale-110 transition-transform duration-300" />
+            {/* Shopping Bag Outline Icon */}
+            <div className="relative z-10 p-1.5 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+              <ShoppingBag size={18} className="text-white group-hover:scale-110 transition-transform duration-300" />
+            </div>
             
-            <span className="relative z-10">
-              {settings?.heroButtonText || "Shop Now"}
+            {/* Button Label Text */}
+            <span className="relative z-10 font-extrabold text-white drop-shadow-md">
+              {settings?.heroButtonText || "SHOP NOW"}
             </span>
 
+            {/* Arrow Right Icon */}
             <ArrowRight
               size={18}
-              className="relative z-10 group-hover:translate-x-1.5 transition-transform duration-300"
+              className="relative z-10 text-white group-hover:translate-x-2 transition-transform duration-300"
             />
           </motion.button>
         </motion.div>
