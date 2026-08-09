@@ -57,8 +57,8 @@ export async function uploadToCloudinary(file: File, folder = "products"): Promi
       } else {
         lastErrorText = await response.text();
       }
-    } catch (err: any) {
-      lastErrorText = err?.message || String(err);
+    } catch (err: unknown) {
+      lastErrorText = err instanceof Error ? err.message : String(err);
     }
   }
 

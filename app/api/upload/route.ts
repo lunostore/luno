@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const result = await new Promise<any>((resolve, reject) => {
+    const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: folder,
@@ -28,15 +28,17 @@ export async function POST(req: Request) {
         },
         (error, result) => {
           if (error) reject(error);
-          else resolve(result);
+          else if (result) resolve({ secure_url: result.secure_url, public_id: result.public_id });
+          else reject(new Error("Upload failed with empty result"));
         }
       );
       uploadStream.end(buffer);
     });
 
     return NextResponse.json({ secure_url: result.secure_url, public_id: result.public_id });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Cloudinary server upload error:", err);
-    return NextResponse.json({ error: err?.message || "Upload failed" }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : "Upload failed";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

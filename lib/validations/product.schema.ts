@@ -8,7 +8,8 @@ export const sizeStockSchema = z.object({
 export const productVariantSchema = z.object({
   colorName: z.string().min(1, "Color name is required"),
   colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Valid hex color required"),
-  image: z.string().url("Color variant image is required"),
+  image: z.string().or(z.literal("")).default(""),
+  images: z.array(z.string()).optional(),
   sizes: z.array(sizeStockSchema).min(1, "At least one size is required"),
 });
 

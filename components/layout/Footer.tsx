@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Instagram, Facebook, MessageCircle } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { getSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
 
 function TiktokIcon({ size = 20 }: { size?: number }) {
