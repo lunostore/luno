@@ -1,49 +1,69 @@
 export async function uploadToCloudinary(file: File, folder = "products"): Promise<string> {
-  // 1. Try secure Server-side API Upload route first
-  try {
-    const apiFormData = new FormData();
-    apiFormData.append("file", file);
-    apiFormData.append("folder", folder);
+  // 1. Try secure Server-side API Upload routes (/api/upload & /api/admin/cloudinary/upload)
+  const apiEndpoints = ["/api/upload", "/api/admin/cloudinary/upload"];
+  for (const endpoint of apiEndpoints) {
+    try {
+      const apiFormData = new FormData();
+      apiFormData.append("file", file);
+      apiFormData.append("folder", folder);
 
-    const apiRes = await fetch("/api/admin/cloudinary/upload", {
-      method: "POST",
-      body: apiFormData,
-    });
+      const apiRes = await fetch(endpoint, {
+        method: "POST",
+        body: apiFormData,
+      });
 
-    if (apiRes.ok) {
-      const apiData = await apiRes.json();
-      if (apiData.secure_url) {
-        return apiData.secure_url as string;
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        if (apiData.secure_url) {
+          return apiData.secure_url as string;
+        }
       }
+    } catch (err) {
+      console.warn(`Server API Cloudinary upload (${endpoint}) failed:`, err);
     }
-  } catch (err) {
-    console.warn("Server API Cloudinary upload fallback triggered:", err);
   }
 
-  // 2. Client-side Unsigned Upload fallback
-  const formData = new FormData();
-  formData.append("file", file);
+  // 2. Client-side Direct Upload fallback with multiple preset attempts
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products";
-
-  formData.append("upload_preset", preset);
-
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
+  const presetsToTry = Array.from(
+    new Set([
+      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products",
+      "ml_default",
+      "unsigned",
+      "nxt_products",
+    ])
   );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Cloudinary Client Upload Error:", errorText);
-    throw new Error("Failed to upload image to Cloudinary");
+  let lastErrorText = "";
+  for (const preset of presetsToTry) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", preset);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.secure_url) {
+          return data.secure_url as string;
+        }
+      } else {
+        lastErrorText = await response.text();
+      }
+    } catch (err: any) {
+      lastErrorText = err?.message || String(err);
+    }
   }
 
-  const data = await response.json();
-  return data.secure_url as string;
+  console.error("All Cloudinary upload attempts failed:", lastErrorText);
+  throw new Error("Failed to upload image to Cloudinary. Please set CLOUDINARY_API_KEY or create Unsigned Upload Preset.");
 }
 
 export async function uploadMultipleToCloudinary(files: File[]): Promise<string[]> {
