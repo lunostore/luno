@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff } from "lucide-react";
+import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff, Copy, Check } from "lucide-react";
 import { getOrders, updateOrderStatus, deleteOrder } from "@/lib/firebase/firestore";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatPrice, formatDate, buildWhatsAppConfirmationMessage } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order";
 import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/types/order";
 import { Spinner } from "@/components/ui/Spinner";
 import { toast } from "sonner";
+
 
 const STATUS_TABS: { value: OrderStatus | "all"; label: string }[] = [
   { value: "all", label: "كل الطلبات" },
@@ -44,6 +45,23 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingScreenshot, setDeletingScreenshot] = useState(false);
+  const [copiedWaMsg, setCopiedWaMsg] = useState(false);
+
+  const handleSendWhatsAppConfirmation = (order: Order) => {
+    const waNumber = (order.whatsappPhone || order.phone).replace(/^0/, "20");
+    const messageText = buildWhatsAppConfirmationMessage(order, "LUNO");
+    const encoded = encodeURIComponent(messageText);
+    window.open(`https://wa.me/${waNumber}?text=${encoded}`, "_blank");
+  };
+
+  const handleCopyWhatsAppMessage = (order: Order) => {
+    const messageText = buildWhatsAppConfirmationMessage(order, "LUNO");
+    navigator.clipboard.writeText(messageText);
+    setCopiedWaMsg(true);
+    toast.success("تم نسخ رسالة تأكيد الطلب للعميل (تصميم 1)");
+    setTimeout(() => setCopiedWaMsg(false), 2500);
+  };
+
 
   useEffect(() => {
     setLoading(true);
@@ -401,7 +419,48 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
 
+                {/* WhatsApp Confirmation Message (Design 1) Card */}
+                <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-5 shadow-[0_4px_20px_rgba(16,185,129,0.04)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-emerald-600/20">
+                        WA
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-emerald-950">
+                          رسالة تأكيد الطلب (التصميم 1 🛍️)
+                        </h4>
+                        <p className="text-[10px] font-medium text-emerald-700">
+                          تحتوي التفاصيل كاملة + رد 1 للتأكيد أو 2 للإلغاء
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCopyWhatsAppMessage(selectedOrder)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-emerald-200 hover:border-emerald-400 text-emerald-800 rounded-xl text-xs font-bold transition-all shadow-sm"
+                        title="نسخ نص الرسالة"
+                      >
+                        {copiedWaMsg ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                        {copiedWaMsg ? "تم النسخ" : "نسخ النص"}
+                      </button>
+                      <button
+                        onClick={() => handleSendWhatsAppConfirmation(selectedOrder)}
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+                        title="إرسال عبر الواتساب مباشرة"
+                      >
+                        <MessageCircle size={13} />
+                        إرسال عبر واتساب
+                      </button>
+                    </div>
+                  </div>
+                  <div className="bg-white/90 border border-emerald-100 rounded-xl p-3.5 text-xs text-emerald-950 font-mono whitespace-pre-wrap leading-relaxed select-all max-h-48 overflow-y-auto">
+                    {buildWhatsAppConfirmationMessage(selectedOrder, "LUNO")}
+                  </div>
+                </div>
+
                 {/* Transfer Screenshot */}
+
                 {selectedOrder.transferScreenshot && (
                   <div>
                     <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">

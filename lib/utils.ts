@@ -58,3 +58,74 @@ export function generateSKU(): string {
   }
   return `LUNO-${code}`;
 }
+
+/** Generates Design 1 WhatsApp Order Confirmation message with 1/2 options */
+export function buildWhatsAppConfirmationMessage(
+  order: {
+    id: string;
+    customerName: string;
+    phone: string;
+    governorate?: string;
+    city: string;
+    address: string;
+    items: Array<{
+      productName: string;
+      quantity: number;
+      price: number;
+      selectedSize?: string;
+      selectedColor?: { name: string };
+    }>;
+    subtotal?: number;
+    shippingCost?: number;
+    total: number;
+  },
+  storeName = "MYZ"
+): string {
+  const shortId = order.id.slice(0, 8).toUpperCase();
+  const itemsText = order.items
+    .map(
+      (item) =>
+        `- ${item.productName}${item.selectedSize ? ` (${item.selectedSize})` : ""}${
+          item.selectedColor?.name ? ` - ${item.selectedColor.name}` : ""
+        } (الكمية: ${item.quantity}) - ${formatPrice(item.price * item.quantity)}`
+    )
+    .join("\n");
+
+  const fullAddress = [order.governorate, order.city, order.address]
+    .filter(Boolean)
+    .join(" - ");
+
+  const subtotalText = order.subtotal ? formatPrice(order.subtotal) : formatPrice(order.total);
+  const shippingText =
+    order.shippingCost !== undefined ? formatPrice(order.shippingCost) : "حسب المحافظة";
+  const totalText = formatPrice(order.total);
+
+  return `أهلاً بك ${order.customerName} 👋
+شكراً لطلبك من ${storeName}! ✨
+
+📝 تفاصيل طلبك:
+-----------------------------------
+رقم الطلب: #${shortId}
+
+🛒 المنتجات:
+${itemsText}
+
+📍 بيانات التوصيل:
+- الاسم: ${order.customerName}
+- الهاتف: ${order.phone}
+- العنوان: ${fullAddress}
+
+💰 الفاتورة:
+- مجموع المنتجات: ${subtotalText}
+- مصاريف الشحن: ${shippingText}
+- الإجمالي النهائي: ${totalText}
+-----------------------------------
+
+🚚 لتجهيز طلبك وتسليمه لشركة الشحن فوراً، نرجو تأكيد الطلب:
+
+1️⃣ تأكيد الطلب (للبدء في التغليف والشحن)
+2️⃣ إلغاء الطلب
+
+✍️ من فضلك أرسل الرقم (1) للتأكيد أو (2) للإلغاء.`;
+}
+

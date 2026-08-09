@@ -51,8 +51,9 @@ export default function CheckoutPage() {
 
   // Shipping & settings
   const [shippingRates, setShippingRates] = useState<GovernorateRate[]>([]);
-  const [vodafoneNumber, setVodafoneNumber] = useState("01000000000");
-  const [instapayUsername, setInstapayUsername] = useState("@nxtstore");
+  const [vodafoneNumber, setVodafoneNumber] = useState("01107108679");
+  const [instapayUsername, setInstapayUsername] = useState("@lunostore");
+
   const [onlinePaymentEnabled, setOnlinePaymentEnabled] = useState<boolean>(true);
   const [orderSuccess, setOrderSuccess] = useState(false);
 
