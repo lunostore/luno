@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import { X, Heart, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
+import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { formatPrice } from "@/lib/utils";
 
 export function WishlistSidebar() {
-  const router = useRouter();
   const { isOpen, closeWishlist, wishlist, toggleWishlist } = useWishlist();
+  const { openProduct } = useProductModal();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -79,7 +79,7 @@ export function WishlistSidebar() {
                         </div>
                         <div className="flex items-center justify-between mt-1.5">
                           <span className="text-xs font-black">{formatPrice(displayPrice)}</span>
-                          <button type="button" onClick={() => { closeWishlist(); router.push(`/products?id=${encodeURIComponent(product.id)}`); }} className="inline-flex items-center gap-1 bg-black text-white dark:bg-white dark:text-black px-2.5 py-1.5 rounded-lg text-[9px] font-black hover:opacity-90 transition-all cursor-pointer shadow-sm">
+                          <button type="button" onClick={() => { closeWishlist(); openProduct(product.id); }} className="inline-flex items-center gap-1 bg-black text-white dark:bg-white dark:text-black px-2.5 py-1.5 rounded-lg text-[9px] font-black hover:opacity-90 transition-all cursor-pointer shadow-sm">
                             <Eye size={10} />
                             عرض المنتج
                           </button>

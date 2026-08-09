@@ -14,7 +14,7 @@ import type { Product, ProductVariant } from "@/types/product";
 import { Spinner } from "@/components/ui/Spinner";
 import { Badge } from "@/components/ui/Badge";
 
-export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: string } = {}) {
+export default function ProductDetailClient({ overrideSlug, onClose }: { overrideSlug?: string; onClose?: () => void } = {}) {
   const params = useParams();
   const rawSlug = (params?.slug as string) || "";
   const targetSlug = overrideSlug || rawSlug;
@@ -33,7 +33,7 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   const { addItem, openCart } = useCart();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !onClose) {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
 
@@ -168,6 +168,10 @@ export default function ProductDetailClient({ overrideSlug }: { overrideSlug?: s
   };
 
   const handleClose = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
     if (typeof window !== "undefined" && window.history.length > 2) {
       router.back();
     } else {

@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag, Eye, Shirt, Layers, Users } from "lucide-react";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useCart } from "@/features/cart/CartProvider";
+import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
-
-import { saveScrollAndReferrer } from "@/hooks/useScrollRestoration";
 
 interface ProductCardProps {
   product: Product;
@@ -19,9 +17,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const router = useRouter();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addItem, openCart } = useCart();
+  const { openProduct } = useProductModal();
 
   const isFavorite = isInWishlist(product.id);
   const displayPrice = product.salePrice ?? product.price;
@@ -98,10 +96,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     clickedImage ||
     (isHoveringMain && secondImage ? secondImage : basePrimaryImage);
 
-  // Navigate to product page with scroll & referrer tracking
+  // Open product in modal overlay (no page navigation = no reload)
   const navigateToProduct = () => {
-    saveScrollAndReferrer();
-    router.push(`/products?id=${encodeURIComponent(product.id)}`);
+    openProduct(product.id);
   };
 
   // Add to cart directly

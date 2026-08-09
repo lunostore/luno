@@ -1,9 +1,12 @@
+"use client";
+
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartSidebar } from "@/components/cart/CartSidebar";
 import { WishlistSidebar } from "@/components/wishlist/WishlistSidebar";
 import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { MaintenanceGuard } from "@/components/layout/MaintenanceGuard";
+import { ProductModalProvider } from "@/features/product-modal/ProductModalProvider";
 
 export default function StoreLayout({
   children,
@@ -12,13 +15,14 @@ export default function StoreLayout({
 }) {
   return (
     <MaintenanceGuard>
-      <VisitorTracker />
-      <Header />
-      <CartSidebar />
-      <WishlistSidebar />
-      <main>{children}</main>
-      <Footer />
+      <ProductModalProvider>
+        <VisitorTracker />
+        <Header />
+        <CartSidebar />
+        <WishlistSidebar />
+        <main>{children}</main>
+        <Footer />
+      </ProductModalProvider>
     </MaintenanceGuard>
   );
 }
-
