@@ -44,12 +44,18 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           slug: initialData.slug,
           sku: initialData.sku || generateSKU(),
           description: initialData.description,
+          subtitle: initialData.subtitle || "Premium Oversized Fit",
+          material: initialData.material || "100% Cotton",
+          weight: initialData.weight || "230 GSM",
+          fit: initialData.fit || "Unisex",
+          isNew: initialData.isNew ?? false,
           price: initialData.price,
           salePrice: initialData.salePrice,
           category: initialData.category || "all",
           brand: initialData.brand || "Luno Store",
           mainImage: initialData.mainImage,
           hoverImage: initialData.hoverImage || "",
+          detailImages: initialData.detailImages || [],
           variants: initialData.variants,
           featured: initialData.featured ?? false,
           bestSeller: initialData.bestSeller ?? false,
@@ -58,6 +64,12 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       : {
           category: "all",
           brand: "Luno Store",
+          subtitle: "Premium Oversized Fit",
+          material: "100% Cotton",
+          weight: "230 GSM",
+          fit: "Unisex",
+          isNew: false,
+          detailImages: [],
           variants: [],
           featured: false,
           bestSeller: false,
@@ -70,6 +82,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
 
   const watchedMainImage = watch("mainImage");
   const watchedHoverImage = watch("hoverImage");
+  const watchedDetailImages = watch("detailImages") || [];
   const watchedVariants = watch("variants") || [];
   const watchedSizeChartType = watch("sizeChartType") || "tshirt";
 
@@ -107,6 +120,27 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     } catch {
       toast.error("Failed to upload image", { id: loadingToast });
     }
+  };
+
+  // Upload 3 detail images for the card thumbnails stack (لوجو، خامة، تفاصيل)
+  const handleDetailImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const loadingToast = toast.loading(`Uploading ${files.length} detail photo(s)...`);
+    try {
+      const urls = await Promise.all(files.map((file) => uploadToCloudinary(file)));
+      const existing = watchedDetailImages;
+      const updated = Array.from(new Set([...existing, ...urls])).slice(0, 3);
+      setValue("detailImages", updated, { shouldValidate: true });
+      toast.success("Card detail photos uploaded successfully", { id: loadingToast });
+    } catch {
+      toast.error("Failed to upload detail photos", { id: loadingToast });
+    }
+  };
+
+  const removeDetailImage = (imgIdx: number) => {
+    const updated = watchedDetailImages.filter((_, idx) => idx !== imgIdx);
+    setValue("detailImages", updated, { shouldValidate: true });
   };
 
   // Upload color-specific variant images (multiple images supported per color)
@@ -341,6 +375,108 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               placeholder="وصف القماش، المقاس، التصميم، تعليمات الغسيل..."
               {...register("description")}
             />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
+              العنوان الفرعي للمنتج (Subtitle)
+            </label>
+            <input
+              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800"
+              placeholder="مثال: Premium Oversized Fit"
+              {...register("subtitle")}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
+              الخامة (Material)
+            </label>
+            <input
+              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800"
+              placeholder="مثال: 100% Cotton"
+              {...register("material")}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
+              الوزن / السمك (GSM)
+            </label>
+            <input
+              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800"
+              placeholder="مثال: 230 GSM"
+              {...register("weight")}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
+              القصة / الفئة (Fit / Gender)
+            </label>
+            <input
+              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800"
+              placeholder="مثال: Unisex / Boxy Fit"
+              {...register("fit")}
+            />
+          </div>
+
+          <div className="sm:col-span-2 pt-2">
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                {...register("isNew")}
+                className="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+              />
+              <span className="text-xs font-bold text-zinc-800">تمييز المنتج كمنتج جديد (عرض شارة NEW الذهبية)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+
+      {/* 2. Card Detail Images (3 Thumbnail Photos for Card Stack) */}
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
+        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">Card Detail Photos (3 صور المصغرة للكارت)</h2>
+        <p className="text-[10px] text-zinc-400 font-medium mb-6">
+          أضف 3 صور للتفاصيل المعروضة عمودياً يمين الكارت (صورة اللوجو، صورة الخاطة/التيكيت، صورة الظهر أو التفاصيل الإضافية).
+        </p>
+
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-4">
+            {watchedDetailImages.map((imgUrl, imgIdx) => (
+              <div key={imgIdx} className="w-24 h-24 rounded-2xl bg-zinc-50 border border-zinc-200 relative overflow-hidden group shadow-sm flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imgUrl} alt={`Detail ${imgIdx + 1}`} className="w-full h-full object-contain p-1" />
+                <button
+                  type="button"
+                  onClick={() => removeDetailImage(imgIdx)}
+                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-110"
+                  title="إزالة الصورة"
+                >
+                  <X size={12} />
+                </button>
+                <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">
+                  صورة {imgIdx + 1}
+                </span>
+              </div>
+            ))}
+
+            {watchedDetailImages.length < 3 && (
+              <label className="w-24 h-24 rounded-2xl border-2 border-dashed border-zinc-200 hover:border-zinc-400 bg-zinc-50/50 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all">
+                <Upload size={16} className="text-zinc-400" />
+                <span className="text-[9px] font-bold text-zinc-500 text-center px-1">
+                  رفع صور التفاصيل ({3 - watchedDetailImages.length} متبقية)
+                </span>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  multiple 
+                  className="hidden" 
+                  onChange={handleDetailImagesUpload}
+                />
+              </label>
+            )}
           </div>
         </div>
       </div>

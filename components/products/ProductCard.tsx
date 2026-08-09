@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Eye, Heart } from "lucide-react";
+import { Heart, ShoppingBag, Eye, Shirt, Layers, Users } from "lucide-react";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
+import { useCart } from "@/features/cart/CartProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
+import { toast } from "sonner";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -17,6 +19,8 @@ interface ProductCardProps {
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const router = useRouter();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { addItem, openCart } = useCart();
+
   const isFavorite = isInWishlist(product.id);
   const displayPrice = product.salePrice ?? product.price;
   const hasDiscount = product.salePrice && product.salePrice < product.price;
@@ -26,31 +30,82 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const staggerDelay = (index % 4) * 0.08;
 
-  // Find second image for hover effect (explicit hoverImage, images array, or variant image)
-  const secondImage =
-    product.hoverImage ||
-    (product.images && product.images.length > 1 ? product.images[1] : null) ||
-    product.variants?.find((v) => v.image && v.image !== product.mainImage)?.image ||
-    (product.variants && product.variants.length > 1 ? product.variants[1]?.image : null) ||
-    null;
-
+  // Selected Variant state
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const activeVariant = product.variants?.[selectedVariantIdx] || null;
 
-  // Get active images array for the active variant or product
-  const activeColorImages = activeVariant?.images && activeVariant.images.length > 0
-    ? activeVariant.images
-    : activeVariant?.image
-    ? [activeVariant.image]
-    : [product.mainImage, product.hoverImage, ...(product.images || [])].filter(Boolean) as string[];
+  // Compute available gallery images for thumbnails:
+  // 1. Explicit detailImages (3 images: logo detail, fabric detail, back/extra detail)
+  // 2. Or images from active variant / hoverImage / general images array
+  const detailImages = product.detailImages && product.detailImages.length > 0
+    ? product.detailImages
+    : (function () {
+        const list: string[] = [];
+        if (activeVariant?.images && activeVariant.images.length > 0) {
+          list.push(...activeVariant.images);
+        } else if (activeVariant?.image) {
+          list.push(activeVariant.image);
+        }
+        if (product.mainImage && !list.includes(product.mainImage)) list.push(product.mainImage);
+        if (product.hoverImage && !list.includes(product.hoverImage)) list.push(product.hoverImage);
+        if (product.images) {
+          product.images.forEach((img) => {
+            if (img && !list.includes(img)) list.push(img);
+          });
+        }
+        return list;
+      })();
 
-  const primaryDisplayImage = activeColorImages[0] || product.mainImage || "/placeholder.jpg";
-  const secondaryDisplayImage = activeColorImages[1] || secondImage || null;
+  // Thumbnail list for the right vertical stack (maximum 3 thumbnails)
+  const stackThumbnails = detailImages.slice(0, 3);
 
-  // Navigate by Firestore Document ID (always unique — never use slug)
+  // Active Main Preview Image (defaults to mainImage or first thumbnail)
+  const [activeMainImage, setActiveMainImage] = useState<string | null>(null);
+  const currentDisplayImage =
+    activeMainImage ||
+    activeVariant?.image ||
+    product.mainImage ||
+    stackThumbnails[0] ||
+    "/placeholder.jpg";
+
+  // Navigate to product page
   const navigateToProduct = () => {
     router.push(`/products?id=${encodeURIComponent(product.id)}`);
   };
+
+  // Add to cart directly
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const selectedColor = activeVariant
+      ? {
+          name: activeVariant.colorName,
+          hex: activeVariant.colorHex,
+          image: activeVariant.image || product.mainImage,
+        }
+      : {
+          name: "Standard",
+          hex: "#000000",
+          image: product.mainImage,
+        };
+
+    const firstAvailableSize =
+      activeVariant?.sizes?.find((s) => s.stock > 0)?.size ||
+      activeVariant?.sizes?.[0]?.size ||
+      "M";
+
+    addItem(product, 1, firstAvailableSize, selectedColor);
+    toast.success(`تمت إضافة ${product.name} إلى السلة! 🛒`, {
+      description: `المقاس: ${firstAvailableSize} | اللون: ${selectedColor.name}`,
+    });
+    openCart();
+  };
+
+  const isNewProduct =
+    product.isNew ||
+    (product.createdAt &&
+      new Date().getTime() - new Date(product.createdAt.toString()).getTime() <
+        14 * 24 * 60 * 60 * 1000);
 
   return (
     <motion.article
@@ -62,141 +117,220 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         delay: staggerDelay,
         ease: [0.16, 1, 0.3, 1],
       }}
-      whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
+      className="group relative"
     >
-      {/* Outer wrapper — NO nested buttons, NO role=button on div */}
-      <div className="block group cursor-pointer select-none" onClick={navigateToProduct}>
+      {/* Main Luxury Dark Card Wrapper */}
+      <div
+        onClick={navigateToProduct}
+        className="block bg-[#121212] dark:bg-[#0e0e0e] border border-zinc-800/80 hover:border-zinc-700 rounded-[2rem] p-4 sm:p-5 shadow-2xl transition-all duration-300 cursor-pointer select-none overflow-hidden"
+      >
+        {/* Top Badges & Actions Overlay */}
+        <div className="flex items-center justify-between mb-3.5 z-20 relative">
+          {/* Left Badges (NEW / SALE / BEST SELLER) */}
+          <div className="flex items-center gap-2">
+            {isNewProduct ? (
+              <span className="border border-amber-400/50 text-amber-300 bg-amber-400/10 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md shadow-sm">
+                NEW
+              </span>
+            ) : hasDiscount ? (
+              <span className="border border-red-500/50 text-red-400 bg-red-500/10 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
+                -{discountPct}%
+              </span>
+            ) : product.bestSeller ? (
+              <span className="border border-amber-400/50 text-amber-300 bg-amber-400/10 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
+                BEST SELLER
+              </span>
+            ) : null}
+          </div>
 
-        {/* Floating Image Container */}
-        <div className="relative overflow-visible">
-
-          {/* Wishlist Heart Button — stops propagation so card click doesn't fire */}
+          {/* Right Wishlist Heart Button */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleWishlist(product);
             }}
-            className="absolute top-3 right-3 z-20 p-2 rounded-full bg-black/30 dark:bg-white/10 backdrop-blur-md text-white hover:text-red-400 hover:scale-110 active:scale-95 transition-all shadow-lg"
-            title={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
+            className="w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 border border-zinc-800 text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95"
+            title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
           >
-            <Heart size={14} className={isFavorite ? "fill-red-500 text-red-500" : ""} />
+            <Heart
+              size={15}
+              className={isFavorite ? "fill-red-500 text-red-500" : "text-white"}
+            />
           </button>
+        </div>
 
-          {/* Discount & Badges */}
-          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 pointer-events-none">
-            {hasDiscount && (
-              <span className="bg-red-500 text-white text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-md">
-                -{discountPct}%
-              </span>
-            )}
-            {product.bestSeller && (
-              <span className="bg-amber-400 text-black text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-md">
-                Best Seller
-              </span>
-            )}
-          </div>
-
-          {/* Quick View Overlay */}
-          <div className="absolute inset-0 z-10 flex items-end justify-center pb-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
-            <motion.span
-              className="flex items-center gap-2 bg-black/80 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl backdrop-blur-sm"
-              initial={{ y: 10, opacity: 0 }}
-              whileHover={{ scale: 1.05 }}
+        {/* ── PRODUCT IMAGES DISPLAY SECTION ── */}
+        <div className="grid grid-cols-12 gap-3 mb-4">
+          {/* Main Large Image Container (Left - Col 8/9) */}
+          <div className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900/90 border border-zinc-800/60 shadow-inner flex items-center justify-center">
+            <motion.div
+              className="w-full h-full relative"
+              whileHover={{ scale: 1.04 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Eye size={13} />
-              عرض المنتج
-            </motion.span>
+              <Image
+                key={currentDisplayImage}
+                src={currentDisplayImage}
+                alt={product.name}
+                fill
+                priority={index < 4}
+                quality={95}
+                crossOrigin="anonymous"
+                sizes="(max-width: 640px) 70vw, 30vw"
+                className="object-contain object-center p-2 transition-all duration-500"
+              />
+            </motion.div>
+
+            {/* Quick Hover Overlay */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+              <span className="bg-black/75 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
+                <Eye size={12} />
+                عرض التفاصيل
+              </span>
+            </div>
           </div>
 
-          {/* Product Image Container */}
-          <div className="aspect-[3/4] relative overflow-hidden rounded-2xl">
-            {primaryDisplayImage ? (
-              <motion.div
-                className="w-full h-full relative"
-                whileHover={{ scale: 1.04 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {/* Main Primary Image */}
-                <Image
-                  key={primaryDisplayImage}
-                  src={primaryDisplayImage}
-                  alt={product.name}
-                  fill
-                  priority={index < 4}
-                  quality={95}
-                  crossOrigin="anonymous"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className={`object-contain object-top transition-all duration-500 ease-in-out ${
-                    secondaryDisplayImage ? "group-hover:opacity-0" : ""
+          {/* Right Vertical Stack (3 Thumbnail Boxes - Col 4/3) */}
+          <div className="col-span-4 sm:col-span-3 flex flex-col justify-between gap-2">
+            {stackThumbnails.map((imgUrl, thumbIdx) => {
+              const isSelected = currentDisplayImage === imgUrl;
+              return (
+                <div
+                  key={imgUrl + thumbIdx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveMainImage(imgUrl);
+                  }}
+                  onMouseEnter={() => setActiveMainImage(imgUrl)}
+                  className={`aspect-square rounded-xl overflow-hidden border transition-all duration-300 cursor-pointer relative bg-zinc-900/80 ${
+                    isSelected
+                      ? "border-amber-400 ring-1 ring-amber-400/50 scale-[1.03] shadow-md"
+                      : "border-zinc-800/80 opacity-70 hover:opacity-100 hover:border-zinc-600"
                   }`}
-                />
-
-                {/* Second Hover Image (if available) */}
-                {secondaryDisplayImage && (
+                  title={`معاينة الصورة ${thumbIdx + 1}`}
+                >
                   <Image
-                    key={secondaryDisplayImage}
-                    src={secondaryDisplayImage}
-                    alt={`${product.name} hover view`}
+                    src={imgUrl}
+                    alt={`${product.name} detail ${thumbIdx + 1}`}
                     fill
-                    quality={95}
-                    crossOrigin="anonymous"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-contain object-top opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out absolute inset-0"
+                    sizes="100px"
+                    className="object-cover object-center p-0.5"
                   />
-                )}
-              </motion.div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-zinc-400 dark:text-zinc-600 text-4xl font-black">LUNO</span>
-              </div>
+                </div>
+              );
+            })}
+
+            {/* Fallback empty thumb slots if product has fewer than 3 images */}
+            {Array.from({ length: Math.max(0, 3 - stackThumbnails.length) }).map(
+              (_, emptyIdx) => (
+                <div
+                  key={`empty-${emptyIdx}`}
+                  className="aspect-square rounded-xl border border-dashed border-zinc-800/60 bg-zinc-900/40 flex items-center justify-center text-zinc-700 text-[10px] font-black"
+                >
+                  LUNO
+                </div>
+              )
             )}
           </div>
         </div>
 
-        {/* Product Info */}
-        <div className="pt-4 text-center space-y-2 px-1">
-          {/* Color swatches */}
-          {product.variants && product.variants.length > 0 && (
-            <div className="flex items-center justify-center gap-2 mb-1.5">
-              {product.variants.slice(0, 6).map((variant, vIdx) => (
-                <button
-                  key={variant.colorHex + vIdx}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedVariantIdx(vIdx);
-                  }}
-                  className={`w-4 h-4 rounded-full transition-all duration-200 shadow-sm border ${
-                    selectedVariantIdx === vIdx
-                      ? "ring-2 ring-zinc-900 dark:ring-white scale-125 z-10"
-                      : "opacity-80 hover:opacity-100 hover:scale-110"
-                  }`}
-                  style={{ backgroundColor: variant.colorHex }}
-                  title={variant.colorName}
-                />
-              ))}
-              {product.variants.length > 6 && (
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold">
-                  +{product.variants.length - 6}
-                </span>
+        {/* ── PRODUCT INFO & DETAILS SECTION ── */}
+        <div className="space-y-3 pt-1">
+          {/* Header Row: Title & Price */}
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wide leading-tight group-hover:text-amber-400 transition-colors">
+                {product.name}
+              </h3>
+              <p className="text-xs text-zinc-400 font-medium mt-0.5">
+                {product.subtitle || "Premium Oversized Fit"}
+              </p>
+            </div>
+
+            <div className="text-right flex-shrink-0">
+              <span className="text-base sm:text-lg font-black text-[#D4B886]">
+                {formatPrice(displayPrice)}
+              </span>
+              {hasDiscount && (
+                <p className="text-[11px] text-zinc-500 line-through font-semibold">
+                  {formatPrice(product.price)}
+                </p>
               )}
+            </div>
+          </div>
+
+          {/* Specifications Row (Icon Badges) */}
+          <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-400 font-medium pt-1 pb-2 border-b border-zinc-800/80">
+            <span className="flex items-center gap-1.5">
+              <Shirt size={13} className="text-zinc-400" />
+              {product.material || "100% Cotton"}
+            </span>
+
+            <span className="text-zinc-600">|</span>
+
+            <span className="flex items-center gap-1.5">
+              <Layers size={13} className="text-zinc-400" />
+              {product.weight || "230 GSM"}
+            </span>
+
+            <span className="text-zinc-600">|</span>
+
+            <span className="flex items-center gap-1.5">
+              <Users size={13} className="text-zinc-400" />
+              {product.fit || "Unisex"}
+            </span>
+          </div>
+
+          {/* Color Swatches selection (if variants exist) */}
+          {product.variants && product.variants.length > 1 && (
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                الألوان:
+              </span>
+              <div className="flex items-center gap-1.5">
+                {product.variants.map((variant, vIdx) => (
+                  <button
+                    key={variant.colorHex + vIdx}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedVariantIdx(vIdx);
+                      if (variant.image) setActiveMainImage(variant.image);
+                    }}
+                    className={`w-3.5 h-3.5 rounded-full transition-all border ${
+                      selectedVariantIdx === vIdx
+                        ? "ring-2 ring-amber-400 scale-125 z-10 border-black"
+                        : "opacity-70 hover:opacity-100 hover:scale-110 border-zinc-700"
+                    }`}
+                    style={{ backgroundColor: variant.colorHex }}
+                    title={variant.colorName}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
-          <h3 className="text-sm sm:text-base md:text-lg font-black text-zinc-900 dark:text-white tracking-wide leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-            {product.name}
-          </h3>
+          {/* ── ACTION BUTTONS ROW (BAG + ADD TO CART) ── */}
+          <div className="flex items-center gap-2.5 pt-2">
+            {/* Bag Icon Button */}
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="w-12 h-12 rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/90 text-white flex items-center justify-center hover:bg-zinc-800 hover:border-zinc-700 transition-all active:scale-95 shadow-md flex-shrink-0"
+              title="إضافة سريعة للسلة"
+            >
+              <ShoppingBag size={18} />
+            </button>
 
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-sm sm:text-base font-black text-zinc-900 dark:text-white">
-              {formatPrice(displayPrice)}
-            </span>
-            {hasDiscount && (
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 line-through font-semibold">
-                {formatPrice(product.price)}
-              </span>
-            )}
+            {/* Main ADD TO CART Button */}
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="flex-1 h-12 rounded-xl sm:rounded-2xl bg-[#D4B886] hover:bg-[#C5A775] text-zinc-950 font-black text-xs sm:text-sm tracking-widest uppercase flex items-center justify-center transition-all shadow-xl active:scale-95 cursor-pointer"
+            >
+              ADD TO CART
+            </button>
           </div>
         </div>
       </div>

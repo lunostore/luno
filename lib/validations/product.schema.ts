@@ -27,9 +27,15 @@ export const productSchema = z.object({
   brand: z.string().min(1, "البراند مطلوب"),
   mainImage: z.string().url("صورة الغلاف الرئيسية مطلوبة"),
   hoverImage: z.string().url("رابط الصورة غير صحيح").or(z.literal("")).optional(),
+  subtitle: z.string().optional(),
+  detailImages: z.array(z.string()).optional(),
+  material: z.string().optional(),
+  weight: z.string().optional(),
+  fit: z.string().optional(),
   variants: z.array(productVariantSchema).min(1, "أضف لون واحد على الأقل"),
   featured: z.boolean().default(false),
   bestSeller: z.boolean().default(false),
+  isNew: z.boolean().default(false),
   sizeChartType: z.enum(["tshirt", "pants"]).default("tshirt"),
 });
 

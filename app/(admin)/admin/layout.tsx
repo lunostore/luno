@@ -115,7 +115,7 @@ export default function AdminLayout({
       <div className="px-6 py-6 border-b border-zinc-900 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Luno Store Logo" className="h-6 w-auto object-contain invert group-hover:scale-105 transition-transform" />
+          <img src="/logo.svg" alt="Luno Store Logo" className="h-6 w-auto object-contain invert group-hover:scale-105 transition-transform" />
         </Link>
 
         <button

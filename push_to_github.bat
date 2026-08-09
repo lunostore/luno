@@ -8,15 +8,8 @@ echo.
 :: Ensure we are in the correct directory
 cd /d "%~dp0"
 
-:: Create public directory and copy logo and banner assets
+:: Ensure public directory exists
 if not exist public mkdir public
-node copy_intro.js >nul 2>&1
-copy /y "%~dp0logo\12-removebg-preview.png" "%~dp0public\logo.png" >nul
-copy /y "%~dp0logo\baner.png" "%~dp0public\banner.png" >nul
-copy /y "%~dp0logo\Screenshot 2026-07-23 041712.png" "%~dp0public\banner_light.png" >nul
-copy /y "%~dp0logo\*انترو*.png" "%~dp0public\intro.png" >nul
-if not exist "%~dp0public\intro.png" copy /y "%~dp0logo\انترو 1.png" "%~dp0public\intro.png" >nul
-if not exist "%~dp0public\intro.png" copy /y "%~dp0public\logo.png" "%~dp0public\intro.png" >nul
 
 :: Initialize Git if not already done
 if not exist .git (

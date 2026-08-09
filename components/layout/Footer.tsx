@@ -64,7 +64,7 @@ export function Footer() {
           <div className="md:col-span-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="Luno Store Brand Logo"
               className="h-8 w-auto object-contain dark:invert"
             />

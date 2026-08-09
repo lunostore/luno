@@ -175,10 +175,10 @@ export function LUNOIntro({ onComplete }: LUNOIntroProps) {
                 {/* Main Logo Image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/logo.png"
+                  src="/logo.svg"
                   alt="Luno Store"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/intro.png";
+                    (e.target as HTMLImageElement).src = "/intro.svg";
                   }}
                   className="w-16 h-16 sm:w-20 sm:h-20 object-contain invert drop-shadow-[0_0_25px_rgba(255,255,255,0.9)]"
                 />

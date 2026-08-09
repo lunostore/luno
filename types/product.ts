@@ -6,6 +6,7 @@ export interface Product {
   slug: string;
   sku: string;       // كود فريد للمنتج مثل LUNO-AB12 — يُدمج في رابط المنتج
   description: string;
+  subtitle?: string;   // وصف فرعي كارت المنتج مثل Premium Oversized Fit
   price: number;
   salePrice?: number;
   category: string;
@@ -13,9 +14,14 @@ export interface Product {
   mainImage: string;
   hoverImage?: string; // صورة الهوفر الثانية المعروضة عند تمرير الماوس
   images?: string[];   // معرض الصور الإضافية
+  detailImages?: string[]; // 3 صور التفاصيل المصغرة للكارت (لوجو، خامة، تفاصيل إضافية)
+  material?: string;   // الخامة مثل 100% Cotton
+  weight?: string;     // الوزن/الخامة مثل 230 GSM
+  fit?: string;        // القصة مثل Unisex / Boxy Fit
   variants: ProductVariant[];
   featured: boolean;
   bestSeller: boolean;
+  isNew?: boolean;     // شارة NEW للمنتجات الجديدة
   sizeChartType?: "tshirt" | "pants"; // نوع جدول المقاسات للمنتج
   createdAt: Timestamp | Date;
 }

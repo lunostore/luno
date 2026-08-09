@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- High Contrast Dark Luxe Container -->
+  <rect width="512" height="512" rx="110" fill="#000000" />
+  
+  <!-- Subtle inner ambient border -->
+  <rect x="12" y="12" width="488" height="488" rx="98" fill="none" stroke="#3F3F46" stroke-width="4" opacity="0.5" />
+
+  <!-- Crisp Geometric Monogram L / LUNO Emblem for Favicon -->
+  <g fill="#FFFFFF">
+    <!-- Stylized Geometric L Monogram -->
+    <path d="M 155 120 L 225 120 L 225 330 L 357 330 L 357 390 L 155 390 Z" />
+    
+    <!-- Accent Dot / Slash for Luxury Aesthetic -->
+    <rect x="305" y="120" width="52" height="52" rx="12" fill="#FFFFFF" />
+  </g>
+</svg>

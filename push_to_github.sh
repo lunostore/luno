@@ -4,16 +4,8 @@ echo "  LUNO STORE - PUSHING TO GITHUB (AUTOMATED SCRIPT)"
 echo "==================================================="
 echo ""
 
-# Create public directory and copy logo and banner assets
+# Ensure public directory exists
 mkdir -p public
-cp "c:/Users/youse/OneDrive/Desktop/nxt/logo/12-removebg-preview.png" "./public/logo.png" 2>/dev/null
-cp "/Users/youse/OneDrive/Desktop/nxt/logo/12-removebg-preview.png" "./public/logo.png" 2>/dev/null
-cp "c:/Users/youse/OneDrive/Desktop/nxt/logo/baner.png" "./public/banner.png" 2>/dev/null
-cp "/Users/youse/OneDrive/Desktop/nxt/logo/baner.png" "./public/banner.png" 2>/dev/null
-cp "c:/Users/youse/OneDrive/Desktop/nxt/logo/Screenshot 2026-07-23 041712.png" "./public/banner_light.png" 2>/dev/null
-cp "/Users/youse/OneDrive/Desktop/nxt/logo/Screenshot 2026-07-23 041712.png" "./public/banner_light.png" 2>/dev/null
-cp ./logo/*انترو*.png ./public/intro.png 2>/dev/null
-cp ./logo/*1.png ./public/intro.png 2>/dev/null
 
 # Initialize Git
 if [ ! -d ".git" ]; then

@@ -80,9 +80,11 @@ export const metadata: Metadata = {
   creator: "Luno Store",
   publisher: "Luno Store",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   },
   alternates: {
     canonical: "/",
@@ -97,7 +99,7 @@ export const metadata: Metadata = {
       "تسوق أحدث تشكيلات الملابس والستريت وير من براند Luno Store. خامات ممتازة وتصاميم عصرية تناسب أسلوب حياتك.",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.svg",
         width: 1200,
         height: 630,
         alt: "Luno Store Clothing Brand",
@@ -108,7 +110,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Luno Store | البراند المفضل للملابس والستريت وير العصرية",
     description: "تسوق أحدث تشكيلات الملابس والستريت وير العصرية من براند Luno Store.",
-    images: ["/logo.png"],
+    images: ["/logo.svg"],
   },
   robots: {
     index: true,
@@ -161,7 +163,7 @@ export default function RootLayout({
               "name": "Luno Store",
               "alternateName": ["لونو", "Luno", "Luno Store", "Luno Streetwear", "ملابس Luno", "براند Luno"],
               "url": process.env.NEXT_PUBLIC_SITE_URL || "https://lunostore.vercel.app",
-              "logo": "/logo.png",
+              "logo": "/logo.svg",
               "description": "براند Luno Store المتخصص في أفضل ملابس الستريت وير والعصرية في مصر والوطن العربي."
             })
           }}

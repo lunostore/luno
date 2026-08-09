@@ -79,10 +79,10 @@ export function IntroCyberLuxury({ onComplete }: { onComplete: () => void }) {
                 <div className="relative w-[300px] sm:w-[460px] h-[140px] sm:h-[210px] flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/intro.png"
+                    src="/intro.svg"
                     alt="Luno Store Particle Logo"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/logo.png";
+                      (e.target as HTMLImageElement).src = "/logo.svg";
                     }}
                     className="w-full h-full object-contain filter drop-shadow-[0_0_40px_rgba(255,255,255,0.95)] invert dark:invert-0"
                   />
@@ -102,7 +102,7 @@ export function IntroCyberLuxury({ onComplete }: { onComplete: () => void }) {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/logo.png"
+                  src="/logo.svg"
                   alt="Luno Store Minimalist Streetwear Model"
                   className="w-full h-full object-cover object-center brightness-90 contrast-125"
                 />
