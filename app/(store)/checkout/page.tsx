@@ -21,6 +21,7 @@ import {
 import { useCart } from "@/features/cart/CartProvider";
 import { createOrder, getShippingRates, getSiteSettings } from "@/lib/firebase/firestore";
 import { formatPrice } from "@/lib/utils";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/validations/checkout.schema";
 import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
@@ -155,18 +156,10 @@ export default function CheckoutPage() {
     if (!screenshotFile) return null;
     setUploadingScreenshot(true);
     try {
-      const formData = new FormData();
-      formData.append("file", screenshotFile);
-      formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_transfers");
-      formData.append("folder", "transfer_screenshots");
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        { method: "POST", body: formData }
-      );
-      const json = await res.json();
-      return json.secure_url ?? null;
-    } catch {
+      const url = await uploadToCloudinary(screenshotFile, "transfer_screenshots");
+      return url ?? null;
+    } catch (err) {
+      console.error("Screenshot upload error:", err);
       return null;
     } finally {
       setUploadingScreenshot(false);

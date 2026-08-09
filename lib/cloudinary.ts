@@ -1,5 +1,26 @@
-// Cloudinary upload helper (client-side)
-export async function uploadToCloudinary(file: File): Promise<string> {
+export async function uploadToCloudinary(file: File, folder = "products"): Promise<string> {
+  // 1. Try secure Server-side API Upload route first
+  try {
+    const apiFormData = new FormData();
+    apiFormData.append("file", file);
+    apiFormData.append("folder", folder);
+
+    const apiRes = await fetch("/api/admin/cloudinary/upload", {
+      method: "POST",
+      body: apiFormData,
+    });
+
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData.secure_url) {
+        return apiData.secure_url as string;
+      }
+    }
+  } catch (err) {
+    console.warn("Server API Cloudinary upload fallback triggered:", err);
+  }
+
+  // 2. Client-side Unsigned Upload fallback
   const formData = new FormData();
   formData.append("file", file);
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
@@ -16,6 +37,8 @@ export async function uploadToCloudinary(file: File): Promise<string> {
   );
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Cloudinary Client Upload Error:", errorText);
     throw new Error("Failed to upload image to Cloudinary");
   }
 
