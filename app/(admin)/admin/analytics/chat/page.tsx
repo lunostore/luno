@@ -38,12 +38,13 @@ export default function AdminChatAnalyticsPage() {
     return () => unsubscribe();
   }, [user, authLoading]);
 
-  const formatRelativeTime = (timestamp: unknown): string => {
+  const formatRelativeTime = (timestamp: any): string => {
     if (!timestamp) return "منذ فترة قصيرة";
     let ms = 0;
-    if (timestamp?.toMillis) ms = timestamp.toMillis();
-    else if (timestamp?.seconds) ms = timestamp.seconds * 1000;
-    else if (timestamp instanceof Date) ms = timestamp.getTime();
+    const ts = timestamp as any;
+    if (typeof ts?.toMillis === "function") ms = ts.toMillis();
+    else if (ts?.seconds) ms = ts.seconds * 1000;
+    else if (ts instanceof Date) ms = ts.getTime();
 
     if (!ms) return "منذ فترة قصيرة";
     const diffSec = Math.floor((Date.now() - ms) / 1000);

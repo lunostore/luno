@@ -289,7 +289,7 @@ export function LUNOChatWidget() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
-    } catch (_err: unknown) {
+    } catch {
       const errorMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
