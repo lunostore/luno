@@ -696,3 +696,123 @@ export function subscribeToVisitorSessions(
   );
 }
 
+// ─── AI Chatbot Analytics & Conversion Tracking ──────────
+
+export interface ChatEvent {
+  id?: string;
+  type: "chat_started" | "product_recommended" | "add_to_cart_click" | "chat_sale";
+  productId?: string;
+  productName?: string;
+  selectedColor?: string;
+  selectedSize?: string;
+  sessionId?: string;
+  price?: number;
+  timestamp: any;
+}
+
+export interface ChatAnalyticsSummary {
+  totalConversations: number;
+  totalRecommendations: number;
+  totalCartAdds: number;
+  conversionRate: number;
+  estimatedRevenue: number;
+  events: ChatEvent[];
+  topProducts: { productId: string; name: string; count: number }[];
+}
+
+export async function logChatEvent(
+  type: ChatEvent["type"],
+  data?: Partial<Omit<ChatEvent, "type" | "timestamp">>
+): Promise<void> {
+  try {
+    const sessionStorageKey = "luno_chat_session_id";
+    let sessionId = typeof window !== "undefined" ? sessionStorage.getItem(sessionStorageKey) : null;
+    if (!sessionId && typeof window !== "undefined") {
+      sessionId = `chat_sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      sessionStorage.setItem(sessionStorageKey, sessionId);
+    }
+
+    await addDoc(collection(db, "chat_events"), cleanUndefined({
+      type,
+      sessionId: sessionId || "unknown",
+      productId: data?.productId || null,
+      productName: data?.productName || null,
+      selectedColor: data?.selectedColor || null,
+      selectedSize: data?.selectedSize || null,
+      price: data?.price || 0,
+      timestamp: serverTimestamp(),
+    }));
+  } catch (err) {
+    console.error("Failed to log chat event:", err);
+  }
+}
+
+export function subscribeChatAnalytics(
+  callback: (summary: ChatAnalyticsSummary) => void
+): () => void {
+  const q = query(collection(db, "chat_events"), orderBy("timestamp", "desc"), limit(200));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const events = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as ChatEvent[];
+
+      const sessionsSet = new Set<string>();
+      let recommendationsCount = 0;
+      let cartAddsCount = 0;
+      let estimatedRevenue = 0;
+      const productCountMap: Record<string, { name: string; count: number }> = {};
+
+      events.forEach((ev) => {
+        if (ev.sessionId) sessionsSet.add(ev.sessionId);
+        if (ev.type === "product_recommended") recommendationsCount++;
+        if (ev.type === "add_to_cart_click") {
+          cartAddsCount++;
+          if (ev.price) estimatedRevenue += ev.price;
+          if (ev.productId) {
+            const pId = ev.productId;
+            const pName = ev.productName || "منتج غير معنون";
+            if (!productCountMap[pId]) {
+              productCountMap[pId] = { name: pName, count: 0 };
+            }
+            productCountMap[pId].count++;
+          }
+        }
+      });
+
+      const totalConversations = sessionsSet.size;
+      const conversionRate = totalConversations > 0 ? (cartAddsCount / totalConversations) * 100 : 0;
+      const topProducts = Object.entries(productCountMap)
+        .map(([productId, { name, count }]) => ({ productId, name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      callback({
+        totalConversations,
+        totalRecommendations: recommendationsCount,
+        totalCartAdds: cartAddsCount,
+        conversionRate: Math.round(conversionRate * 10) / 10,
+        estimatedRevenue,
+        events,
+        topProducts,
+      });
+    },
+    (err) => {
+      console.error("Error subscribing to chat analytics:", err);
+      callback({
+        totalConversations: 0,
+        totalRecommendations: 0,
+        totalCartAdds: 0,
+        conversionRate: 0,
+        estimatedRevenue: 0,
+        events: [],
+        topProducts: [],
+      });
+    }
+  );
+}
+
+

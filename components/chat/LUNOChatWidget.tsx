@@ -2,8 +2,22 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Sparkles, ShoppingBag, ExternalLink, Bot, RefreshCw } from "lucide-react";
+import {
+  MessageSquare,
+  X,
+  Send,
+  Sparkles,
+  ShoppingBag,
+  ExternalLink,
+  Bot,
+  RefreshCw,
+  ShoppingCart,
+  Check,
+} from "lucide-react";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
+import { useCart } from "@/features/cart/CartProvider";
+import { getProductById, logChatEvent } from "@/lib/firebase/firestore";
+import type { Product } from "@/types/product";
 
 interface ChatMessage {
   id: string;
@@ -14,13 +28,194 @@ interface ChatMessage {
 }
 
 const CHATBOT_ENDPOINT =
-  process.env.NEXT_PUBLIC_CHATBOT_API_URL || "https://luno-lunostore.web.val.run";
+  process.env.NEXT_PUBLIC_CHATBOT_API_URL || "https://luno--d775de94945311f1a7231607ee4eb77e.web.val.run/";
 
 const QUICK_PROMPTS = [
   "🔥 أرشحلي أحدث المنتجات المصممة بأعلى جودة",
   "👕 ايه هي خامات الملابس والقصات المتوفرة؟",
   "🚚 ما هي مواعيد الشحن وطرق الدفع المتاحة؟",
 ];
+
+// ── In-Chat Interactive Product Card Component ────────────
+
+function InChatProductCard({
+  productId,
+  defaultColor,
+  defaultSize,
+}: {
+  productId: string;
+  defaultColor?: string;
+  defaultSize?: string;
+}) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedColorName, setSelectedColorName] = useState(defaultColor || "");
+  const [selectedSize, setSelectedSize] = useState(defaultSize || "");
+  const [added, setAdded] = useState(false);
+  const { addItem, openCart } = useCart();
+  const { openProduct } = useProductModal();
+
+  useEffect(() => {
+    let isMounted = true;
+    getProductById(productId).then((prod) => {
+      if (isMounted && prod) {
+        setProduct(prod);
+        if (!selectedColorName && prod.variants?.[0]?.colorName) {
+          setSelectedColorName(prod.variants[0].colorName);
+        }
+        if (!selectedSize) {
+          const firstVariant = prod.variants?.[0];
+          const availableSize =
+            firstVariant?.sizes?.find((s) => s.stock > 0)?.size ||
+            firstVariant?.sizes?.[0]?.size ||
+            "M";
+          setSelectedSize(availableSize);
+        }
+        logChatEvent("product_recommended", { productId: prod.id, productName: prod.name });
+      }
+      setLoading(false);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="my-2 p-3 bg-zinc-900 border border-zinc-800 rounded-2xl animate-pulse text-xs text-zinc-400">
+        جاري تحميل المنتج المقترح...
+      </div>
+    );
+  }
+
+  if (!product) return null;
+
+  const currentVariant =
+    product.variants?.find((v) => v.colorName.toLowerCase() === selectedColorName.toLowerCase()) ||
+    product.variants?.[0];
+
+  const colorObj = currentVariant
+    ? { name: currentVariant.colorName, hex: currentVariant.colorHex || "#000000", image: currentVariant.image || product.mainImage }
+    : { name: "افتراضي", hex: "#000000", image: product.mainImage };
+
+  const handleAddToCart = () => {
+    if (!selectedSize) return;
+    addItem(product, 1, selectedSize, colorObj);
+    setAdded(true);
+    logChatEvent("add_to_cart_click", {
+      productId: product.id,
+      productName: product.name,
+      selectedColor: colorObj.name,
+      selectedSize: selectedSize,
+      price: product.salePrice && product.salePrice < product.price ? product.salePrice : product.price,
+    });
+    openCart();
+    setTimeout(() => setAdded(false), 2500);
+  };
+
+  const finalPrice = product.salePrice && product.salePrice < product.price ? product.salePrice : product.price;
+
+  return (
+    <div className="my-2.5 p-3.5 bg-zinc-900/95 border border-amber-500/30 rounded-2xl shadow-xl flex flex-col gap-2.5 text-right font-sans">
+      <div className="flex gap-3 items-center">
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-black flex-shrink-0 border border-zinc-800 relative">
+          <img src={colorObj.image || product.mainImage} alt={product.name} className="w-full h-full object-cover" />
+          {product.salePrice && product.salePrice < product.price && (
+            <span className="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
+              خصم
+            </span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-bold text-xs text-white truncate">{product.name}</h4>
+          <div className="flex items-baseline gap-2 mt-0.5 font-mono">
+            <span className="text-amber-400 font-extrabold text-xs">{finalPrice} ج.م</span>
+            {product.salePrice && product.salePrice < product.price && (
+              <span className="line-through text-zinc-500 text-[10px]">{product.price} ج.م</span>
+            )}
+          </div>
+          {product.material && (
+            <p className="text-[10px] text-zinc-400 mt-0.5">الخامة: {product.material}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Colors Swatches */}
+      {product.variants && product.variants.length > 0 && (
+        <div className="flex items-center gap-1.5 text-[10px] text-zinc-300">
+          <span className="text-zinc-400 font-medium">اللون:</span>
+          <div className="flex flex-wrap gap-1">
+            {product.variants.map((v) => (
+              <button
+                key={v.colorName}
+                type="button"
+                onClick={() => setSelectedColorName(v.colorName)}
+                className={`px-2 py-0.5 rounded-full border text-[10px] font-medium transition-all ${
+                  selectedColorName.toLowerCase() === v.colorName.toLowerCase()
+                    ? "border-amber-400 bg-amber-400/20 text-amber-300 font-bold"
+                    : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-white"
+                }`}
+              >
+                {v.colorName}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sizes Selection */}
+      {currentVariant?.sizes && currentVariant.sizes.length > 0 && (
+        <div className="flex items-center gap-1.5 text-[10px] text-zinc-300">
+          <span className="text-zinc-400 font-medium">المقاس:</span>
+          <div className="flex flex-wrap gap-1">
+            {currentVariant.sizes.map((s) => (
+              <button
+                key={s.size}
+                type="button"
+                disabled={s.stock <= 0}
+                onClick={() => setSelectedSize(s.size)}
+                className={`px-2 py-0.5 rounded-md border text-[10px] font-bold transition-all ${
+                  selectedSize === s.size
+                    ? "border-amber-400 bg-amber-400 text-zinc-950"
+                    : s.stock > 0
+                    ? "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-500"
+                    : "border-zinc-800 bg-zinc-950 text-zinc-600 line-through opacity-50 cursor-not-allowed"
+                }`}
+              >
+                {s.size}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Actions: Direct Add to Cart & Open Modal */}
+      <div className="flex gap-2 mt-1">
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-md ${
+            added
+              ? "bg-emerald-500 text-zinc-950"
+              : "bg-gradient-to-r from-[#D4B886] to-amber-500 text-zinc-950 hover:brightness-110 active:scale-95"
+          }`}
+        >
+          {added ? <Check size={14} /> : <ShoppingCart size={14} />}
+          <span>{added ? "تمت الإضافة للسلة!" : "إضافة إلى السلة بضغطة واحدة"}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => openProduct(product.id)}
+          className="px-3 py-2 rounded-xl border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-all cursor-pointer"
+        >
+          التفاصيل
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Chat Widget Component ────────────────────────────
 
 export function LUNOChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +241,7 @@ export function LUNOChatWidget() {
   useEffect(() => {
     if (isOpen) {
       scrollToBottom();
+      logChatEvent("chat_started");
     }
   }, [messages, isOpen, isLoading]);
 
@@ -79,12 +275,12 @@ export function LUNOChatWidget() {
         body: JSON.stringify({ messages: historyPayload }),
       });
 
-      if (!response.ok) {
-        throw new Error("عذراً، لم أتمكن من الاتصال بالخادم.");
-      }
-
-      const data = await response.json();
-      const botReply = data.reply || data.message || "عذراً، لم أتمكن من فهم طلبك حالياً.";
+      const data = await response.json().catch(() => ({}));
+      const botReply =
+        data.reply ||
+        data.text ||
+        data.message ||
+        (response.ok ? "أهلاً بك! كيف يمكنني مساعدتك؟" : "عذراً، تعذر الوصول لخدمة الـ AI حالياً.");
 
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -108,20 +304,46 @@ export function LUNOChatWidget() {
     }
   };
 
-  // Helper to parse message text and render clickable product links
+  // Helper to parse message text and render interactive product cards & links & suggestion pills
   const renderFormattedMessage = (content: string) => {
+    // 1. Extract suggestion pills tag: [SUGGESTIONS:item1|item2|item3]
+    let suggestionPills: string[] = [];
+    const suggestionsMatch = content.match(/\[SUGGESTIONS:(.*?)\]/);
+    let cleanText = content;
+
+    if (suggestionsMatch) {
+      cleanText = cleanText.replace(suggestionsMatch[0], "");
+      suggestionPills = suggestionsMatch[1].split("|").map((s) => s.trim()).filter(Boolean);
+    }
+
+    // 2. Extract [PRODUCT_CARD:id=XYZ:color=COLOR:size=SIZE]
+    const cardRegex = /\[PRODUCT_CARD:id=([a-zA-Z0-9_-]+)(?::color=([^:\s]+))?(?::size=([^:\s]+))?\]/g;
+    const cardMatches: { id: string; color?: string; size?: string }[] = [];
+    let match;
+
+    while ((match = cardRegex.exec(cleanText)) !== null) {
+      cardMatches.push({
+        id: match[1],
+        color: match[2] || undefined,
+        size: match[3] || undefined,
+      });
+    }
+
+    cleanText = cleanText.replace(cardRegex, "");
+
+    // 3. Extract links /products?id=XYZ
     const productIdRegex = /(?:https?:\/\/luno-store\.com\/products\?id=|\/products\?id=)([a-zA-Z0-9_-]+)/g;
     const parts = [];
     let lastIndex = 0;
-    let match;
+    let linkMatch;
 
-    while ((match = productIdRegex.exec(content)) !== null) {
-      const fullMatch = match[0];
-      const prodId = match[1];
-      const index = match.index;
+    while ((linkMatch = productIdRegex.exec(cleanText)) !== null) {
+      const fullMatch = linkMatch[0];
+      const prodId = linkMatch[1];
+      const index = linkMatch.index;
 
       if (index > lastIndex) {
-        parts.push(content.substring(lastIndex, index));
+        parts.push(cleanText.substring(lastIndex, index));
       }
 
       parts.push(
@@ -140,11 +362,36 @@ export function LUNOChatWidget() {
       lastIndex = index + fullMatch.length;
     }
 
-    if (lastIndex < content.length) {
-      parts.push(content.substring(lastIndex));
+    if (lastIndex < cleanText.length) {
+      parts.push(cleanText.substring(lastIndex));
     }
 
-    return parts.length > 0 ? parts : content;
+    return (
+      <div className="flex flex-col gap-1">
+        <div>{parts.length > 0 ? parts : cleanText}</div>
+
+        {/* Embedded Interactive Product Cards */}
+        {cardMatches.map((c, i) => (
+          <InChatProductCard key={c.id + i} productId={c.id} defaultColor={c.color} defaultSize={c.size} />
+        ))}
+
+        {/* Interactive Follow-up Suggestion Chips */}
+        {suggestionPills.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-zinc-800/60">
+            {suggestionPills.map((text, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => sendMessage(text)}
+                className="text-[10px] bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-xl px-2.5 py-1 transition-all cursor-pointer active:scale-95 font-medium"
+              >
+                💬 {text}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -181,7 +428,7 @@ export function LUNOChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[400px] h-[540px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+            className="fixed bottom-24 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[400px] h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
             dir="rtl"
           >
             {/* Header */}
@@ -223,7 +470,7 @@ export function LUNOChatWidget() {
                     className={`flex flex-col ${isUser ? "items-start" : "items-end"}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed font-sans shadow-md ${
+                      className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed font-sans shadow-md ${
                         isUser
                           ? "bg-[#D4B886] text-zinc-950 rounded-br-none font-bold"
                           : "bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-bl-none whitespace-pre-line"
