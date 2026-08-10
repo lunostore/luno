@@ -8,7 +8,6 @@ import {
   MessageSquare,
   ShoppingCart,
   TrendingUp,
-  DollarSign,
   Award,
   RefreshCw,
   Clock,
@@ -39,7 +38,7 @@ export default function AdminChatAnalyticsPage() {
     return () => unsubscribe();
   }, [user, authLoading]);
 
-  const formatRelativeTime = (timestamp: any): string => {
+  const formatRelativeTime = (timestamp: unknown): string => {
     if (!timestamp) return "منذ فترة قصيرة";
     let ms = 0;
     if (timestamp?.toMillis) ms = timestamp.toMillis();

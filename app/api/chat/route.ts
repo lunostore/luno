@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { getProducts, getCategories, getShippingRates, getSiteSettings } from "@/lib/firebase/firestore";
 
+export const dynamic = "force-static";
+
+interface ChatPayloadMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
+
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
@@ -14,11 +21,11 @@ export async function OPTIONS() {
 
 export async function GET() {
   const hasGemini = !!process.env.GEMINI_API_KEY;
-  const hasGroq = !!process.env.GROQ_API_KEY;
+  const hasGroq = !!(process.env.GROQ_API_KEY || process.env.GROK_API_KEY);
   return new Response(
     `حالة مفاتيح AI في LUNO Store:\n- GEMINI_API_KEY: ${
       hasGemini ? "موجود ✅" : "غير موجود ❌"
-    }\n- GROQ_API_KEY: ${
+    }\n- GROQ_API_KEY / GROK_API_KEY: ${
       hasGroq ? "موجود ✅" : "غير موجود ❌"
     }`,
     {
@@ -34,7 +41,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages } = body;
+    const { messages } = body as { messages: ChatPayloadMessage[] };
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -43,7 +50,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const groqKey = process.env.GROQ_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
 
     // جلب بيانات المتجر الحية لحظياً من Firestore (بدون صلاحية للطلبات أو بيانات العملاء)
@@ -158,7 +165,7 @@ ${productsSummary}`;
           console.log(`[LUNO Chat] Calling Groq model [${model}]...`);
           const groqMessages = [
             { role: "system", content: systemContext },
-            ...trimmedMessages.map((m: any) => ({
+            ...trimmedMessages.map((m) => ({
               role: m.role === "user" ? "user" : "assistant",
               content: m.content,
             })),
@@ -214,7 +221,7 @@ ${productsSummary}`;
         try {
           console.log(`[LUNO Chat] Groq unavailable. Calling Gemini [${model}]...`);
 
-          let geminiContents = trimmedMessages.map((m: any) => ({
+          let geminiContents = trimmedMessages.map((m) => ({
             role: m.role === "user" ? "user" : "model",
             parts: [{ text: m.content }],
           }));
@@ -223,7 +230,12 @@ ${productsSummary}`;
             geminiContents = geminiContents.slice(1);
           }
 
-          const mergedContents: any[] = [];
+          interface GeminiPart {
+            role: string;
+            parts: { text: string }[];
+          }
+
+          const mergedContents: GeminiPart[] = [];
           for (const item of geminiContents) {
             if (
               mergedContents.length > 0 &&
@@ -290,14 +302,15 @@ ${productsSummary}`;
         headers: { "Access-Control-Allow-Origin": "*" },
       }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : "Internal server error";
     console.error("Critical chatbot crash:", err);
     return NextResponse.json(
       {
         reply: "عذراً، حدث خطأ غير متوقع في الخادم. يرجى إعادة المحاولة.",
         text: "عذراً، حدث خطأ غير متوقع في الخادم.",
         message: "عذراً، حدث خطأ غير متوقع في الخادم.",
-        error: err?.message || "Internal server error",
+        error: errorMsg,
       },
       {
         status: 200,

@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MessageSquare,
   X,
   Send,
   Sparkles,
@@ -13,6 +12,7 @@ import {
   RefreshCw,
   ShoppingCart,
   Check,
+  MessageSquareText,
 } from "lucide-react";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { useCart } from "@/features/cart/CartProvider";
@@ -60,17 +60,15 @@ function InChatProductCard({
     getProductById(productId).then((prod) => {
       if (isMounted && prod) {
         setProduct(prod);
-        if (!selectedColorName && prod.variants?.[0]?.colorName) {
-          setSelectedColorName(prod.variants[0].colorName);
+        if (prod.variants?.[0]?.colorName) {
+          setSelectedColorName((prev) => prev || prod.variants[0].colorName);
         }
-        if (!selectedSize) {
-          const firstVariant = prod.variants?.[0];
-          const availableSize =
-            firstVariant?.sizes?.find((s) => s.stock > 0)?.size ||
-            firstVariant?.sizes?.[0]?.size ||
-            "M";
-          setSelectedSize(availableSize);
-        }
+        const firstVariant = prod.variants?.[0];
+        const availableSize =
+          firstVariant?.sizes?.find((s) => s.stock > 0)?.size ||
+          firstVariant?.sizes?.[0]?.size ||
+          "M";
+        setSelectedSize((prev) => prev || availableSize);
         logChatEvent("product_recommended", { productId: prod.id, productName: prod.name });
       }
       setLoading(false);
@@ -291,7 +289,7 @@ export function LUNOChatWidget() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
-    } catch (err: any) {
+    } catch (_err: unknown) {
       const errorMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -401,20 +399,26 @@ export function LUNOChatWidget() {
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          className="relative group w-14 h-14 rounded-full bg-[#121212] border border-[#D4B886]/60 text-[#D4B886] flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer backdrop-blur-md overflow-hidden"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="relative group w-15 h-15 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border border-[#D4B886]/80 text-[#D4B886] flex items-center justify-center shadow-[0_12px_35px_rgba(212,184,134,0.25)] cursor-pointer backdrop-blur-xl overflow-hidden transition-all duration-300"
           title="LUNO AI Assistant"
         >
-          {/* Subtle halo glow */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 via-transparent to-amber-300/10 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Animated gold aura glow */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/30 via-transparent to-amber-300/20 opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          {/* Ripple pulse ping ring */}
+          {!isOpen && (
+            <span className="absolute inset-0 rounded-full bg-amber-400/20 animate-ping pointer-events-none" />
+          )}
 
           {isOpen ? (
-            <X size={22} className="relative z-10 text-white" />
+            <X size={24} className="relative z-10 text-white drop-shadow-md" />
           ) : (
             <div className="relative z-10 flex items-center justify-center">
-              <Sparkles size={22} className="text-[#D4B886] animate-pulse" />
-              <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-amber-400 rounded-full ring-4 ring-[#121212] shadow-sm" />
+              <MessageSquareText size={24} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300" />
+              <Sparkles size={12} className="absolute -top-1 -right-1 text-amber-300 animate-pulse" />
+              <span className="absolute -bottom-1 -left-1 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
             </div>
           )}
         </motion.button>
