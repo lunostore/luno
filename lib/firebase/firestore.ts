@@ -290,7 +290,9 @@ export interface SiteSettings {
   storePhone?: string;
   vodafoneCash?: string;
   instapayUsername?: string;
-  onlinePaymentEnabled?: boolean;  // تفعيل/إيقاف الدفع الأونلاين
+  vodafoneCashEnabled?: boolean;  // تفعيل/إيقاف فودافون كاش كطريقة دفع مستقلة
+  instapayEnabled?: boolean;      // تفعيل/إيقاف انستا باي كطريقة دفع مستقلة
+  onlinePaymentEnabled?: boolean;  // تفعيل/إيقاف الدفع الأونلاين العام
   instagramUrl?: string;
   facebookUrl?: string;
   tiktokUrl?: string;

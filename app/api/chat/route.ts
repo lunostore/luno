@@ -68,7 +68,9 @@ export async function POST(req: Request) {
       ]);
 
       if (products && products.length > 0) {
+        // العرض مقتصر فقط على آخر منتج تم إضافته للمتجر
         productsSummary = products
+          .slice(0, 1)
           .map((p) => {
             const priceText =
               p.salePrice && p.salePrice < p.price
@@ -85,7 +87,7 @@ export async function POST(req: Request) {
                 })
                 .join(" | ") || "ألوان/مقاسات عامة";
 
-            return `• منتج: ${p.name}
+            return `• أحدث منتج تم إضافته للمتجر: ${p.name}
   - المعرف (ID): ${p.id}
   - السعر: ${priceText}
   - القسم: ${p.category || "عام"}
@@ -109,12 +111,31 @@ export async function POST(req: Request) {
           .join("، ");
       }
 
-      if (siteSettings) {
-        storeSettingsSummary = `
-- اسم المتجر: ${siteSettings.storeName || "LUNO Store"}
-- وسائل الدفع المتاحة: الدفع عند الاستلام (COD)، فودافون كاش (*355#) (${siteSettings.vodafoneCash || "متوفر"})، انستا باي (${siteSettings.instapayUsername || "متوفر"})، والدفع الإلكتروني الأونلاين.
-- وسائل التواصل: ${siteSettings.storePhone ? `تلفون: ${siteSettings.storePhone}` : ""} ${siteSettings.storeEmail ? `إيميل: ${siteSettings.storeEmail}` : ""}`;
-      }
+      const isOnlineEnabled = siteSettings?.onlinePaymentEnabled !== false;
+      const isVfEnabled = isOnlineEnabled && siteSettings?.vodafoneCashEnabled !== false;
+      const isInstaEnabled = isOnlineEnabled && siteSettings?.instapayEnabled !== false;
+
+      const vfText = isVfEnabled
+        ? `متاح ✅ ورقم التحويل هو: (${siteSettings?.vodafoneCash?.trim() || "غير مسجل بالسيستم"})`
+        : `معطّل حالياً ❌ (غير متاح الاستقبال عليه)`;
+
+      const instaText = isInstaEnabled
+        ? `متاح ✅ وحساب التحويل هو: (${siteSettings?.instapayUsername?.trim() || "غير مسجل بالسيستم"})`
+        : `معطّل حالياً ❌ (غير متاح الاستقبال عليه)`;
+
+      const activeMethodsList = [
+        "الدفع عند الاستلام (COD)",
+        isVfEnabled ? "فودافون كاش" : null,
+        isInstaEnabled ? "انستا باي (InstaPay)" : null,
+      ].filter(Boolean).join("، ");
+
+      storeSettingsSummary = `
+- اسم المتجر: ${siteSettings?.storeName || "LUNO Store"}
+- حالة الدفع المتاحة حالياً بالمتجر: [${activeMethodsList}]
+- تفاصيل فودافون كاش: ${vfText}
+- تفاصيل انستا باي (InstaPay): ${instaText}
+- الدفع عند الاستلام (COD): متاح لجميع المحافظات ✅
+- وسائل التواصل: ${siteSettings?.storePhone ? `تلفون: ${siteSettings.storePhone}` : ""} ${siteSettings?.storeEmail ? `إيميل: ${siteSettings.storeEmail}` : ""}`;
     } catch (dbErr) {
       console.error("Failed to fetch live context for chatbot:", dbErr);
     }
@@ -124,19 +145,22 @@ export async function POST(req: Request) {
 
 قواعد مهمة جداً لضمان جودة الرد واللغة العربية الصافية:
 1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
-2. عند ترشيح أي منتج يناسب العميل، ارفق دائماً التاج الخاص بكارت المنتج التفاعلي في ردك بهذا الشكل بالضبط:
+2. الصدق والأمانة والدقة الفائقة في طرق الدفع (مهم جداً جداً):
+   - يقرأ السيستم حالة الدفع المتاحة لحظياً. إذا كانت طريقة دفع معطّلة (سواء فودافون كاش أو انستا باي)، وسألك العميل عنها، أخبره بصراحة وشياكة: "حالياً متاح طريقة كذا فقط (اذكر المفعّل فقط) وطريقة كذا غير متاحة حالياً."
+   - جاوب بالرقم أو الحساب المكتوب في البيانات أعلاه فقط إذا كانت الطريقة مفعّلة. يمنع منعاً باتاً اختراع أو تأليف أي رقم أو حساب وهمي إطلاقاً!
+3. عند ترشيح المنتج، ارفق دائماً التاج الخاص بكارت المنتج التفاعلي في ردك بهذا الشكل بالضبط:
    [PRODUCT_CARD:id=PRODUCT_ID:color=اسم_اللون:size=المقاس]
    مثال: [PRODUCT_CARD:id=prod123:color=أسود:size=L]
 
-3. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID كإغلاق تسويقي.
+4. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID كإغلاق تسويقي.
 
-4. البيع المتقاطع والإغلاق الذكي (Sales Closing):
+5. البيع المتقاطع والإغلاق الذكي (Sales Closing):
    - اقترح دائماً لونا يناسب ذوق العميل أو مقاساً متوفر بالمخزون بناءً على بيانات المنتجات أدناه.
    - في نهاية ردك، يمكنك وضع اقتراحين أو 3 أسئلة سريعة يمكن للعميل الضغط عليها بهذا التنسيق:
    [SUGGESTIONS:أضف هذا المنتج للسلة الآن|ما هي خامة هذا المنتج؟|ما هي مصاريف الشحن لـ القاهرة؟]
 
-5. يمنع منعاً باتاً الإفصاح عن أي معلومات حساسة أو طلبات عملاء آخرين.
-6. اجعل إجاباتك مختصرة، مشوقة، ومريحة للقارئ.
+6. يمنع منعاً باتاً الإفصاح عن أي معلومات حساسة أو طلبات عملاء آخرين.
+7. اجعل إجاباتك مختصرة، مشوقة، ومريحة للقارئ.
 
 بيانات المتجر والمعلومات المتاحة لحظياً من قاعدة البيانات:
 ${storeSettingsSummary}

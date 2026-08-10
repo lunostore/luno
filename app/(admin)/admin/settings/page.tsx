@@ -30,6 +30,9 @@ export default function AdminSettingsPage() {
     storePhone: "01107108679",
     vodafoneCash: "01107108679",
     instapayUsername: "@lunostore",
+    vodafoneCashEnabled: true,
+    instapayEnabled: true,
+    onlinePaymentEnabled: true,
     instagramUrl: "https://www.instagram.com/lunos.store1?igsh=ajZvanBuYW0yMGtp",
     facebookUrl: "https://www.facebook.com/share/1D4P25PPrn/",
     tiktokUrl: "https://www.tiktok.com/@lunostore4?_r=1&_t=ZS-98ilUuI7eZG",
@@ -747,57 +750,107 @@ Luno Store is not responsible for delays caused by courier services or events be
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Vodafone Cash Number
-              </label>
-              <input
-                type="text"
-                value={settings.vodafoneCash || ""}
-                onChange={(e) => setSettings({ ...settings, vodafoneCash: e.target.value })}
-                className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900"
-              />
+            {/* Vodafone Cash Toggle & Input */}
+            <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 space-y-3" dir="rtl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-zinc-900">
+                    {settings.vodafoneCashEnabled !== false ? "✅ فودافون كاش مفعّل" : "🔴 فودافون كاش معطّل"}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">طريقة دفع فودافون كاش</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, vodafoneCashEnabled: settings.vodafoneCashEnabled === false })}
+                  className={`relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none shadow-inner ${
+                    settings.vodafoneCashEnabled !== false ? "bg-emerald-500" : "bg-zinc-300"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+                      settings.vodafoneCashEnabled !== false ? "right-0.5" : "left-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1 text-right">
+                  رقم فودافون كاش للتحويل
+                </label>
+                <input
+                  type="text"
+                  value={settings.vodafoneCash || ""}
+                  onChange={(e) => setSettings({ ...settings, vodafoneCash: e.target.value })}
+                  placeholder="011xxxxxxx"
+                  className="w-full px-3.5 py-2 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900 bg-white"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                InstaPay Handle / Username
-              </label>
-              <input
-                type="text"
-                value={settings.instapayUsername || ""}
-                onChange={(e) => setSettings({ ...settings, instapayUsername: e.target.value })}
-                className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900"
-              />
+            {/* InstaPay Toggle & Input */}
+            <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 space-y-3" dir="rtl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-zinc-900">
+                    {settings.instapayEnabled !== false ? "✅ انستا باي (InstaPay) مفعّل" : "🔴 انستا باي (InstaPay) معطّل"}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">طريقة دفع انستا باي</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, instapayEnabled: settings.instapayEnabled === false })}
+                  className={`relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none shadow-inner ${
+                    settings.instapayEnabled !== false ? "bg-emerald-500" : "bg-zinc-300"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+                      settings.instapayEnabled !== false ? "right-0.5" : "left-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1 text-right">
+                  حساب / يوزر انستا باي (InstaPay)
+                </label>
+                <input
+                  type="text"
+                  value={settings.instapayUsername || ""}
+                  onChange={(e) => setSettings({ ...settings, instapayUsername: e.target.value })}
+                  placeholder="username@instapay"
+                  className="w-full px-3.5 py-2 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900 bg-white"
+                />
+              </div>
             </div>
 
             {/* Online Payment Toggle */}
             <div className="sm:col-span-2">
               <div className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 ${
-                settings.onlinePaymentEnabled
+                settings.onlinePaymentEnabled !== false
                   ? "border-green-300 bg-green-50"
                   : "border-red-200 bg-red-50"
               }`}>
                 <div>
                   <p className="text-sm font-black text-zinc-900">
-                    {settings.onlinePaymentEnabled ? "✅ الدفع الأونلاين مفعّل" : "🔴 الدفع الأونلاين معطّل"}
+                    {settings.onlinePaymentEnabled !== false ? "✅ الدفع المسبق أونلاين مفعّل كلياً" : "🔴 الدفع المسبق أونلاين معطّل كلياً"}
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-0.5">
-                    {settings.onlinePaymentEnabled
-                      ? "العملاء يقدرون يدفعوا بفودافون كاش أو انستاباي"
-                      : "الدفع عند الاستلام فقط — الأونلاين مخفي تماماً"}
+                    {settings.onlinePaymentEnabled !== false
+                      ? "العملاء يقدرون يدفعوا بطرق الدفع الأونلاين المفعّلة أعلاه"
+                      : "الدفع عند الاستلام (COD) فقط — خيارات الأونلاين مخفية تماماً"}
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setSettings({ ...settings, onlinePaymentEnabled: !settings.onlinePaymentEnabled })}
+                  onClick={() => setSettings({ ...settings, onlinePaymentEnabled: settings.onlinePaymentEnabled === false })}
                   className={`relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none shadow-inner ${
-                    settings.onlinePaymentEnabled ? "bg-green-500" : "bg-zinc-300"
+                    settings.onlinePaymentEnabled !== false ? "bg-green-500" : "bg-zinc-300"
                   }`}
                 >
                   <span
                     className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-300 ${
-                      settings.onlinePaymentEnabled ? "right-0.5" : "left-0.5"
+                      settings.onlinePaymentEnabled !== false ? "right-0.5" : "left-0.5"
                     }`}
                   />
                 </button>

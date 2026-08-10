@@ -29,12 +29,6 @@ interface ChatMessage {
 const CHATBOT_ENDPOINT =
   process.env.NEXT_PUBLIC_CHATBOT_API_URL || "https://luno--d775de94945311f1a7231607ee4eb77e.web.val.run/";
 
-const QUICK_PROMPTS = [
-  "🔥 أرشحلي أحدث المنتجات المصممة بأعلى جودة",
-  "👕 ايه هي خامات الملابس والقصات المتوفرة؟",
-  "🚚 ما هي مواعيد الشحن وطرق الدفع المتاحة؟",
-];
-
 // ── In-Chat Interactive Product Card Component ────────────
 
 function InChatProductCard({
@@ -393,31 +387,31 @@ export function LUNOChatWidget() {
 
   return (
     <>
-      {/* ── FLOATING LAUNCHER BUTTON ── */}
+      {/* ── FLOATING LAUNCHER BUTTON (Enlarged Luxury Size) ── */}
       <div className="fixed bottom-6 right-6 z-40 select-none">
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="relative group w-15 h-15 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border border-[#D4B886]/80 text-[#D4B886] flex items-center justify-center shadow-[0_12px_35px_rgba(212,184,134,0.25)] cursor-pointer backdrop-blur-xl overflow-hidden transition-all duration-300"
+          whileHover={{ scale: 1.12 }}
+          whileTap={{ scale: 0.88 }}
+          className="relative group w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-[#D4B886] text-[#D4B886] flex items-center justify-center shadow-[0_15px_40px_rgba(212,184,134,0.35)] cursor-pointer backdrop-blur-2xl overflow-hidden transition-all duration-300"
           title="LUNO AI Assistant"
         >
           {/* Animated gold aura glow */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/30 via-transparent to-amber-300/20 opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/35 via-transparent to-amber-300/25 opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
           
           {/* Ripple pulse ping ring */}
           {!isOpen && (
-            <span className="absolute inset-0 rounded-full bg-amber-400/20 animate-ping pointer-events-none" />
+            <span className="absolute inset-0 rounded-full bg-amber-400/25 animate-ping pointer-events-none" />
           )}
 
           {isOpen ? (
-            <X size={24} className="relative z-10 text-white drop-shadow-md" />
+            <X size={28} className="relative z-10 text-white drop-shadow-md" />
           ) : (
             <div className="relative z-10 flex items-center justify-center">
-              <Bot size={26} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_2px_8px_rgba(212,184,134,0.4)]" />
-              <Sparkles size={11} className="absolute -top-1 -right-1 text-amber-300 animate-pulse" />
-              <span className="absolute -bottom-1 -left-1 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
+              <Bot size={34} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_12px_rgba(212,184,134,0.5)]" />
+              <Sparkles size={14} className="absolute -top-1.5 -right-1.5 text-amber-300 animate-pulse" />
+              <span className="absolute -bottom-1 -left-1 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
             </div>
           )}
         </motion.button>
@@ -431,14 +425,14 @@ export function LUNOChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[400px] h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+            className="fixed bottom-28 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[82vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
             dir="rtl"
           >
             {/* Header */}
             <div className="px-5 py-4 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-zinc-900 to-zinc-800 border border-zinc-700 flex items-center justify-center shadow-inner relative">
-                  <Bot size={20} className="text-[#D4B886]" />
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-zinc-900 to-zinc-800 border border-zinc-700 flex items-center justify-center shadow-inner relative">
+                  <Bot size={24} className="text-[#D4B886]" />
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-zinc-900" />
                 </div>
                 <div>
@@ -498,27 +492,8 @@ export function LUNOChatWidget() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Starter Prompts */}
-            {messages.length <= 2 && (
-              <div className="px-4 py-2 border-t border-zinc-800/40 bg-zinc-900/30 flex flex-col gap-1.5 flex-shrink-0">
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">أسئلة مقترحة:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {QUICK_PROMPTS.map((promptText, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => sendMessage(promptText)}
-                      className="text-[10px] bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-right transition-all cursor-pointer active:scale-95"
-                    >
-                      {promptText}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Input Bar */}
-            <div className="p-3 border-t border-zinc-800/80 bg-zinc-900/80 flex items-center gap-2 flex-shrink-0">
+            <div className="p-3.5 border-t border-zinc-800/80 bg-zinc-900/80 flex items-center gap-2 flex-shrink-0">
               <input
                 type="text"
                 placeholder="اكتب سؤالك هنا لمساعد LUNO..."
