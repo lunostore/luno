@@ -7,6 +7,7 @@ import { WishlistSidebar } from "@/components/wishlist/WishlistSidebar";
 import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { MaintenanceGuard } from "@/components/layout/MaintenanceGuard";
 import { ProductModalProvider } from "@/features/product-modal/ProductModalProvider";
+import { LUNOChatWidget } from "@/components/chat/LUNOChatWidget";
 
 export default function StoreLayout({
   children,
@@ -22,6 +23,7 @@ export default function StoreLayout({
         <WishlistSidebar />
         <main>{children}</main>
         <Footer />
+        <LUNOChatWidget />
       </ProductModalProvider>
     </MaintenanceGuard>
   );
