@@ -8,6 +8,15 @@ interface ChatPayloadMessage {
   content: string;
 }
 
+/** Purify bot text from any accidental foreign language unicode characters (Chinese, Korean, Japanese, Thai, Cyrillic) */
+function sanitizeBotText(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/[\u4e00-\u9fa5\uac00-\ud7af\u3040-\u30ff\u0e00-\u0e7f\u0400-\u04ff]/g, "")
+    .replace(/[^\S\r\n]+/g, " ")
+    .trim();
+}
+
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
@@ -53,7 +62,6 @@ export async function POST(req: Request) {
     const geminiKey = process.env.GEMINI_API_KEY;
     const groqKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
 
-    // جلب بيانات المتجر الحية لحظياً من Firestore (بدون صلاحية للطلبات أو بيانات العملاء)
     let productsSummary = "لا توجد منتجات مسجلة حالياً.";
     let categoriesSummary = "";
     let shippingSummary = "";
@@ -68,7 +76,6 @@ export async function POST(req: Request) {
       ]);
 
       if (products && products.length > 0) {
-        // العرض مقتصر فقط على آخر منتج تم إضافته للمتجر
         productsSummary = products
           .slice(0, 1)
           .map((p) => {
@@ -87,11 +94,13 @@ export async function POST(req: Request) {
                 })
                 .join(" | ") || "ألوان/مقاسات عامة";
 
+            const matText = p.material && p.material.trim() ? p.material.trim() : "100% قطن فاخر";
+
             return `• أحدث منتج تم إضافته للمتجر: ${p.name}
   - المعرف (ID): ${p.id}
   - السعر: ${priceText}
   - القسم: ${p.category || "عام"}
-  - الخامة: ${p.material || "خامة فاخرة 100% قطن"}
+  - نوع خامة وقماش المنتج المكتوب بالأدمن: (${matText})
   - القصة/الفيت: ${p.fit || "قصة عادية / Oversized"}
   - الألوان والمقاسات المتاحة: ${colorsAndSizes}
   - الرابط المباشر للمنتج: /products?id=${p.id}
@@ -144,21 +153,17 @@ export async function POST(req: Request) {
 تحدث باللغة العربية الفصحى البسيطة والواضحة بطريقة ودودة، احترافية، تسويقية جذابة ومساعدة جداً للعملاء.
 
 قواعد مهمة جداً لضمان جودة الرد واللغة العربية الصافية:
-1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
-2. الصدق والأمانة والدقة الفائقة في طرق الدفع (مهم جداً جداً):
+1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو اليابانية أو التايلاندية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
+2. الصدق والأمانة والدقة الفائقة في خامات المنتجات وطرق الدفع (مهم جداً جداً):
+   - عندما يسألك العميل عن نوع خامة أو قماش المنتج، اذكر له نوع الخامة المسجلة بالنظام أدناه بدقة ووضوح (مثل: 100% قطن، ميلتون، إلخ).
    - يقرأ السيستم حالة الدفع المتاحة لحظياً. إذا كانت طريقة دفع معطّلة (سواء فودافون كاش أو انستا باي)، وسألك العميل عنها، أخبره بصراحة وشياكة: "حالياً متاح طريقة كذا فقط (اذكر المفعّل فقط) وطريقة كذا غير متاحة حالياً."
    - جاوب بالرقم أو الحساب المكتوب في البيانات أعلاه فقط إذا كانت الطريقة مفعّلة. يمنع منعاً باتاً اختراع أو تأليف أي رقم أو حساب وهمي إطلاقاً!
-3. عند ترشيح المنتج، ارفق دائماً التاج الخاص بكارت المنتج التفاعلي في ردك بهذا الشكل بالضبط:
-   [PRODUCT_CARD:id=PRODUCT_ID:color=اسم_اللون:size=المقاس]
-   مثال: [PRODUCT_CARD:id=prod123:color=أسود:size=L]
+3. متى ترفق كارت المنتج التفاعلي [PRODUCT_CARD]؟ (مهم جداً لسلاسة المحادثة):
+   - ارفق كارت المنتج التفاعلي [PRODUCT_CARD:id=PRODUCT_ID:color=اسم_اللون:size=المقاس] فقط وفقط إذا طلب العميل رؤية المنتجات، أو سأل عن الشراء، أو ترشيح قطعة ملابس!
+   - إذا كان سؤال العميل عن الشحن، المحافظات، فودافون كاش، انستا باي، طرق الدفع، أو سلام/تحية (مثل أهلاً، شكراً)، يمنع منعاً باتاً إرفاق كارت المنتج. جاوب على سؤال العميل مباشرة وبشكل سلس وطبيعي جداً بدون إقحام كروت منتجات!
 
-4. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID كإغلاق تسويقي.
-
-5. البيع المتقاطع والإغلاق الذكي (Sales Closing):
-   - اقترح دائماً لونا يناسب ذوق العميل أو مقاساً متوفر بالمخزون بناءً على بيانات المنتجات أدناه.
-   - في نهاية ردك، يمكنك وضع اقتراحين أو 3 أسئلة سريعة يمكن للعميل الضغط عليها بهذا التنسيق:
-   [SUGGESTIONS:أضف هذا المنتج للسلة الآن|ما هي خامة هذا المنتج؟|ما هي مصاريف الشحن لـ القاهرة؟]
-
+4. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID فقط عند ترشيح منتج للعميل.
+5. يمنع منعاً باتاً إضافة أي أسئلة اقتراحية أو تاجات أسئلة ثابتة مثل [SUGGESTIONS] أسفل كروت المنتجات أو في نهاية الرد. يجب أن ينتهي ردك بشكل طبيعي دون إضافة أي أسئلة مقترحة في النهاية.
 6. يمنع منعاً باتاً الإفصاح عن أي معلومات حساسة أو طلبات عملاء آخرين.
 7. اجعل إجاباتك مختصرة، مشوقة، ومريحة للقارئ.
 
@@ -185,8 +190,6 @@ ${productsSummary}`;
       ];
       for (const model of geminiModels) {
         try {
-          console.log(`[LUNO Chat] Calling Gemini model [${model}]...`);
-
           let geminiContents = trimmedMessages.map((m) => ({
             role: m.role === "user" ? "user" : "model",
             parts: [{ text: m.content }],
@@ -227,7 +230,7 @@ ${productsSummary}`;
                 body: JSON.stringify({
                   systemInstruction: { parts: [{ text: systemContext }] },
                   contents: geminiContents,
-                  generationConfig: { temperature: 0.7, maxOutputTokens: 800 },
+                  generationConfig: { temperature: 0.2, maxOutputTokens: 800 },
                 }),
               }
             );
@@ -236,21 +239,18 @@ ${productsSummary}`;
               const data = await response.json();
               const botText = data.candidates?.[0]?.content?.parts?.[0]?.text;
               if (botText) {
-                console.log(`[LUNO Chat] Gemini [${model}] succeeded!`);
+                const cleanText = sanitizeBotText(botText);
                 return NextResponse.json(
-                  { reply: botText, text: botText, message: botText, provider: `Gemini (${model})` },
+                  { reply: cleanText, text: cleanText, message: cleanText, provider: `Gemini (${model})` },
                   {
                     headers: { "Access-Control-Allow-Origin": "*" },
                   }
                 );
               }
-            } else {
-              const errText = await response.text();
-              console.error(`[LUNO Chat] Gemini [${model}] error:`, response.status, errText);
             }
           }
         } catch (geminiErr) {
-          console.error(`[LUNO Chat] Gemini [${model}] fetch failed:`, geminiErr);
+          console.error(`Gemini [${model}] fetch failed:`, geminiErr);
         }
       }
     }
@@ -264,7 +264,6 @@ ${productsSummary}`;
       ];
       for (const model of groqModels) {
         try {
-          console.log(`[LUNO Chat] Gemini failed/unavailable. Calling Groq [${model}]...`);
           const groqMessages = [
             { role: "system", content: systemContext },
             ...trimmedMessages.map((m) => ({
@@ -284,7 +283,7 @@ ${productsSummary}`;
               body: JSON.stringify({
                 model,
                 messages: groqMessages,
-                temperature: 0.7,
+                temperature: 0.2,
                 max_tokens: 800,
               }),
             }
@@ -294,20 +293,17 @@ ${productsSummary}`;
             const data = await response.json();
             const botText = data.choices?.[0]?.message?.content;
             if (botText) {
-              console.log(`[LUNO Chat] Groq [${model}] succeeded!`);
+              const cleanText = sanitizeBotText(botText);
               return NextResponse.json(
-                { reply: botText, text: botText, message: botText, provider: `Groq (${model})` },
+                { reply: cleanText, text: cleanText, message: cleanText, provider: `Groq (${model})` },
                 {
                   headers: { "Access-Control-Allow-Origin": "*" },
                 }
               );
             }
-          } else {
-            const errText = await response.text();
-            console.error(`[LUNO Chat] Groq [${model}] error:`, response.status, errText);
           }
         } catch (groqErr) {
-          console.error(`[LUNO Chat] Groq [${model}] fetch failed:`, groqErr);
+          console.error(`Groq [${model}] fetch failed:`, groqErr);
         }
       }
     }
@@ -316,7 +312,7 @@ ${productsSummary}`;
       {
         reply:
           "عذراً يا فندم، الخادم يواجه ضغطاً كبيراً حالياً ولا يمكنه الاتصال بالذكاء الاصطناعي. يرجى المحاولة بعد قليل. 🌸",
-        text: "عذراً يا فندم، الخادم يواجه ضغطاً كبيراً حالياً ولا يمكنه الاتصال بالذكاء الاصطناعي. يرجى المحاولة بعد قليل. 🌸",
+        text: "عذراً يا فندم، الخادم يواجه ضغطاً كبيراً حالياً. يرجى المحاولة بعد قليل. 🌸",
         message: "عذراً يا فندم، الخادم يواجه ضغطاً كبيراً حالياً. يرجى المحاولة بعد قليل.",
         error: "جميع محاولات الاتصال بالذكاء الاصطناعي فشلت",
       },

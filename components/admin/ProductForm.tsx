@@ -388,15 +388,33 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
             />
           </div>
 
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-              الخامة (Material)
+          {/* Dedicated Fabric Material Custom Manual Input Box */}
+          <div className="sm:col-span-2 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-2">
+            <label className="block text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between">
+              <span>🧵 نوع خامة القماش (اكتب اسم الخامة بيدك)</span>
+              <span className="text-[10px] font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                يقرأها الشات بوت فوراً للعملاء
+              </span>
             </label>
             <input
-              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800"
-              placeholder="مثال: 100% Cotton"
+              type="text"
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl text-xs bg-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-semibold text-zinc-900 placeholder:text-zinc-400"
+              placeholder="اكتب اسم خامة القماش هنا بيدك (مثال: 100% قطن مصري، ميلتون بايلوت 240 GSM، جابردين فاخر...)"
               {...register("material")}
             />
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-[10px] text-zinc-400 font-medium">اقتراحات خامات سريعة:</span>
+              {["قطن مصري 100%", "ميلتون بايلوت 240 GSM", "جابردين فاخر", "كتان مغسول", "أوفر سايز قطن 100%"].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setValue("material", preset, { shouldValidate: true })}
+                  className="text-[10px] bg-white border border-zinc-200 hover:border-amber-400 text-zinc-700 px-2.5 py-1 rounded-lg transition-all font-medium cursor-pointer"
+                >
+                  + {preset}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

@@ -19,57 +19,8 @@
 ## 1. نظرة عامة والهدف التجاري
 
 تم تصميم **LUNO Chat AI** ليعمل كمساعد مبيعات خبير واحترافي يرافق زوار المتجر في رحلة الشراء. يهدف الشات بوت إلى:
-- **تحويل الزوار إلى مشتريين (Sales Conversion Rate)** عبر ترشيح أحدث القطع المضافة للمتجر.
-- **توفير تجربة تسوق فورية**: اختيار المقاس واللون والإضافة لسلة المشتريات دون الحاجة للانتقال بين الصفحات.
-- **الإجابة اللحظية والدقيقة عن طرق الدفع المفعّلة حياً**: فودافون كاش وانستا باي والدفع عند الاستلام بناءً على خيارات التحكم في لوحة الأدمن.
-
----
-
-## 2. المعمارية التقنية وتدوير النماذج (AI Models Fallback Engine)
-
-يعتمد الشات بوت على استراتيجية **التدوير الذكي التلقائي (Model Failover Architecture)** بدءاً من **Gemini** أولاً ثم **Groq** كبديل احتياطي لضمان استمرارية الخدمة بنسبة 100%:
-
-```
-[User Request] ➔ [CORS & History Trimmer]
-                       │
-                       ▼
-       ┌───────────────────────────────┐
-       │   1. Google Gemini Primary    │
-       │   - gemini-2.0-flash          │
-       │   - gemini-2.0-flash-lite     │
-       │   - gemini-2.5-flash          │
-       └───────────────┬───────────────┘
-                       │ (إذا فشل أو انتهى الحد)
-                       ▼
-       ┌───────────────────────────────┐
-       │   2. Groq AI Models Fallback  │
-       │   - llama-3.3-70b-versatile   │
-       │   - llama-3.3-70b-specdec     │
-       │   - llama-3.1-8b-instant      │
-       └───────────────┬───────────────┘
-                       │
-                       ▼
-     [Interactive JSON Response + UI Cards]
-```
-
----
-
-## 3. الربط بقاعدة البيانات وسياسة الأمان (Security & Data Access)
-
-يقرأ الخادم بيانات المتجر لحظياً قبل كل رد لبناء السياق الحي (Live Store Context) من مشروع Firebase `luno-629e0`:
-
-### ✅ البيانات المتاح قراءتها للشات بوت:
-- **المنتجات (`products`)**: أحدث منتج تم إضافته للمتجر فقط (`slice(0, 1)`).
-- **أرقام الدفع وحالات التفعيل (`site_settings/general`)**: 
-  - حالة تفعيل فودافون كاش (`vodafoneCashEnabled`) ورقم التحويل.
-  - حالة تفعيل انستا باي (`instapayEnabled`) وحساب التحويل.
-  - حالة الدفع الأونلاين العام (`onlinePaymentEnabled`).
-- **أسعار الشحن (`site_settings/shipping`)**: أسعار توصيل المحافظات المحدثة.
-
-### 🛡️ سياسة الصدق والأمان:
-- يقرأ الشات بوت حالة تفعيل كل طريقة دفع لحظياً؛ إذا كانت طريقة معطلة من الأدمن، يعتذر للعميل بشياكة ويخبره بالطرق المتاحة حالياً فقط.
-- يمنع اختراع أو تأليف أي أرقام فودافون كاش أو انستا باي وهمية.
-- **يُحظر تماماً** وصول الشات بوت لسجل الطلبات (`orders`) أو الرسائل أو بيانات العملاء الشخصية.
+- **تحويل الزوار إلى مشتريين (Sales Conversion Rate)** عبر ترشيح أحدث القطع المضافة للمتجر عند طلب العميل فقط.
+- **إجابة استفسارات خامات الملابس**: يقرأ نوع الخامة المكتوبة يدوياً لكل منتج من لوحة الأدمن ويشرحها للعميل بدقة تامة.
 
 ---
 
@@ -99,6 +50,15 @@ function parseFirestoreField(field: any): any {
     return res;
   }
   return undefined;
+}
+
+/** فلتر صارم لتصفية وتنقية الردود من أي حروف أو رموز لغات غريبة */
+function sanitizeBotText(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/[\u4e00-\u9fa5\uac00-\ud7af\u3040-\u30ff\u0e00-\u0e7f\u0400-\u04ff]/g, "")
+    .replace(/[^\S\r\n]+/g, " ")
+    .trim();
 }
 
 export default async function (req: Request): Promise<Response> {
@@ -165,8 +125,9 @@ export default async function (req: Request): Promise<Response> {
                 : `${product.price || 0} ج.م`;
 
               const colors = product.variants?.map((v: any) => v.colorName).join("، ") || "ألوان عامة";
+              const matStr = product.material && product.material.trim() ? product.material.trim() : "100% قطن فاخر";
 
-              return `• أحدث منتج تم إضافته للمتجر: ${product.name}\n  - المعرف (ID): ${product.id}\n  - السعر: ${priceStr}\n  - الألوان المتاحة: ${colors}\n  - الخامة: ${product.material || "قطن 100%"}\n  - القصة: ${product.fit || "Oversized"}\n  - الرابط: /products?id=${product.id}\n  - الوصف: ${product.description || ""}`;
+              return `• أحدث منتج تم إضافته للمتجر: ${product.name}\n  - المعرف (ID): ${product.id}\n  - السعر: ${priceStr}\n  - نوع خامة وقماش المنتج المكتوب بالأدمن: (${matStr})\n  - الألوان المتاحة: ${colors}\n  - القصة: ${product.fit || "Oversized"}\n  - الرابط: /products?id=${product.id}\n  - الوصف: ${product.description || ""}`;
             })
             .join("\n\n");
         }
@@ -215,20 +176,18 @@ export default async function (req: Request): Promise<Response> {
 تحدث باللغة العربية الفصحى البسيطة والواضحة بطريقة ودودة، احترافية، تسويقية جذابة ومساعدة جداً للعملاء.
 
 قواعد مهمة جداً لضمان جودة الرد واللغة العربية الصافية:
-1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
-2. الصدق والأمانة والدقة الفائقة في طرق الدفع (مهم جداً جداً):
+1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو اليابانية أو التايلاندية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
+2. الصدق والأمانة والدقة الفائقة في خامات المنتجات وطرق الدفع (مهم جداً جداً):
+   - عندما يسألك العميل عن نوع خامة أو قماش المنتج (مثل: ايه هي خامة المنتج؟ / مصنوع من ايه؟)، اذكر له نوع الخامة المكتوبة في البيانات أدناه بالظبط (المكتوبة في حقل نوع خامة وقماش المنتج المكتوب بالأدمن).
    - يقرأ السيستم حالة الدفع المتاحة لحظياً. إذا كانت طريقة دفع معطّلة (سواء فودافون كاش أو انستا باي)، وسألك العميل عنها، أخبره بصراحة وشياكة: "حالياً متاح طريقة كذا فقط (اذكر المفعّل فقط) وطريقة كذا غير متاحة حالياً."
    - جاوب بالرقم أو الحساب المكتوب في البيانات أعلاه فقط إذا كانت الطريقة مفعّلة. يمنع منعاً باتاً اختراع أو تأليف أي رقم أو حساب وهمي إطلاقاً!
-3. عند ترشيح المنتج، ارفق دائماً التاج الخاص بكارت المنتج التفاعلي في ردك بهذا الشكل بالضبط:
-   [PRODUCT_CARD:id=PRODUCT_ID:color=اسم_اللون:size=المقاس]
-   مثال: [PRODUCT_CARD:id=prod123:color=أسود:size=L]
+3. متى ترفق كارت المنتج التفاعلي [PRODUCT_CARD]؟ (مهم جداً لسلاسة المحادثة):
+   - ارفق كارت المنتج التفاعلي [PRODUCT_CARD:id=PRODUCT_ID:color=اسم_اللون:size=المقاس] فقط وفقط إذاطلب العميل رؤية المنتجات، أو سأل عن الشراء، أو ترشيح قطعة ملابس!
+   - إذا كان سؤال العميل عن الشحن، المحافظات، فودافون كاش، انستا باي، طرق الدفع، أو سلام/تحية (مثل أهلاً، شكراً)، يمنع منعاً باتاً إرفاق كارت المنتج. جاوب على سؤال العميل مباشرة وبشكل سلس وطبيعي جداً بدون إقحام كروت منتجات!
 
-4. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID كإغلاق تسويقي.
+4. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID فقط عند ترشيح منتج للعميل.
 
-5. البيع المتقاطع والإغلاق الذكي (Sales Closing):
-   - اقترح دائماً لونا يناسب ذوق العميل أو مقاساً متوفر بالمخزون بناءً على بيانات المنتجات أدناه.
-   - في نهاية ردك، يمكنك وضع اقتراحين أو 3 أسئلة سريعة يمكن للعميل الضغط عليها بهذا التنسيق:
-   [SUGGESTIONS:أضف هذا المنتج للسلة الآن|ما هي خامة هذا المنتج؟|ما هي مصاريف الشحن لـ القاهرة؟]
+5. يمنع منعاً باتاً إضافة أي أسئلة اقتراحية أو تاجات أسئلة ثابتة مثل [SUGGESTIONS] أسفل كروت المنتجات أو في نهاية الرد. يجب أن ينتهي ردك بشكل طبيعي دون إضافة أي أسئلة مقترحة في النهاية.
 
 6. يمنع منعاً باتاً الإفصاح عن أي معلومات حساسة أو طلبات عملاء آخرين.
 7. اجعل إجاباتك مختصرة، مشوقة، ومريحة للقارئ.
@@ -258,14 +217,17 @@ ${productsSummary}`;
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: systemContext }] },
               contents: trimmedMessages.map((m: any) => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.content }] })),
-              generationConfig: { temperature: 0.7, maxOutputTokens: 800 },
+              generationConfig: { temperature: 0.2, maxOutputTokens: 800 },
             }),
           });
 
           if (response.ok) {
             const data = await response.json();
             const botText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (botText) return new Response(JSON.stringify({ reply: botText, text: botText, provider: `Gemini (${model})` }), { headers: { "Access-Control-Allow-Origin": "*" } });
+            if (botText) {
+              const cleanText = sanitizeBotText(botText);
+              return new Response(JSON.stringify({ reply: cleanText, text: cleanText, provider: `Gemini (${model})` }), { headers: { "Access-Control-Allow-Origin": "*" } });
+            }
           }
         } catch (geminiErr) {
           console.error(geminiErr);
@@ -284,7 +246,7 @@ ${productsSummary}`;
             body: JSON.stringify({
               model,
               messages: [{ role: "system", content: systemContext }, ...trimmedMessages],
-              temperature: 0.7,
+              temperature: 0.2,
               max_tokens: 800,
             }),
           });
@@ -292,7 +254,10 @@ ${productsSummary}`;
           if (response.ok) {
             const data = await response.json();
             const botText = data.choices?.[0]?.message?.content;
-            if (botText) return new Response(JSON.stringify({ reply: botText, text: botText, provider: `Groq (${model})` }), { headers: { "Access-Control-Allow-Origin": "*" } });
+            if (botText) {
+              const cleanText = sanitizeBotText(botText);
+              return new Response(JSON.stringify({ reply: cleanText, text: cleanText, provider: `Groq (${model})` }), { headers: { "Access-Control-Allow-Origin": "*" } });
+            }
           }
         } catch (groqErr) {
           console.error(groqErr);

@@ -387,14 +387,14 @@ export function LUNOChatWidget() {
 
   return (
     <>
-      {/* ── FLOATING LAUNCHER BUTTON (Enlarged Luxury Size) ── */}
-      <div className="fixed bottom-6 right-6 z-40 select-none">
+      {/* ── FLOATING LAUNCHER BUTTON (Responsive Luxury Size) ── */}
+      <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 select-none">
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          whileHover={{ scale: 1.12 }}
-          whileTap={{ scale: 0.88 }}
-          className="relative group w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-[#D4B886] text-[#D4B886] flex items-center justify-center shadow-[0_15px_40px_rgba(212,184,134,0.35)] cursor-pointer backdrop-blur-2xl overflow-hidden transition-all duration-300"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="relative group w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-[#D4B886] text-[#D4B886] flex items-center justify-center shadow-[0_10px_30px_rgba(212,184,134,0.35)] cursor-pointer backdrop-blur-2xl overflow-hidden transition-all duration-300"
           title="LUNO AI Assistant"
         >
           {/* Animated gold aura glow */}
@@ -406,12 +406,20 @@ export function LUNOChatWidget() {
           )}
 
           {isOpen ? (
-            <X size={28} className="relative z-10 text-white drop-shadow-md" />
+            <X size={24} className="relative z-10 text-white drop-shadow-md" />
           ) : (
-            <div className="relative z-10 flex items-center justify-center">
-              <Bot size={34} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_12px_rgba(212,184,134,0.5)]" />
-              <Sparkles size={14} className="absolute -top-1.5 -right-1.5 text-amber-300 animate-pulse" />
-              <span className="absolute -bottom-1 -left-1 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
+            <div className="relative z-10 flex items-center justify-center w-full h-full p-1.5">
+              <img
+                src="/images/bot-avatar.png"
+                alt="LUNO AI Bot Avatar"
+                className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_2px_10px_rgba(212,184,134,0.6)]"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+              <Bot size={26} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300 hidden" />
+              <Sparkles size={12} className="absolute -top-1 -right-1 text-amber-300 animate-pulse pointer-events-none" />
+              <span className="absolute bottom-0.5 left-0.5 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
             </div>
           )}
         </motion.button>
@@ -425,14 +433,22 @@ export function LUNOChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-28 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[82vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+            className="fixed bottom-22 right-3 sm:bottom-28 sm:right-6 z-40 w-[calc(100vw-1.5rem)] sm:w-[420px] h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
             dir="rtl"
           >
             {/* Header */}
             <div className="px-5 py-4 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-zinc-900 to-zinc-800 border border-zinc-700 flex items-center justify-center shadow-inner relative">
-                  <Bot size={24} className="text-[#D4B886]" />
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-zinc-900 to-zinc-800 border border-zinc-700/80 flex items-center justify-center shadow-inner relative overflow-hidden p-0.5">
+                  <img
+                    src="/images/bot-avatar.png"
+                    alt="LUNO AI Bot Avatar"
+                    className="w-full h-full object-cover rounded-xl"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                  <Bot size={22} className="text-[#D4B886]" />
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-zinc-900" />
                 </div>
                 <div>
