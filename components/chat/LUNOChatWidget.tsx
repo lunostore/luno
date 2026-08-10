@@ -210,6 +210,7 @@ function InChatProductCard({
 
 export function LUNOChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome-1",
@@ -408,16 +409,18 @@ export function LUNOChatWidget() {
           {isOpen ? (
             <X size={24} className="relative z-10 text-white drop-shadow-md" />
           ) : (
-            <div className="relative z-10 flex items-center justify-center w-full h-full p-1.5">
-              <img
-                src="/images/bot-avatar.png"
-                alt="LUNO AI Bot Avatar"
-                className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_2px_10px_rgba(212,184,134,0.6)]"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = "none";
-                }}
-              />
-              <Bot size={26} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300 hidden" />
+            <div className="relative z-10 flex items-center justify-center w-full h-full p-1">
+              {!avatarError ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src="/images/bot-avatar.png"
+                  alt="LUNO AI Bot Avatar"
+                  className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_2px_10px_rgba(212,184,134,0.6)]"
+                  onError={() => setAvatarError(true)}
+                />
+              ) : (
+                <Bot size={26} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300" />
+              )}
               <Sparkles size={12} className="absolute -top-1 -right-1 text-amber-300 animate-pulse pointer-events-none" />
               <span className="absolute bottom-0.5 left-0.5 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
             </div>
@@ -440,15 +443,17 @@ export function LUNOChatWidget() {
             <div className="px-5 py-4 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-zinc-900 to-zinc-800 border border-zinc-700/80 flex items-center justify-center shadow-inner relative overflow-hidden p-0.5">
-                  <img
-                    src="/images/bot-avatar.png"
-                    alt="LUNO AI Bot Avatar"
-                    className="w-full h-full object-cover rounded-xl"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
-                  <Bot size={22} className="text-[#D4B886]" />
+                  {!avatarError ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src="/images/bot-avatar.png"
+                      alt="LUNO AI Bot Avatar"
+                      className="w-full h-full object-cover rounded-xl"
+                      onError={() => setAvatarError(true)}
+                    />
+                  ) : (
+                    <Bot size={22} className="text-[#D4B886]" />
+                  )}
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-zinc-900" />
                 </div>
                 <div>

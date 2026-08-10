@@ -3,7 +3,7 @@ const path = require('path');
 
 const src1 = path.join(__dirname, 'logo', 'next is yours nxt', '1.png');
 const src2 = path.join(__dirname, 'logo', 'next is yours nxt', '2.png');
-const botAvatarSrc = 'C:/Users/youse/.gemini/antigravity-ide/brain/21686c93-ce8b-4042-b114-21e5534f454f/ai_bot_avatar_1786329369069.png';
+const botAvatarSrc = path.join(__dirname, 'logo', 'bot-avatar.png');
 
 const dest1 = path.join(__dirname, 'public', 'size-chart-tshirt.png');
 const dest2 = path.join(__dirname, 'public', 'size-chart-pants.png');
