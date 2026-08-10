@@ -100,32 +100,32 @@ export function buildWhatsAppConfirmationMessage(
     order.shippingCost !== undefined ? formatPrice(order.shippingCost) : "حسب المحافظة";
   const totalText = formatPrice(order.total);
 
-  return `أهلاً بك ${order.customerName} 👋
-شكراً لطلبك من ${storeName}! ✨
+  return `مرحبا ${order.customerName}
+شكرا لطلبك من ${storeName}!
 
-📝 تفاصيل طلبك:
+تفاصيل طلبك:
 -----------------------------------
 رقم الطلب: #${shortId}
 
-🛒 المنتجات:
+المنتجات:
 ${itemsText}
 
-📍 بيانات التوصيل:
+بيانات التوصيل:
 - الاسم: ${order.customerName}
 - الهاتف: ${order.phone}
 - العنوان: ${fullAddress}
 
-💰 الفاتورة:
+الفاتورة:
 - مجموع المنتجات: ${subtotalText}
 - مصاريف الشحن: ${shippingText}
-- الإجمالي النهائي: ${totalText}
+- الاجمالي النهائي: ${totalText}
 -----------------------------------
 
-🚚 لتجهيز طلبك وتسليمه لشركة الشحن فوراً، نرجو تأكيد الطلب:
+لتجهيز طلبك وتسليمه لشركة الشحن فورا، نرجو تأكيد الطلب:
 
-1️⃣ تأكيد الطلب (للبدء في التغليف والشحن)
-2️⃣ إلغاء الطلب
+(1) تأكيد الطلب - للبدء في التغليف والشحن
+(2) الغاء الطلب
 
-✍️ من فضلك أرسل الرقم (1) للتأكيد أو (2) للإلغاء.`;
+من فضلك أرسل الرقم (1) للتأكيد أو (2) للالغاء.`;
 }
 
