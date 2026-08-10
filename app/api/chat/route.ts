@@ -24,9 +24,9 @@ export async function GET() {
   const hasGroq = !!(process.env.GROQ_API_KEY || process.env.GROK_API_KEY);
   return new Response(
     `حالة مفاتيح AI في LUNO Store:\n- GEMINI_API_KEY: ${
-      hasGemini ? "موجود ✅" : "غير موجود ❌"
+      hasGemini ? "موجود ✅ (الأساسي)" : "غير موجود ❌"
     }\n- GROQ_API_KEY / GROK_API_KEY: ${
-      hasGroq ? "موجود ✅" : "غير موجود ❌"
+      hasGroq ? "موجود ✅ (الاحتياطي)" : "غير موجود ❌"
     }`,
     {
       status: 200,
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const groqKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
 
     // جلب بيانات المتجر الحية لحظياً من Firestore (بدون صلاحية للطلبات أو بيانات العملاء)
     let productsSummary = "لا توجد منتجات مسجلة حالياً.";
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
       if (siteSettings) {
         storeSettingsSummary = `
 - اسم المتجر: ${siteSettings.storeName || "LUNO Store"}
-- وسائل الدفع المتاحة: الدفع عند الاستلام (COD)، فودافون كاش (${siteSettings.vodafoneCash || "متوفر"})، انستا باي (${siteSettings.instapayUsername || "متوفر"})، والدفع الإلكتروني الأونلاين.
+- وسائل الدفع المتاحة: الدفع عند الاستلام (COD)، فودافون كاش (*355#) (${siteSettings.vodafoneCash || "متوفر"})، انستا باي (${siteSettings.instapayUsername || "متوفر"})، والدفع الإلكتروني الأونلاين.
 - وسائل التواصل: ${siteSettings.storePhone ? `تلفون: ${siteSettings.storePhone}` : ""} ${siteSettings.storeEmail ? `إيميل: ${siteSettings.storeEmail}` : ""}`;
       }
     } catch (dbErr) {
@@ -120,24 +120,23 @@ export async function POST(req: Request) {
     }
 
     const systemContext = `أنت الخبير والمساعد الذكي الرسمي لزيادة المبيعات في متجر "LUNO Store" لملابس الموضة والأزياء الراقية.
-تحدث باللغة العربية بطريقة ودودة، احترافية، تسويقية جذابة ومساعدة جداً للعملاء.
+تحدث باللغة العربية الفصحى البسيطة والواضحة بطريقة ودودة، احترافية، تسويقية جذابة ومساعدة جداً للعملاء.
 
-قواعد مهمة جداً لإجابات الشات بوت وتوليد المبيعات:
-1. عند ترشيح أي منتج يناسب العميل، ارفق دائماً التاج الخاص بكارت المنتج التفاعلي في ردك بهذا الشكل بالضبط:
+قواعد مهمة جداً لضمان جودة الرد واللغة العربية الصافية:
+1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
+2. عند ترشيح أي منتج يناسب العميل، ارفق دائماً التاج الخاص بكارت المنتج التفاعلي في ردك بهذا الشكل بالضبط:
    [PRODUCT_CARD:id=PRODUCT_ID:color=اسم_اللون:size=المقاس]
    مثال: [PRODUCT_CARD:id=prod123:color=أسود:size=L]
-   (إذا لم يحدد العميل لوناً أو مقاساً، اختر اللون الأكثر مبيعاً والأول في القائمة كاقتران ذكي).
 
-2. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID كإغلاق تسويقي.
+3. اكتب أيضاً رابط المنتج التقليدي /products?id=PRODUCT_ID كإغلاق تسويقي.
 
-3. البيع المتقاطع والإغلاق الذكي (Sales Closing):
+4. البيع المتقاطع والإغلاق الذكي (Sales Closing):
    - اقترح دائماً لونا يناسب ذوق العميل أو مقاساً متوفر بالمخزون بناءً على بيانات المنتجات أدناه.
-   - شجع العميل على الشراء بإبراز مزايا الخامة وخصومات السعر.
    - في نهاية ردك، يمكنك وضع اقتراحين أو 3 أسئلة سريعة يمكن للعميل الضغط عليها بهذا التنسيق:
    [SUGGESTIONS:أضف هذا المنتج للسلة الآن|ما هي خامة هذا المنتج؟|ما هي مصاريف الشحن لـ القاهرة؟]
 
-4. يمنع منعاً باتاً الإفصاح عن أي معلومات حساسة أو طلبات عملاء آخرين.
-5. اجعل إجاباتك مختصرة، مشوقة، ومريحة للقارئ.
+5. يمنع منعاً باتاً الإفصاح عن أي معلومات حساسة أو طلبات عملاء آخرين.
+6. اجعل إجاباتك مختصرة، مشوقة، ومريحة للقارئ.
 
 بيانات المتجر والمعلومات المتاحة لحظياً من قاعدة البيانات:
 ${storeSettingsSummary}
@@ -153,64 +152,7 @@ ${productsSummary}`;
 
     const trimmedMessages = messages.slice(-8);
 
-    // ── 1. Groq Model Rotation ──
-    if (groqKey) {
-      const groqModels = [
-        "llama-3.3-70b-versatile",
-        "llama-3.3-70b-specdec",
-        "llama-3.1-8b-instant",
-      ];
-      for (const model of groqModels) {
-        try {
-          console.log(`[LUNO Chat] Calling Groq model [${model}]...`);
-          const groqMessages = [
-            { role: "system", content: systemContext },
-            ...trimmedMessages.map((m) => ({
-              role: m.role === "user" ? "user" : "assistant",
-              content: m.content,
-            })),
-          ];
-
-          const response = await fetch(
-            "https://api.groq.com/openai/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${groqKey}`,
-              },
-              body: JSON.stringify({
-                model,
-                messages: groqMessages,
-                temperature: 0.7,
-                max_tokens: 800,
-              }),
-            }
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            const botText = data.choices?.[0]?.message?.content;
-            if (botText) {
-              console.log(`[LUNO Chat] Groq [${model}] succeeded!`);
-              return NextResponse.json(
-                { reply: botText, text: botText, message: botText, provider: `Groq (${model})` },
-                {
-                  headers: { "Access-Control-Allow-Origin": "*" },
-                }
-              );
-            }
-          } else {
-            const errText = await response.text();
-            console.error(`[LUNO Chat] Groq [${model}] error:`, response.status, errText);
-          }
-        } catch (groqErr) {
-          console.error(`[LUNO Chat] Groq [${model}] fetch failed:`, groqErr);
-        }
-      }
-    }
-
-    // ── 2. Gemini Fallback Rotation ──
+    // ── 1. Gemini AI Models Primary (الأساسي الأول) ──
     if (geminiKey) {
       const geminiModels = [
         "gemini-2.0-flash",
@@ -219,7 +161,7 @@ ${productsSummary}`;
       ];
       for (const model of geminiModels) {
         try {
-          console.log(`[LUNO Chat] Groq unavailable. Calling Gemini [${model}]...`);
+          console.log(`[LUNO Chat] Calling Gemini model [${model}]...`);
 
           let geminiContents = trimmedMessages.map((m) => ({
             role: m.role === "user" ? "user" : "model",
@@ -285,6 +227,63 @@ ${productsSummary}`;
           }
         } catch (geminiErr) {
           console.error(`[LUNO Chat] Gemini [${model}] fetch failed:`, geminiErr);
+        }
+      }
+    }
+
+    // ── 2. Groq AI Models Fallback (الاحتياطي الثاني) ──
+    if (groqKey) {
+      const groqModels = [
+        "llama-3.3-70b-versatile",
+        "llama-3.3-70b-specdec",
+        "llama-3.1-8b-instant",
+      ];
+      for (const model of groqModels) {
+        try {
+          console.log(`[LUNO Chat] Gemini failed/unavailable. Calling Groq [${model}]...`);
+          const groqMessages = [
+            { role: "system", content: systemContext },
+            ...trimmedMessages.map((m) => ({
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content,
+            })),
+          ];
+
+          const response = await fetch(
+            "https://api.groq.com/openai/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${groqKey}`,
+              },
+              body: JSON.stringify({
+                model,
+                messages: groqMessages,
+                temperature: 0.7,
+                max_tokens: 800,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            const botText = data.choices?.[0]?.message?.content;
+            if (botText) {
+              console.log(`[LUNO Chat] Groq [${model}] succeeded!`);
+              return NextResponse.json(
+                { reply: botText, text: botText, message: botText, provider: `Groq (${model})` },
+                {
+                  headers: { "Access-Control-Allow-Origin": "*" },
+                }
+              );
+            }
+          } else {
+            const errText = await response.text();
+            console.error(`[LUNO Chat] Groq [${model}] error:`, response.status, errText);
+          }
+        } catch (groqErr) {
+          console.error(`[LUNO Chat] Groq [${model}] fetch failed:`, groqErr);
         }
       }
     }
