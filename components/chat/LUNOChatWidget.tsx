@@ -12,7 +12,6 @@ import {
   RefreshCw,
   ShoppingCart,
   Check,
-  MessageSquareText,
 } from "lucide-react";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { useCart } from "@/features/cart/CartProvider";
@@ -416,8 +415,8 @@ export function LUNOChatWidget() {
             <X size={24} className="relative z-10 text-white drop-shadow-md" />
           ) : (
             <div className="relative z-10 flex items-center justify-center">
-              <MessageSquareText size={24} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300" />
-              <Sparkles size={12} className="absolute -top-1 -right-1 text-amber-300 animate-pulse" />
+              <Bot size={26} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_2px_8px_rgba(212,184,134,0.4)]" />
+              <Sparkles size={11} className="absolute -top-1 -right-1 text-amber-300 animate-pulse" />
               <span className="absolute -bottom-1 -left-1 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
             </div>
           )}
