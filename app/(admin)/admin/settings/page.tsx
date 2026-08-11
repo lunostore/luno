@@ -6,6 +6,7 @@ import { Trash2, Video, Image as ImageIcon, Save, Sparkles, Sliders, Type, Credi
 
 
 import { getSiteSettings, updateSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
+import { DEFAULT_SHIPPING_POLICY_TEXT } from "@/constants/policies";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -73,6 +74,7 @@ We accept returns within 7 days of delivery for unused items in original conditi
 
 Limitation of Liability
 Luno Store is not responsible for delays caused by courier services or events beyond our control. We are not liable for any indirect or consequential damages.`,
+    shippingPolicyText: DEFAULT_SHIPPING_POLICY_TEXT,
   });
 
   useEffect(() => {
@@ -627,6 +629,21 @@ Luno Store is not responsible for delays caused by courier services or events be
                 onChange={(e) => setSettings({ ...settings, termsOfServiceText: e.target.value })}
                 placeholder="Enter custom terms of service content..."
                 className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 leading-relaxed font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-xs font-bold text-zinc-800 uppercase tracking-wider mb-2">
+                <FileText size={14} />
+                Shipping & Returns Policy (سياسة الشحن والاسترجاع)
+              </label>
+              <textarea
+                rows={12}
+                value={settings.shippingPolicyText || ""}
+                onChange={(e) => setSettings({ ...settings, shippingPolicyText: e.target.value })}
+                placeholder="أدخل نص سياسة الشحن والاسترجاع..."
+                className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 leading-relaxed font-mono"
+                dir="rtl"
               />
             </div>
           </div>

@@ -4,34 +4,126 @@ export interface GovernorateRate {
   nameEn: string;
   price: number;
   active: boolean;
+  additionalKgPrice?: number;
 }
 
 export const DEFAULT_EGYPT_GOVERNORATES: GovernorateRate[] = [
-  { id: "cairo", nameAr: "القاهرة", nameEn: "Cairo", price: 50, active: true },
-  { id: "giza", nameAr: "الجيزة", nameEn: "Giza", price: 50, active: true },
-  { id: "qalyubia", nameAr: "القليوبية", nameEn: "Qalyubia", price: 55, active: true },
-  { id: "alexandria", nameAr: "الإسكندرية", nameEn: "Alexandria", price: 65, active: true },
-  { id: "beheira", nameAr: "البحيرة", nameEn: "Beheira", price: 70, active: true },
-  { id: "matrouh", nameAr: "مطروح", nameEn: "Matrouh", price: 85, active: true },
-  { id: "gharbia", nameAr: "الغربية", nameEn: "Gharbia", price: 65, active: true },
-  { id: "menofia", nameAr: "المنوفية", nameEn: "Menofia", price: 65, active: true },
-  { id: "dakahlia", nameAr: "الدقهلية", nameEn: "Dakahlia", price: 65, active: true },
-  { id: "kafr_el_sheikh", nameAr: "كفر الشيخ", nameEn: "Kafr El Sheikh", price: 70, active: true },
-  { id: "sharqia", nameAr: "الشرقية", nameEn: "Sharqia", price: 65, active: true },
-  { id: "damietta", nameAr: "دمياط", nameEn: "Damietta", price: 70, active: true },
-  { id: "port_said", nameAr: "بورسعيد", nameEn: "Port Said", price: 70, active: true },
-  { id: "ismailia", nameAr: "الإسماعيلية", nameEn: "Ismailia", price: 70, active: true },
-  { id: "suez", nameAr: "السويس", nameEn: "Suez", price: 70, active: true },
-  { id: "north_sinai", nameAr: "شمال سيناء", nameEn: "North Sinai", price: 95, active: true },
-  { id: "south_sinai", nameAr: "جنوب سيناء", nameEn: "South Sinai", price: 95, active: true },
-  { id: "beni_suef", nameAr: "بني سويف", nameEn: "Beni Suef", price: 75, active: true },
-  { id: "fayoum", nameAr: "الفيوم", nameEn: "Fayoum", price: 75, active: true },
-  { id: "minya", nameAr: "المنيا", nameEn: "Minya", price: 80, active: true },
-  { id: "assiut", nameAr: "أسيوط", nameEn: "Assiut", price: 80, active: true },
-  { id: "sohag", nameAr: "سوهاج", nameEn: "Sohag", price: 85, active: true },
-  { id: "qena", nameAr: "قنا", nameEn: "Qena", price: 85, active: true },
-  { id: "luxor", nameAr: "الأقصر", nameEn: "Luxor", price: 90, active: true },
-  { id: "aswan", nameAr: "أسوان", nameEn: "Aswan", price: 95, active: true },
-  { id: "red_sea", nameAr: "البحر الأحمر", nameEn: "Red Sea", price: 95, active: true },
-  { id: "new_valley", nameAr: "الوادي الجديد", nameEn: "New Valley", price: 100, active: true },
+  { id: "cairo", nameAr: "القاهرة", nameEn: "Cairo", price: 55, active: true, additionalKgPrice: 7 },
+  { id: "giza", nameAr: "الجيزة", nameEn: "Giza", price: 55, active: true, additionalKgPrice: 7 },
+  { id: "qalyubia", nameAr: "القليوبية", nameEn: "Qalyubia", price: 55, active: true, additionalKgPrice: 7 },
+  { id: "alexandria", nameAr: "الإسكندرية", nameEn: "Alexandria", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "beheira", nameAr: "البحيرة", nameEn: "Beheira", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "matrouh", nameAr: "مطروح", nameEn: "Matrouh", price: 110, active: true, additionalKgPrice: 7 },
+  { id: "gharbia", nameAr: "الغربية", nameEn: "Gharbia", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "menofia", nameAr: "المنوفية", nameEn: "Menofia", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "dakahlia", nameAr: "الدقهلية", nameEn: "Dakahlia", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "kafr_el_sheikh", nameAr: "كفر الشيخ", nameEn: "Kafr El Sheikh", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "sharqia", nameAr: "الشرقية", nameEn: "Sharqia", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "damietta", nameAr: "دمياط", nameEn: "Damietta", price: 65, active: true, additionalKgPrice: 7 },
+  { id: "port_said", nameAr: "بورسعيد", nameEn: "Port Said", price: 70, active: true, additionalKgPrice: 7 },
+  { id: "ismailia", nameAr: "الإسماعيلية", nameEn: "Ismailia", price: 70, active: true, additionalKgPrice: 7 },
+  { id: "suez", nameAr: "السويس", nameEn: "Suez", price: 70, active: true, additionalKgPrice: 7 },
+  { id: "north_sinai", nameAr: "شمال سيناء", nameEn: "North Sinai", price: 110, active: true, additionalKgPrice: 7 },
+  { id: "south_sinai", nameAr: "جنوب سيناء", nameEn: "South Sinai", price: 110, active: true, additionalKgPrice: 7 },
+  { id: "beni_suef", nameAr: "بني سويف", nameEn: "Beni Suef", price: 75, active: true, additionalKgPrice: 7 },
+  { id: "fayoum", nameAr: "الفيوم", nameEn: "Fayoum", price: 75, active: true, additionalKgPrice: 7 },
+  { id: "minya", nameAr: "المنيا", nameEn: "Minya", price: 75, active: true, additionalKgPrice: 7 },
+  { id: "assiut", nameAr: "أسيوط", nameEn: "Assiut", price: 75, active: true, additionalKgPrice: 7 },
+  { id: "sohag", nameAr: "سوهاج", nameEn: "Sohag", price: 100, active: true, additionalKgPrice: 7 },
+  { id: "qena", nameAr: "قنا", nameEn: "Qena", price: 100, active: true, additionalKgPrice: 7 },
+  { id: "luxor", nameAr: "الأقصر", nameEn: "Luxor", price: 100, active: true, additionalKgPrice: 7 },
+  { id: "aswan", nameAr: "أسوان", nameEn: "Aswan", price: 100, active: true, additionalKgPrice: 7 },
+  { id: "red_sea", nameAr: "البحر الأحمر", nameEn: "Red Sea", price: 100, active: true, additionalKgPrice: 7 },
+  { id: "new_valley", nameAr: "الوادي الجديد", nameEn: "New Valley", price: 110, active: true, additionalKgPrice: 7 },
 ];
+
+export const SHIPPING_WEIGHT_RULES = {
+  firstKgBase: 1000,
+  additionalKgRate: 7.0,
+};
+
+// Full origin to destination shipping rates lookup matrix provided by shipper
+export const SHIPPING_MATRIX: Record<string, Record<string, number>> = {
+  CAIRO: {
+    CAIRO: 55, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 70, SUEZ: 70, PORT_SAID: 70, SHARKIA: 65, FAYOUM: 75, BANI_SWEIF: 75, MENIA: 75, ASSIUT: 75, GIZA: 55, SOUHAGE: 100, QENA: 100, ASWAN: 100, LOUXOR: 100, RED_SEA: 100, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 55, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  KAFR_EL_SHEIKH: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 55, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  MARSA_MATROUH: {
+    CAIRO: 110, KAFR_EL_SHEIKH: 110, MARSA_MATROUH: 55, ISMAILIA: 110, SUEZ: 110, PORT_SAID: 110, SHARKIA: 110, FAYOUM: 110, BANI_SWEIF: 110, MENIA: 110, ASSIUT: 110, GIZA: 110, SOUHAGE: 110, QENA: 110, ASWAN: 110, LOUXOR: 110, RED_SEA: 110, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 110, BEHIRA: 110, QALIUBIA: 110, GHARBIA: 110, MONOUFIA: 110, DOMITTA: 110, DAKAHLIA: 110
+  },
+  ISMAILIA: {
+    CAIRO: 70, KAFR_EL_SHEIKH: 75, MARSA_MATROUH: 110, ISMAILIA: 55, SUEZ: 65, PORT_SAID: 65, SHARKIA: 75, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 70, SOUHAGE: 100, QENA: 100, ASWAN: 100, LOUXOR: 100, RED_SEA: 100, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 75, BEHIRA: 75, QALIUBIA: 70, GHARBIA: 75, MONOUFIA: 75, DOMITTA: 75, DAKAHLIA: 75
+  },
+  SUEZ: {
+    CAIRO: 70, KAFR_EL_SHEIKH: 75, MARSA_MATROUH: 110, ISMAILIA: 65, SUEZ: 55, PORT_SAID: 65, SHARKIA: 75, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 70, SOUHAGE: 100, QENA: 100, ASWAN: 100, LOUXOR: 100, RED_SEA: 100, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 75, BEHIRA: 75, QALIUBIA: 70, GHARBIA: 75, MONOUFIA: 75, DOMITTA: 75, DAKAHLIA: 75
+  },
+  PORT_SAID: {
+    CAIRO: 70, KAFR_EL_SHEIKH: 75, MARSA_MATROUH: 110, ISMAILIA: 65, SUEZ: 65, PORT_SAID: 55, SHARKIA: 75, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 70, SOUHAGE: 100, QENA: 100, ASWAN: 100, LOUXOR: 100, RED_SEA: 100, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 75, BEHIRA: 75, QALIUBIA: 70, GHARBIA: 75, MONOUFIA: 75, DOMITTA: 75, DAKAHLIA: 75
+  },
+  SHARKIA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 55, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  FAYOUM: {
+    CAIRO: 75, KAFR_EL_SHEIKH: 90, MARSA_MATROUH: 110, ISMAILIA: 85, SUEZ: 85, PORT_SAID: 85, SHARKIA: 90, FAYOUM: 55, BANI_SWEIF: 70, MENIA: 70, ASSIUT: 70, GIZA: 75, SOUHAGE: 85, QENA: 85, ASWAN: 85, LOUXOR: 85, RED_SEA: 85, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 90, BEHIRA: 90, QALIUBIA: 75, GHARBIA: 90, MONOUFIA: 90, DOMITTA: 90, DAKAHLIA: 90
+  },
+  BANI_SWEIF: {
+    CAIRO: 75, KAFR_EL_SHEIKH: 90, MARSA_MATROUH: 110, ISMAILIA: 85, SUEZ: 85, PORT_SAID: 85, SHARKIA: 90, FAYOUM: 70, BANI_SWEIF: 55, MENIA: 70, ASSIUT: 70, GIZA: 75, SOUHAGE: 85, QENA: 85, ASWAN: 85, LOUXOR: 85, RED_SEA: 85, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 90, BEHIRA: 90, QALIUBIA: 75, GHARBIA: 90, MONOUFIA: 90, DOMITTA: 90, DAKAHLIA: 90
+  },
+  MENIA: {
+    CAIRO: 75, KAFR_EL_SHEIKH: 90, MARSA_MATROUH: 110, ISMAILIA: 85, SUEZ: 85, PORT_SAID: 85, SHARKIA: 90, FAYOUM: 70, BANI_SWEIF: 70, MENIA: 55, ASSIUT: 70, GIZA: 75, SOUHAGE: 85, QENA: 85, ASWAN: 85, LOUXOR: 85, RED_SEA: 85, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 90, BEHIRA: 90, QALIUBIA: 75, GHARBIA: 90, MONOUFIA: 90, DOMITTA: 90, DAKAHLIA: 90
+  },
+  ASSIUT: {
+    CAIRO: 75, KAFR_EL_SHEIKH: 90, MARSA_MATROUH: 110, ISMAILIA: 85, SUEZ: 85, PORT_SAID: 85, SHARKIA: 90, FAYOUM: 70, BANI_SWEIF: 70, MENIA: 70, ASSIUT: 55, GIZA: 75, SOUHAGE: 85, QENA: 85, ASWAN: 85, LOUXOR: 85, RED_SEA: 85, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 90, BEHIRA: 90, QALIUBIA: 75, GHARBIA: 90, MONOUFIA: 90, DOMITTA: 90, DAKAHLIA: 90
+  },
+  GIZA: {
+    CAIRO: 55, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 70, SUEZ: 70, PORT_SAID: 70, SHARKIA: 65, FAYOUM: 75, BANI_SWEIF: 75, MENIA: 75, ASSIUT: 75, GIZA: 55, SOUHAGE: 100, QENA: 100, ASWAN: 100, LOUXOR: 100, RED_SEA: 100, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 55, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  SOUHAGE: {
+    CAIRO: 100, KAFR_EL_SHEIKH: 105, MARSA_MATROUH: 110, ISMAILIA: 100, SUEZ: 100, PORT_SAID: 100, SHARKIA: 105, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 100, SOUHAGE: 55, QENA: 75, ASWAN: 75, LOUXOR: 75, RED_SEA: 75, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 105, BEHIRA: 105, QALIUBIA: 100, GHARBIA: 105, MONOUFIA: 105, DOMITTA: 105, DAKAHLIA: 105
+  },
+  QENA: {
+    CAIRO: 100, KAFR_EL_SHEIKH: 105, MARSA_MATROUH: 110, ISMAILIA: 100, SUEZ: 100, PORT_SAID: 100, SHARKIA: 105, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 100, SOUHAGE: 75, QENA: 55, ASWAN: 75, LOUXOR: 75, RED_SEA: 75, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 105, BEHIRA: 105, QALIUBIA: 100, GHARBIA: 105, MONOUFIA: 105, DOMITTA: 105, DAKAHLIA: 105
+  },
+  ASWAN: {
+    CAIRO: 100, KAFR_EL_SHEIKH: 105, MARSA_MATROUH: 110, ISMAILIA: 100, SUEZ: 100, PORT_SAID: 100, SHARKIA: 105, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 100, SOUHAGE: 75, QENA: 75, ASWAN: 55, LOUXOR: 75, RED_SEA: 75, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 105, BEHIRA: 105, QALIUBIA: 100, GHARBIA: 105, MONOUFIA: 105, DOMITTA: 105, DAKAHLIA: 105
+  },
+  LOUXOR: {
+    CAIRO: 100, KAFR_EL_SHEIKH: 105, MARSA_MATROUH: 110, ISMAILIA: 100, SUEZ: 100, PORT_SAID: 100, SHARKIA: 105, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 100, SOUHAGE: 75, QENA: 75, ASWAN: 75, LOUXOR: 55, RED_SEA: 75, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 105, BEHIRA: 105, QALIUBIA: 100, GHARBIA: 105, MONOUFIA: 105, DOMITTA: 105, DAKAHLIA: 105
+  },
+  RED_SEA: {
+    CAIRO: 100, KAFR_EL_SHEIKH: 105, MARSA_MATROUH: 110, ISMAILIA: 100, SUEZ: 100, PORT_SAID: 100, SHARKIA: 105, FAYOUM: 85, BANI_SWEIF: 85, MENIA: 85, ASSIUT: 85, GIZA: 100, SOUHAGE: 75, QENA: 75, ASWAN: 75, LOUXOR: 75, RED_SEA: 55, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 105, BEHIRA: 105, QALIUBIA: 100, GHARBIA: 105, MONOUFIA: 105, DOMITTA: 105, DAKAHLIA: 105
+  },
+  NEW_VALLLEY: {
+    CAIRO: 110, KAFR_EL_SHEIKH: 110, MARSA_MATROUH: 110, ISMAILIA: 110, SUEZ: 110, PORT_SAID: 110, SHARKIA: 110, FAYOUM: 110, BANI_SWEIF: 110, MENIA: 110, ASSIUT: 110, GIZA: 110, SOUHAGE: 110, QENA: 110, ASWAN: 110, LOUXOR: 110, RED_SEA: 110, NEW_VALLLEY: 55, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 110, BEHIRA: 110, QALIUBIA: 110, GHARBIA: 110, MONOUFIA: 110, DOMITTA: 110, DAKAHLIA: 110
+  },
+  NOURTH_SINAI: {
+    CAIRO: 110, KAFR_EL_SHEIKH: 110, MARSA_MATROUH: 110, ISMAILIA: 110, SUEZ: 110, PORT_SAID: 110, SHARKIA: 110, FAYOUM: 110, BANI_SWEIF: 110, MENIA: 110, ASSIUT: 110, GIZA: 110, SOUHAGE: 110, QENA: 110, ASWAN: 110, LOUXOR: 110, RED_SEA: 110, NEW_VALLLEY: 110, NOURTH_SINAI: 55, SOUTH_SINAI: 110, ALEXANDRIA: 110, BEHIRA: 110, QALIUBIA: 110, GHARBIA: 110, MONOUFIA: 110, DOMITTA: 110, DAKAHLIA: 110
+  },
+  SOUTH_SINAI: {
+    CAIRO: 110, KAFR_EL_SHEIKH: 110, MARSA_MATROUH: 110, ISMAILIA: 110, SUEZ: 110, PORT_SAID: 110, SHARKIA: 110, FAYOUM: 110, BANI_SWEIF: 110, MENIA: 110, ASSIUT: 110, GIZA: 110, SOUHAGE: 110, QENA: 110, ASWAN: 110, LOUXOR: 110, RED_SEA: 110, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 55, ALEXANDRIA: 110, BEHIRA: 110, QALIUBIA: 110, GHARBIA: 110, MONOUFIA: 110, DOMITTA: 110, DAKAHLIA: 110
+  },
+  ALEXANDRIA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 55, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  BEHIRA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 55, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  QALIUBIA: {
+    CAIRO: 55, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 70, SUEZ: 70, PORT_SAID: 70, SHARKIA: 65, FAYOUM: 75, BANI_SWEIF: 75, MENIA: 75, ASSIUT: 75, GIZA: 55, SOUHAGE: 100, QENA: 100, ASWAN: 100, LOUXOR: 100, RED_SEA: 100, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 55, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  GHARBIA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 55, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 65
+  },
+  MONOUFIA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 55, DOMITTA: 65, DAKAHLIA: 65
+  },
+  DOMITTA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 55, DAKAHLIA: 65
+  },
+  DAKAHLIA: {
+    CAIRO: 65, KAFR_EL_SHEIKH: 65, MARSA_MATROUH: 110, ISMAILIA: 75, SUEZ: 75, PORT_SAID: 75, SHARKIA: 65, FAYOUM: 90, BANI_SWEIF: 90, MENIA: 90, ASSIUT: 90, GIZA: 65, SOUHAGE: 105, QENA: 105, ASWAN: 105, LOUXOR: 105, RED_SEA: 105, NEW_VALLLEY: 110, NOURTH_SINAI: 110, SOUTH_SINAI: 110, ALEXANDRIA: 65, BEHIRA: 65, QALIUBIA: 65, GHARBIA: 65, MONOUFIA: 65, DOMITTA: 65, DAKAHLIA: 55
+  },
+};
+

@@ -311,6 +311,7 @@ export interface SiteSettings {
   // Legal & Privacy CMS
   privacyPolicyText?: string;
   termsOfServiceText?: string;
+  shippingPolicyText?: string;
 
   // Maintenance & Restock System
   maintenanceEnabled?: boolean;

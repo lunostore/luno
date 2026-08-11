@@ -121,6 +121,7 @@ export function Footer() {
               {[
                 { href: "/about", label: "About Us" },
                 { href: "/contact", label: "Contact Us" },
+                { href: "/shipping-policy", label: "Shipping & Returns" },
                 { href: "/privacy", label: "Privacy Policy" },
                 { href: "/terms", label: "Terms of Service" },
               ].map((link) => (
