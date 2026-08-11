@@ -44,8 +44,9 @@ export default function AdminAnalyticsPage() {
   const formatRelativeTime = (timestamp: unknown): { label: string; isLive: boolean } => {
     if (!timestamp) return { label: "غير معروف", isLive: false };
     let ms = 0;
-    if (timestamp?.toMillis) ms = timestamp.toMillis();
-    else if (timestamp?.seconds) ms = timestamp.seconds * 1000;
+    const ts = timestamp as Record<string, unknown> & { toMillis?: () => number; seconds?: number };
+    if (typeof ts?.toMillis === "function") ms = ts.toMillis();
+    else if (ts?.seconds) ms = ts.seconds * 1000;
     else if (timestamp instanceof Date) ms = timestamp.getTime();
 
     if (!ms) return { label: "غير معروف", isLive: false };
