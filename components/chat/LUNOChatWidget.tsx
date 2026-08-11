@@ -27,7 +27,7 @@ interface ChatMessage {
 }
 
 const CHATBOT_ENDPOINT =
-  process.env.NEXT_PUBLIC_CHATBOT_API_URL || "https://luno--d775de94945311f1a7231607ee4eb77e.web.val.run/";
+  process.env.NEXT_PUBLIC_CHATBOT_API_URL || "/api/chat";
 
 // ── In-Chat Interactive Product Card Component ────────────
 
@@ -389,13 +389,13 @@ export function LUNOChatWidget() {
   return (
     <>
       {/* ── FLOATING LAUNCHER BUTTON (Responsive Luxury Size) ── */}
-      <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 select-none">
+      <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-[9999] select-none pointer-events-auto">
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="relative group w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-[#D4B886] text-[#D4B886] flex items-center justify-center shadow-[0_10px_30px_rgba(212,184,134,0.35)] cursor-pointer backdrop-blur-2xl overflow-hidden transition-all duration-300"
+          className="relative group w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-[#D4B886] text-[#D4B886] flex items-center justify-center shadow-[0_10px_30px_rgba(212,184,134,0.35)] cursor-pointer backdrop-blur-2xl overflow-hidden transition-all duration-300"
           title="LUNO AI Assistant"
         >
           {/* Animated gold aura glow */}
@@ -436,7 +436,7 @@ export function LUNOChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-22 right-3 sm:bottom-28 sm:right-6 z-40 w-[calc(100vw-1.5rem)] sm:w-[420px] h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+            className="fixed bottom-22 right-3 sm:bottom-28 sm:right-6 z-[9999] w-[calc(100vw-1.5rem)] sm:w-[420px] h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl pointer-events-auto"
             dir="rtl"
           >
             {/* Header */}

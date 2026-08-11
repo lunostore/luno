@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProducts, getCategories, getShippingRates, getSiteSettings } from "@/lib/firebase/firestore";
-import "@/copy_now";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 interface ChatPayloadMessage {
   role: "user" | "assistant" | "system";
