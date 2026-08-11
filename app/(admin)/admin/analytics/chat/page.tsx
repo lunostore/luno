@@ -38,10 +38,10 @@ export default function AdminChatAnalyticsPage() {
     return () => unsubscribe();
   }, [user, authLoading]);
 
-  const formatRelativeTime = (timestamp: any): string => {
+  const formatRelativeTime = (timestamp: unknown): string => {
     if (!timestamp) return "منذ فترة قصيرة";
     let ms = 0;
-    const ts = timestamp as any;
+    const ts = timestamp as Record<string, unknown> & { toMillis?: () => number; seconds?: number };
     if (typeof ts?.toMillis === "function") ms = ts.toMillis();
     else if (ts?.seconds) ms = ts.seconds * 1000;
     else if (ts instanceof Date) ms = ts.getTime();

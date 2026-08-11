@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Truck, Search, Save, RefreshCw, Scale, MapPin, Zap } from "lucide-react";
 import { getShippingRates, updateShippingRates } from "@/lib/firebase/firestore";
-import { DEFAULT_EGYPT_GOVERNORATES, SHIPPING_MATRIX, SHIPPING_WEIGHT_RULES, type GovernorateRate } from "@/constants/governorates";
+import { SHIPPING_MATRIX, type GovernorateRate } from "@/constants/governorates";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -36,10 +36,10 @@ export default function AdminShippingPage() {
       prev.map((r) => {
         if (r.id !== id) return r;
         if (rawVal === "") {
-          return { ...r, price: "" as any };
+          return { ...r, price: 0 };
         }
         const parsed = parseFloat(rawVal);
-        return { ...r, price: isNaN(parsed) ? ("" as any) : Math.max(0, parsed) };
+        return { ...r, price: isNaN(parsed) ? 0 : Math.max(0, parsed) };
       })
     );
   };
@@ -49,10 +49,10 @@ export default function AdminShippingPage() {
       prev.map((r) => {
         if (r.id !== id) return r;
         if (rawVal === "") {
-          return { ...r, additionalKgPrice: "" as any };
+          return { ...r, additionalKgPrice: 7 };
         }
         const parsed = parseFloat(rawVal);
-        return { ...r, additionalKgPrice: isNaN(parsed) ? ("" as any) : Math.max(0, parsed) };
+        return { ...r, additionalKgPrice: isNaN(parsed) ? 7 : Math.max(0, parsed) };
       })
     );
   };

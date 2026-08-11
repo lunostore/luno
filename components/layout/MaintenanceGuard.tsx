@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, MessageCircle, Instagram, Sparkles, ShieldAlert, Key, Lock, X } from "lucide-react";
+import { Clock, MessageCircle, Instagram, Sparkles, Key, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
 import { updateSiteSettings } from "@/lib/firebase/firestore";
@@ -137,7 +136,6 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
   const whatsappPhone = settings?.storePhone || "01107108679";
   const instagramUrl = settings?.instagramUrl || "https://www.instagram.com/lunos.store1";
   const tiktokUrl = settings?.tiktokUrl || "https://www.tiktok.com/@lunostore4";
-  const storeName = settings?.storeName || "LUNO STORE";
 
   return (
     <div

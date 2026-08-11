@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Truck, ShieldCheck, RefreshCw, AlertCircle, PhoneCall, Package } from "lucide-react";
+import { Truck, ShieldCheck, RefreshCw, PhoneCall, Package } from "lucide-react";
 import { getSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
 import { DEFAULT_SHIPPING_POLICY_TEXT } from "@/constants/policies";
 

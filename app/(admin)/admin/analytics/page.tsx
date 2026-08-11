@@ -14,13 +14,11 @@ import {
   Search,
   RefreshCw,
   TrendingUp,
-  Sparkles,
   Layers,
 } from "lucide-react";
 import {
   subscribeToVisitorSessions,
   type VisitorAnalyticsSummary,
-  type VisitorSession,
 } from "@/lib/firebase/firestore";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/features/auth/AuthProvider";
@@ -43,7 +41,7 @@ export default function AdminAnalyticsPage() {
     return () => unsubscribe();
   }, [user, authLoading]);
 
-  const formatRelativeTime = (timestamp: any): { label: string; isLive: boolean } => {
+  const formatRelativeTime = (timestamp: unknown): { label: string; isLive: boolean } => {
     if (!timestamp) return { label: "غير معروف", isLive: false };
     let ms = 0;
     if (timestamp?.toMillis) ms = timestamp.toMillis();
