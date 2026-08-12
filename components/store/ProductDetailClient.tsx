@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Minus, Plus, ChevronLeft, ChevronRight, Heart, X } from "lucide-react";
 import { toast } from "sonner";
-import { getProductBySlug } from "@/lib/firebase/firestore";
+import { getProductBySlug, subscribeToProducts } from "@/lib/firebase/firestore";
 import { useCart } from "@/features/cart/CartProvider";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
@@ -37,36 +37,64 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
       window.scrollTo({ top: 0, behavior: "instant" });
     }
 
-    getProductBySlug(targetSlug)
-      .then((data) => {
-        if (data) {
-          setProduct(data);
-          if (data?.variants && data.variants.length > 0 && data.variants[0]) {
-            const firstVariant = data.variants[0];
-            setSelectedColor({
+    if (!targetSlug) return;
+
+    // Realtime subscription so any admin edits to prices/images/stocks reflect immediately without refresh
+    const unsubscribe = subscribeToProducts((allProducts) => {
+      const decodedParam = decodeURIComponent(targetSlug).toLowerCase().trim();
+      const matched =
+        allProducts.find((p) => p.id === targetSlug) ||
+        allProducts.find((p) => (p.slug || "").toLowerCase().trim() === decodedParam) ||
+        allProducts.find((p) => (p.name || "").toLowerCase().trim() === decodedParam) ||
+        allProducts.find(
+          (p) =>
+            (p.slug || "").toLowerCase().includes(decodedParam) ||
+            (p.name || "").toLowerCase().includes(decodedParam)
+        );
+
+      if (matched) {
+        setProduct(matched);
+        setSelectedColor((prev) => {
+          if (prev) {
+            const currentVar = matched.variants?.find((v) => v.colorHex === prev.hex || v.colorName === prev.name);
+            if (currentVar) {
+              return {
+                name: currentVar.colorName || "افتراضي",
+                hex: currentVar.colorHex || "#000000",
+                image: currentVar.image || matched.mainImage || "",
+              };
+            }
+          }
+          if (matched?.variants && matched.variants.length > 0 && matched.variants[0]) {
+            const firstVariant = matched.variants[0];
+            return {
               name: firstVariant.colorName || "افتراضي",
               hex: firstVariant.colorHex || "#000000",
-              image: firstVariant.image || data.mainImage || "",
-            });
-            const firstInStock =
-              firstVariant.sizes?.find((s) => s.stock > 0)?.size ||
-              firstVariant.sizes?.[0]?.size ||
-              "قياسي";
-            setSelectedSize(firstInStock);
-          } else {
-            // Default fallback for products without variants (e.g. phone models / covers)
-            setSelectedColor({
-              name: "افتراضي",
-              hex: "#000000",
-              image: data.mainImage || "",
-            });
-            setSelectedSize("قياسي");
+              image: firstVariant.image || matched.mainImage || "",
+            };
           }
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [targetSlug]);
+          return {
+            name: "افتراضي",
+            hex: "#000000",
+            image: matched.mainImage || "",
+          };
+        });
+
+        setSelectedSize((prev) => {
+          if (prev) return prev;
+          const firstVariant = matched.variants?.[0];
+          return (
+            firstVariant?.sizes?.find((s) => s.stock > 0)?.size ||
+            firstVariant?.sizes?.[0]?.size ||
+            "قياسي"
+          );
+        });
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [targetSlug, onClose]);
 
   const hasVariants = Boolean(product?.variants && product.variants.length > 0);
   const activeVariant = hasVariants && product?.variants

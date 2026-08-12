@@ -290,6 +290,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
         await createProduct(sanitizedData);
         toast.success("Product created successfully!");
       }
+      router.refresh();
       router.push("/admin/products");
     } catch {
       toast.error("Failed to save product. Please check all variant inputs.");
