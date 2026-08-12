@@ -27,7 +27,8 @@ interface ChatMessage {
 }
 
 const CHATBOT_ENDPOINT =
-  process.env.NEXT_PUBLIC_CHATBOT_API_URL || "/api/chat";
+  process.env.NEXT_PUBLIC_CHATBOT_API_URL || "https://luno--d775de94945311f1a7231607ee4eb77e.web.val.run/";
+
 
 // ── In-Chat Interactive Product Card Component ────────────
 

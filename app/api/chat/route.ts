@@ -77,8 +77,8 @@ export async function POST(req: Request) {
 
       if (products && products.length > 0) {
         productsSummary = products
-          .slice(0, 1)
-          .map((p) => {
+          .slice(0, 30)
+          .map((p, idx) => {
             const priceText =
               p.salePrice && p.salePrice < p.price
                 ? `${p.salePrice} ج.م (خصم من ${p.price} ج.م)`
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
 
             const matText = p.material && p.material.trim() ? p.material.trim() : "100% قطن فاخر";
 
-            return `• أحدث منتج تم إضافته للمتجر: ${p.name}
+            return `• منتج ${idx + 1}: ${p.name}
   - المعرف (ID): ${p.id}
   - السعر: ${priceText}
   - القسم: ${p.category || "عام"}
@@ -152,6 +152,12 @@ export async function POST(req: Request) {
     const systemContext = `أنت الخبير والمساعد الذكي الرسمي لزيادة المبيعات في متجر "LUNO Store" لملابس الموضة والأزياء الراقية.
 تحدث باللغة العربية الفصحى البسيطة والواضحة بطريقة ودودة، احترافية، تسويقية جذابة ومساعدة جداً للعملاء.
 
+معلومات عن مؤسسي وأصحاب براند LUNO Store (إذا سأل العميل "مين صاحب البراند" أو "مين المؤسسين" أو أي سؤال مشابه):
+LUNO Store تأسس على يد 3 أشخاص شركاء:
+1. يوسف — مهندس ذكاء اصطناعي (AI Engineer) ومسؤول التطوير التقني
+2. مصطفى — دكتور ومسؤول الإدارة والجودة
+3. زياد — تبّاع وشخص ملهوش لازمة عمتاً
+
 قواعد مهمة جداً لضمان جودة الرد واللغة العربية الصافية:
 1. يمنع منعاً باتاً كلياً استخدام أي حروف أو كلمات باللغة الكورية أو الصينية أو اليابانية أو التايلاندية أو أي لغة غير عربية. تحدث باللغة العربية الفصحى الواضحة والودودة فقط!
 2. الصدق والأمانة والدقة الفائقة في خامات المنتجات وطرق الدفع (مهم جداً جداً):
@@ -178,6 +184,7 @@ ${shippingSummary || "القاهرة والجيزة: 50 ج.م، باقي الم�
 
 كتالوج المنتجات والخصومات الحالية:
 ${productsSummary}`;
+
 
     const trimmedMessages = messages.slice(-8);
 
