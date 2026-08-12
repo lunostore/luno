@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCart } from "@/features/cart/CartProvider";
-import { createOrder, getShippingRates, getSiteSettings } from "@/lib/firebase/firestore";
+import { createOrder, getShippingRates, getSiteSettings, validateStockAvailability } from "@/lib/firebase/firestore";
 import { formatPrice } from "@/lib/utils";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/validations/checkout.schema";
@@ -181,18 +181,9 @@ export default function CheckoutPage() {
       toast.error("من فضلك ارفع صورة إيصال التحويل");
       return;
     }
+
     setSubmitting(true);
     try {
-      let screenshotUrl: string | null = null;
-      if (paymentCategory === "online" && screenshotFile) {
-        screenshotUrl = await uploadScreenshot();
-        if (!screenshotUrl) {
-          toast.error("فشل رفع صورة التحويل — حاول مرة أخرى");
-          setSubmitting(false);
-          return;
-        }
-      }
-
       const orderItems: OrderItem[] = items.map((item) => ({
         productId: item.product.id,
         productName: item.product.name,
@@ -202,6 +193,31 @@ export default function CheckoutPage() {
         selectedSize: item.selectedSize,
         selectedColor: item.selectedColor,
       }));
+
+      // Check stock availability live before placing order
+      const stockCheck = await validateStockAvailability(orderItems);
+      if (!stockCheck.valid) {
+        const issue = stockCheck.issues[0];
+        if (issue) {
+          toast.error(
+            `عذراً، الكمية المطلوبة غير متوفرة حالياً لـ (${issue.productName} - ${issue.color} - ${issue.size}). المتبقي: ${issue.available} قطعة.`
+          );
+        } else {
+          toast.error("عذراً، بعض المنتجات في سلتك غير متوفرة بالكميات المطلوبة.");
+        }
+        setSubmitting(false);
+        return;
+      }
+
+      let screenshotUrl: string | null = null;
+      if (paymentCategory === "online" && screenshotFile) {
+        screenshotUrl = await uploadScreenshot();
+        if (!screenshotUrl) {
+          toast.error("فشل رفع صورة التحويل — حاول مرة أخرى");
+          setSubmitting(false);
+          return;
+        }
+      }
 
       const orderPayload: CreateOrderInput = {
         customerName: data.customerName.trim(),

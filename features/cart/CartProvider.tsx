@@ -58,6 +58,12 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         image: payloadProduct.mainImage || "",
       };
 
+      const variant = payloadProduct.variants?.find(
+        (v) => v.colorName.toLowerCase() === (pColor.name || "").toLowerCase()
+      ) || payloadProduct.variants?.[0];
+      const sizeStockObj = variant?.sizes?.find((s) => s.size === pSize);
+      const maxStock = sizeStockObj ? sizeStockObj.stock : 999;
+
       const existingIndex = state.items.findIndex(
         (item) =>
           item.product?.id === payloadProduct.id &&
@@ -67,16 +73,19 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
       if (existingIndex >= 0) {
         const updated = [...state.items];
+        const currentQty = updated[existingIndex].quantity || 1;
+        const requestedQty = currentQty + (action.payload.quantity || 1);
         updated[existingIndex] = {
           ...updated[existingIndex],
-          quantity: (updated[existingIndex].quantity || 1) + (action.payload.quantity || 1),
+          quantity: Math.min(requestedQty, maxStock > 0 ? maxStock : 1),
         };
         return { ...state, items: updated };
       }
 
+      const initialQty = Math.min(action.payload.quantity || 1, maxStock > 0 ? maxStock : 1);
       const newItem: CartItem = {
         product: payloadProduct,
-        quantity: action.payload.quantity || 1,
+        quantity: initialQty,
         selectedSize: pSize,
         selectedColor: pColor,
       };
@@ -100,13 +109,22 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "UPDATE_QUANTITY":
       return {
         ...state,
-        items: state.items.map((item) =>
-          item.product?.id === action.payload.productId &&
-          (item.selectedSize || "قياسي") === (action.payload.size || "قياسي") &&
-          (item.selectedColor?.hex || "#000000") === (action.payload.color || "#000000")
-            ? { ...item, quantity: Math.max(1, action.payload.quantity) }
-            : item
-        ),
+        items: state.items.map((item) => {
+          if (
+            item.product?.id === action.payload.productId &&
+            (item.selectedSize || "قياسي") === (action.payload.size || "قياسي") &&
+            (item.selectedColor?.hex || "#000000") === (action.payload.color || "#000000")
+          ) {
+            const variant = item.product?.variants?.find(
+              (v) => v.colorName.toLowerCase() === (item.selectedColor?.name || "").toLowerCase()
+            ) || item.product?.variants?.[0];
+            const sizeStockObj = variant?.sizes?.find((s) => s.size === (item.selectedSize || "قياسي"));
+            const maxStock = sizeStockObj ? sizeStockObj.stock : 999;
+            const finalQty = Math.min(Math.max(1, action.payload.quantity), maxStock > 0 ? maxStock : 1);
+            return { ...item, quantity: finalQty };
+          }
+          return item;
+        }),
       };
 
     case "CLEAR_CART":

@@ -87,16 +87,41 @@ export default function AdminOrdersPage() {
   });
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    // Find the current order to get previousStatus
+    const currentOrder = orders.find((o) => o.id === orderId);
+    const previousStatus = currentOrder?.status;
+
+    // Confirmation prompts for stock-affecting actions
+    if (newStatus === "confirmed" && previousStatus === "pending") {
+      if (!confirm("تأكيد الطلب سيخصم المخزون تلقائياً. متأكد؟")) return;
+    }
+    if (newStatus === "cancelled" && (previousStatus === "confirmed" || previousStatus === "shipping")) {
+      if (!confirm("إلغاء طلب مؤكد سيعيد المخزون تلقائياً. متأكد؟")) return;
+    }
+
     setUpdatingId(orderId);
     try {
-      await updateOrderStatus(orderId, newStatus);
+      const { warnings } = await updateOrderStatus(orderId, newStatus, previousStatus);
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
       if (selectedOrder?.id === orderId) {
         setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
       }
-      toast.success(`تم تحديث الحالة إلى: ${ORDER_STATUS_LABELS[newStatus]}`);
+
+      // Show stock operation results
+      if (newStatus === "confirmed" && previousStatus === "pending") {
+        toast.success("✅ تم تأكيد الطلب وخصم المخزون تلقائياً");
+      } else if (newStatus === "cancelled" && (previousStatus === "confirmed" || previousStatus === "shipping")) {
+        toast.success("🔄 تم إلغاء الطلب واستعادة المخزون تلقائياً");
+      } else {
+        toast.success(`تم تحديث الحالة إلى: ${ORDER_STATUS_LABELS[newStatus]}`);
+      }
+
+      // Show any warnings
+      if (warnings && warnings.length > 0) {
+        warnings.forEach((w) => toast.warning(w, { duration: 8000 }));
+      }
     } catch {
       toast.error("فشل تحديث الحالة");
     } finally {

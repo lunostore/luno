@@ -219,6 +219,7 @@ export async function createOrder(data: CreateOrderInput): Promise<string> {
     ...data,
     customerPhone: data.phone,
     status: "pending" as OrderStatus,
+    stockDeducted: false, // Track whether stock was deducted for this order
     createdAt: Timestamp.now(),
   }));
   return docRef.id;
@@ -240,14 +241,244 @@ export async function getOrderById(id: string): Promise<Order | null> {
   return { id: snapshot.id, ...snapshot.data() } as Order;
 }
 
+// ─── Stock Management ────────────────────────────────────
+
+export interface StockValidationResult {
+  valid: boolean;
+  issues: { productId: string; productName: string; color: string; size: string; requested: number; available: number }[];
+}
+
+/**
+ * Validate stock availability for all items before placing/confirming an order.
+ */
+export async function validateStockAvailability(
+  items: { productId: string; productName: string; quantity: number; selectedSize: string; selectedColor: { name: string } }[]
+): Promise<StockValidationResult> {
+  const issues: StockValidationResult["issues"] = [];
+
+  for (const item of items) {
+    try {
+      const product = await getProductById(item.productId);
+      if (!product) {
+        issues.push({
+          productId: item.productId,
+          productName: item.productName,
+          color: item.selectedColor.name,
+          size: item.selectedSize,
+          requested: item.quantity,
+          available: 0,
+        });
+        continue;
+      }
+
+      const variant = product.variants?.find(
+        (v) => v.colorName.toLowerCase() === item.selectedColor.name.toLowerCase()
+      ) || product.variants?.[0];
+
+      if (!variant) {
+        issues.push({
+          productId: item.productId,
+          productName: item.productName,
+          color: item.selectedColor.name,
+          size: item.selectedSize,
+          requested: item.quantity,
+          available: 0,
+        });
+        continue;
+      }
+
+      const sizeEntry = variant.sizes?.find((s) => s.size === item.selectedSize);
+      const availableStock = sizeEntry?.stock ?? 0;
+
+      if (availableStock < item.quantity) {
+        issues.push({
+          productId: item.productId,
+          productName: item.productName,
+          color: item.selectedColor.name,
+          size: item.selectedSize,
+          requested: item.quantity,
+          available: availableStock,
+        });
+      }
+    } catch (err) {
+      console.error(`Stock check failed for product ${item.productId}:`, err);
+      // Don't block the order on read errors — allow and let admin handle
+    }
+  }
+
+  return { valid: issues.length === 0, issues };
+}
+
+/**
+ * Deduct stock for each item in a confirmed order.
+ * Returns list of any items that went below zero (oversold).
+ */
+export async function deductStockForOrder(
+  items: { productId: string; productName: string; quantity: number; selectedSize: string; selectedColor: { name: string } }[]
+): Promise<string[]> {
+  const warnings: string[] = [];
+
+  for (const item of items) {
+    try {
+      const product = await getProductById(item.productId);
+      if (!product || !product.variants) {
+        warnings.push(`المنتج "${item.productName}" غير موجود في قاعدة البيانات`);
+        continue;
+      }
+
+      const variantIndex = product.variants.findIndex(
+        (v) => v.colorName.toLowerCase() === item.selectedColor.name.toLowerCase()
+      );
+      const vi = variantIndex >= 0 ? variantIndex : 0;
+      const variant = product.variants[vi];
+      if (!variant) continue;
+
+      const sizeIndex = variant.sizes?.findIndex((s) => s.size === item.selectedSize) ?? -1;
+      if (sizeIndex < 0) {
+        warnings.push(`المقاس "${item.selectedSize}" غير موجود للمنتج "${item.productName}" لون "${item.selectedColor.name}"`);
+        continue;
+      }
+
+      const currentStock = variant.sizes[sizeIndex].stock;
+      const newStock = currentStock - item.quantity;
+
+      if (newStock < 0) {
+        warnings.push(
+          `⚠️ المنتج "${item.productName}" (${item.selectedColor.name} / ${item.selectedSize}): المخزون ${currentStock} والمطلوب ${item.quantity} — تم الخصم لكن الرصيد سالب (${newStock})`
+        );
+      }
+
+      // Update the specific size stock in Firestore
+      const updatedVariants = [...product.variants];
+      const updatedSizes = [...updatedVariants[vi].sizes];
+      updatedSizes[sizeIndex] = { ...updatedSizes[sizeIndex], stock: Math.max(0, newStock) };
+      updatedVariants[vi] = { ...updatedVariants[vi], sizes: updatedSizes };
+
+      await updateDoc(doc(db, "products", item.productId), {
+        variants: updatedVariants.map((v) => ({
+          colorName: v.colorName,
+          colorHex: v.colorHex,
+          image: v.image,
+          images: v.images || [],
+          sizes: v.sizes.map((s) => ({ size: s.size, stock: s.stock })),
+        })),
+      });
+    } catch (err) {
+      console.error(`Failed to deduct stock for ${item.productId}:`, err);
+      warnings.push(`فشل خصم مخزون المنتج "${item.productName}"`);
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Restore stock for each item when a confirmed/shipping order is cancelled.
+ */
+export async function restoreStockForOrder(
+  items: { productId: string; productName: string; quantity: number; selectedSize: string; selectedColor: { name: string } }[]
+): Promise<string[]> {
+  const warnings: string[] = [];
+
+  for (const item of items) {
+    try {
+      const product = await getProductById(item.productId);
+      if (!product || !product.variants) {
+        warnings.push(`المنتج "${item.productName}" غير موجود — لم يتم استعادة المخزون`);
+        continue;
+      }
+
+      const variantIndex = product.variants.findIndex(
+        (v) => v.colorName.toLowerCase() === item.selectedColor.name.toLowerCase()
+      );
+      const vi = variantIndex >= 0 ? variantIndex : 0;
+      const variant = product.variants[vi];
+      if (!variant) continue;
+
+      const sizeIndex = variant.sizes?.findIndex((s) => s.size === item.selectedSize) ?? -1;
+      if (sizeIndex < 0) {
+        warnings.push(`المقاس "${item.selectedSize}" غير موجود للمنتج "${item.productName}"`);
+        continue;
+      }
+
+      const currentStock = variant.sizes[sizeIndex].stock;
+      const restoredStock = currentStock + item.quantity;
+
+      // Update the specific size stock in Firestore
+      const updatedVariants = [...product.variants];
+      const updatedSizes = [...updatedVariants[vi].sizes];
+      updatedSizes[sizeIndex] = { ...updatedSizes[sizeIndex], stock: restoredStock };
+      updatedVariants[vi] = { ...updatedVariants[vi], sizes: updatedSizes };
+
+      await updateDoc(doc(db, "products", item.productId), {
+        variants: updatedVariants.map((v) => ({
+          colorName: v.colorName,
+          colorHex: v.colorHex,
+          image: v.image,
+          images: v.images || [],
+          sizes: v.sizes.map((s) => ({ size: s.size, stock: s.stock })),
+        })),
+      });
+    } catch (err) {
+      console.error(`Failed to restore stock for ${item.productId}:`, err);
+      warnings.push(`فشل استعادة مخزون المنتج "${item.productName}"`);
+    }
+  }
+
+  return warnings;
+}
+
+// ─── Order Status with Auto Stock Management ─────────────
+
 export async function updateOrderStatus(
   id: string,
-  status: OrderStatus
-): Promise<void> {
-  await updateDoc(doc(db, "orders", id), { status });
+  newStatus: OrderStatus,
+  previousStatus?: OrderStatus
+): Promise<{ warnings: string[] }> {
+  const warnings: string[] = [];
+
+  // Get order data for stock operations
+  const order = await getOrderById(id);
+  if (!order) {
+    await updateDoc(doc(db, "orders", id), { status: newStatus });
+    return { warnings: ["لم يتم العثور على بيانات الطلب"] };
+  }
+
+  const wasStockDeducted = (order as Order & { stockDeducted?: boolean }).stockDeducted === true;
+
+  // ── CASE 1: Confirming order (pending → confirmed) → Deduct stock
+  if (newStatus === "confirmed" && previousStatus === "pending" && !wasStockDeducted) {
+    const deductWarnings = await deductStockForOrder(order.items);
+    warnings.push(...deductWarnings);
+    await updateDoc(doc(db, "orders", id), {
+      status: newStatus,
+      stockDeducted: true,
+    });
+    return { warnings };
+  }
+
+  // ── CASE 2: Cancelling a confirmed/shipping order → Restore stock
+  if (newStatus === "cancelled" && (previousStatus === "confirmed" || previousStatus === "shipping") && wasStockDeducted) {
+    const restoreWarnings = await restoreStockForOrder(order.items);
+    warnings.push(...restoreWarnings);
+    await updateDoc(doc(db, "orders", id), {
+      status: newStatus,
+      stockDeducted: false,
+    });
+    return { warnings };
+  }
+
+  // ── DEFAULT: Just update status (no stock changes)
+  await updateDoc(doc(db, "orders", id), { status: newStatus });
+  return { warnings };
 }
 
 export async function deleteOrder(id: string): Promise<void> {
+  // If order had stock deducted, restore it before deletion
+  const order = await getOrderById(id);
+  if (order && (order as Order & { stockDeducted?: boolean }).stockDeducted === true) {
+    await restoreStockForOrder(order.items);
+  }
   await deleteDoc(doc(db, "orders", id));
 }
 

@@ -147,7 +147,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       }}
       className="group relative h-full flex flex-col"
     >
-      {/* Main Luxury Dark Card Wrapper — Fixed height flex-col container */}
+      {/* Main Luxury Dark Card Wrapper — Fixed height flex-col container (No outer borders) */}
       <div
         onClick={navigateToProduct}
         onMouseLeave={() => {
@@ -155,7 +155,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           setHoveredImage(null);
           setClickedImage(null);
         }}
-        className="block bg-[#121212] dark:bg-[#0e0e0e] border border-zinc-800/80 hover:border-zinc-700 rounded-[2rem] p-4 sm:p-5 shadow-2xl transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between"
+        className="block bg-[#121212] dark:bg-[#0e0e0e] rounded-[2rem] p-4 sm:p-5 shadow-2xl transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
       >
         <div>
           {/* Top Badges & Actions Overlay */}
@@ -163,15 +163,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {/* Left Badges (NEW / SALE / BEST SELLER) */}
             <div className="flex items-center gap-2">
               {isNewProduct ? (
-                <span className="border border-amber-400/50 text-amber-300 bg-amber-400/10 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md shadow-sm">
+                <span className="text-amber-300 bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md shadow-sm">
                   NEW
                 </span>
               ) : hasDiscount ? (
-                <span className="border border-red-500/50 text-red-400 bg-red-500/10 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
+                <span className="text-red-400 bg-red-500/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
                   -{discountPct}%
                 </span>
               ) : product.bestSeller ? (
-                <span className="border border-amber-400/50 text-amber-300 bg-amber-400/10 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
+                <span className="text-amber-300 bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
                   BEST SELLER
                 </span>
               ) : null}
@@ -184,7 +184,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 e.stopPropagation();
                 toggleWishlist(product);
               }}
-              className="w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 border border-zinc-800 text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95"
+              className="w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95 border-0"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
               <Heart
@@ -200,7 +200,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <div
               onMouseEnter={() => setIsHoveringMain(true)}
               onMouseLeave={() => setIsHoveringMain(false)}
-              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900/90 border border-zinc-800/60 shadow-inner flex items-center justify-center"
+              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900/90 shadow-inner flex items-center justify-center border-0"
             >
               <motion.div
                 className="w-full h-full relative"
@@ -243,10 +243,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     }}
                     onMouseEnter={() => setHoveredImage(imgUrl)}
                     onMouseLeave={() => setHoveredImage(null)}
-                    className={`aspect-square rounded-xl overflow-hidden border transition-all duration-300 cursor-pointer relative bg-zinc-900/80 ${
+                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-zinc-900/80 border-0 ${
                       isSelected || isHovered
-                        ? "border-amber-400 ring-1 ring-amber-400/50 scale-[1.03] shadow-md opacity-100"
-                        : "border-zinc-800/80 opacity-70 hover:opacity-100 hover:border-zinc-600"
+                        ? "ring-2 ring-amber-400/80 scale-[1.03] shadow-md opacity-100"
+                        : "opacity-70 hover:opacity-100"
                     }`}
                     title={`معاينة الصورة ${thumbIdx + 1}`}
                   >
@@ -266,7 +266,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 (_, emptyIdx) => (
                   <div
                     key={`empty-${emptyIdx}`}
-                    className="aspect-square rounded-xl border border-dashed border-zinc-800/60 bg-zinc-900/40 flex items-center justify-center text-zinc-700 text-[10px] font-black"
+                    className="aspect-square rounded-xl bg-zinc-900/40 flex items-center justify-center text-zinc-700 text-[10px] font-black border-0"
                   >
                     LUNO
                   </div>
@@ -303,7 +303,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
 
             {/* Specifications Row (Icon Badges) — Fixed Height */}
-            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-400 font-medium pt-1 pb-2 border-b border-zinc-800/80 h-7 overflow-hidden">
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-400 font-medium pt-1 pb-2 h-7 overflow-hidden">
               <span className="flex items-center gap-1.5 whitespace-nowrap">
                 <Shirt size={13} className="text-zinc-400 flex-shrink-0" />
                 {product.material || "100% Cotton"}
@@ -342,10 +342,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                           setClickedImage(null);
                           setHoveredImage(null);
                         }}
-                        className={`w-3.5 h-3.5 rounded-full transition-all border ${
+                        className={`w-3.5 h-3.5 rounded-full transition-all border-0 ${
                           selectedVariantIdx === vIdx
-                            ? "ring-2 ring-amber-400 scale-125 z-10 border-black"
-                            : "opacity-70 hover:opacity-100 hover:scale-110 border-zinc-700"
+                            ? "ring-2 ring-amber-400 scale-125 z-10"
+                            : "opacity-70 hover:opacity-100 hover:scale-110"
                         }`}
                         style={{ backgroundColor: variant.colorHex }}
                         title={variant.colorName}
@@ -363,7 +363,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-12 h-12 rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/90 text-white flex items-center justify-center hover:bg-zinc-800 hover:border-zinc-700 transition-all active:scale-95 shadow-md flex-shrink-0"
+              className="w-12 h-12 rounded-xl sm:rounded-2xl bg-zinc-900/90 text-white flex items-center justify-center hover:bg-zinc-800 transition-all active:scale-95 shadow-md flex-shrink-0 border-0"
               title="إضافة سريعة للسلة"
             >
               <ShoppingBag size={18} />
