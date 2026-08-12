@@ -147,7 +147,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       }}
       className="group relative h-full flex flex-col"
     >
-      {/* Main Luxury Dark Card Wrapper — Fixed height flex-col container (No outer borders) */}
+      {/* Main Card Wrapper — Borderless, Light & Dark Mode Compatible */}
       <div
         onClick={navigateToProduct}
         onMouseLeave={() => {
@@ -155,7 +155,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           setHoveredImage(null);
           setClickedImage(null);
         }}
-        className="block bg-[#121212] dark:bg-[#0e0e0e] rounded-[2rem] p-4 sm:p-5 shadow-2xl transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
+        className="block bg-white dark:bg-[#111113] rounded-[2rem] p-4 sm:p-5 shadow-xl shadow-zinc-200/60 dark:shadow-2xl dark:shadow-black/60 transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
       >
         <div>
           {/* Top Badges & Actions Overlay */}
@@ -163,15 +163,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {/* Left Badges (NEW / SALE / BEST SELLER) */}
             <div className="flex items-center gap-2">
               {isNewProduct ? (
-                <span className="text-amber-300 bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md shadow-sm">
+                <span className="text-amber-700 dark:text-amber-300 bg-amber-400/20 dark:bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md shadow-sm">
                   NEW
                 </span>
               ) : hasDiscount ? (
-                <span className="text-red-400 bg-red-500/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
+                <span className="text-red-600 dark:text-red-400 bg-red-500/20 dark:bg-red-500/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
                   -{discountPct}%
                 </span>
               ) : product.bestSeller ? (
-                <span className="text-amber-300 bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
+                <span className="text-amber-700 dark:text-amber-300 bg-amber-400/20 dark:bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
                   BEST SELLER
                 </span>
               ) : null}
@@ -184,12 +184,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 e.stopPropagation();
                 toggleWishlist(product);
               }}
-              className="w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95 border-0"
+              className="w-9 h-9 rounded-full bg-zinc-100/90 hover:bg-zinc-200/90 dark:bg-black/50 dark:hover:bg-black/80 text-zinc-700 dark:text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95 border-0"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
               <Heart
                 size={15}
-                className={isFavorite ? "fill-red-500 text-red-500" : "text-white"}
+                className={isFavorite ? "fill-red-500 text-red-500" : "text-zinc-700 dark:text-white"}
               />
             </button>
           </div>
@@ -200,7 +200,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <div
               onMouseEnter={() => setIsHoveringMain(true)}
               onMouseLeave={() => setIsHoveringMain(false)}
-              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900/90 shadow-inner flex items-center justify-center border-0"
+              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-100/90 dark:bg-zinc-900/90 shadow-inner flex items-center justify-center border-0"
             >
               <motion.div
                 className="w-full h-full relative"
@@ -243,9 +243,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     }}
                     onMouseEnter={() => setHoveredImage(imgUrl)}
                     onMouseLeave={() => setHoveredImage(null)}
-                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-zinc-900/80 border-0 ${
+                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-zinc-100/90 dark:bg-zinc-900/80 border-0 ${
                       isSelected || isHovered
-                        ? "ring-2 ring-amber-400/80 scale-[1.03] shadow-md opacity-100"
+                        ? "ring-2 ring-amber-500/80 dark:ring-amber-400/80 scale-[1.03] shadow-md opacity-100"
                         : "opacity-70 hover:opacity-100"
                     }`}
                     title={`معاينة الصورة ${thumbIdx + 1}`}
@@ -266,7 +266,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 (_, emptyIdx) => (
                   <div
                     key={`empty-${emptyIdx}`}
-                    className="aspect-square rounded-xl bg-zinc-900/40 flex items-center justify-center text-zinc-700 text-[10px] font-black border-0"
+                    className="aspect-square rounded-xl bg-zinc-100/60 dark:bg-zinc-900/40 flex items-center justify-center text-zinc-400 dark:text-zinc-700 text-[10px] font-black border-0"
                   >
                     LUNO
                   </div>
@@ -282,20 +282,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {/* Header Row: Title & Price */}
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wide leading-tight group-hover:text-amber-400 transition-colors line-clamp-1">
+                <h3 className="text-base sm:text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wide leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
                   {product.name}
                 </h3>
-                <p className="text-xs text-zinc-400 font-medium mt-0.5 line-clamp-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5 line-clamp-1">
                   {product.subtitle || "Premium Oversized Fit"}
                 </p>
               </div>
 
               <div className="text-right flex-shrink-0">
-                <span className="text-base sm:text-lg font-black text-[#D4B886]">
+                <span className="text-base sm:text-lg font-black text-amber-600 dark:text-[#D4B886]">
                   {formatPrice(displayPrice)}
                 </span>
                 {hasDiscount && (
-                  <p className="text-[11px] text-zinc-500 line-through font-semibold">
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 line-through font-semibold">
                     {formatPrice(product.price)}
                   </p>
                 )}
@@ -303,23 +303,23 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
 
             {/* Specifications Row (Icon Badges) — Fixed Height */}
-            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-400 font-medium pt-1 pb-2 h-7 overflow-hidden">
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium pt-1 pb-2 h-7 overflow-hidden">
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Shirt size={13} className="text-zinc-400 flex-shrink-0" />
+                <Shirt size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
                 {product.material || "100% Cotton"}
               </span>
 
-              <span className="text-zinc-600">|</span>
+              <span className="text-zinc-300 dark:text-zinc-700">|</span>
 
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Layers size={13} className="text-zinc-400 flex-shrink-0" />
+                <Layers size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
                 {product.weight || "230 GSM"}
               </span>
 
-              <span className="text-zinc-600">|</span>
+              <span className="text-zinc-300 dark:text-zinc-700">|</span>
 
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Users size={13} className="text-zinc-400 flex-shrink-0" />
+                <Users size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
                 {product.fit || "Unisex"}
               </span>
             </div>
@@ -328,7 +328,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <div className="h-7 flex items-center pt-1.5">
               {product.variants && product.variants.length > 1 ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">
                     الألوان:
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -344,7 +344,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                         }}
                         className={`w-3.5 h-3.5 rounded-full transition-all border-0 ${
                           selectedVariantIdx === vIdx
-                            ? "ring-2 ring-amber-400 scale-125 z-10"
+                            ? "ring-2 ring-amber-500 dark:ring-amber-400 scale-125 z-10"
                             : "opacity-70 hover:opacity-100 hover:scale-110"
                         }`}
                         style={{ backgroundColor: variant.colorHex }}
@@ -363,7 +363,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-12 h-12 rounded-xl sm:rounded-2xl bg-zinc-900/90 text-white flex items-center justify-center hover:bg-zinc-800 transition-all active:scale-95 shadow-md flex-shrink-0 border-0"
+              className="w-12 h-12 rounded-xl sm:rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 dark:text-white flex items-center justify-center transition-all active:scale-95 shadow-md flex-shrink-0 border-0"
               title="إضافة سريعة للسلة"
             >
               <ShoppingBag size={18} />
@@ -373,7 +373,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <button
               type="button"
               onClick={handleAddToCart}
-              className="flex-1 h-12 rounded-xl sm:rounded-2xl bg-[#D4B886] hover:bg-[#C5A775] text-zinc-950 font-black text-xs sm:text-sm tracking-widest uppercase flex items-center justify-center transition-all shadow-xl active:scale-95 cursor-pointer"
+              className="flex-1 h-12 rounded-xl sm:rounded-2xl bg-[#D4B886] hover:bg-[#C5A775] text-zinc-950 font-black text-xs sm:text-sm tracking-widest uppercase flex items-center justify-center transition-all shadow-xl active:scale-95 cursor-pointer border-0"
             >
               ADD TO CART
             </button>
