@@ -437,7 +437,7 @@ export function LUNOChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-22 right-3 sm:bottom-28 sm:right-6 z-[9999] w-[calc(100vw-1.5rem)] sm:w-[420px] h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl pointer-events-auto"
+            className="fixed bottom-[5.5rem] right-2 sm:bottom-28 sm:right-6 z-[9999] w-[calc(100vw-1rem)] sm:w-[420px] h-[70vh] sm:h-[560px] max-h-[80vh] bg-zinc-950/95 dark:bg-black/95 text-white border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl pointer-events-auto"
             dir="rtl"
           >
             {/* Header */}
