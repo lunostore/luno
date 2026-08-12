@@ -147,7 +147,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       }}
       className="group relative h-full flex flex-col"
     >
-      {/* Main Card Wrapper — Borderless, Floating in Dark Mode, Light Mode Compatible */}
+      {/* Main Card Wrapper — Completely Borderless & Shadowless Floating Container */}
       <div
         onClick={navigateToProduct}
         onMouseLeave={() => {
@@ -155,7 +155,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           setHoveredImage(null);
           setClickedImage(null);
         }}
-        className="block bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-4 sm:p-5 shadow-xl shadow-zinc-200/50 dark:shadow-none transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
+        className="block bg-transparent rounded-[2rem] p-4 sm:p-5 shadow-none transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
       >
         <div>
           {/* Top Badges & Actions Overlay */}
@@ -163,7 +163,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {/* Left Badges (NEW / SALE / BEST SELLER) */}
             <div className="flex items-center gap-2">
               {isNewProduct ? (
-                <span className="text-amber-700 dark:text-amber-300 bg-amber-400/20 dark:bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md shadow-sm">
+                <span className="text-amber-700 dark:text-amber-300 bg-amber-400/20 dark:bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
                   NEW
                 </span>
               ) : hasDiscount ? (
@@ -184,7 +184,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 e.stopPropagation();
                 toggleWishlist(product);
               }}
-              className="w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95 border-0"
+              className="w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white flex items-center justify-center transition-all backdrop-blur-md hover:scale-110 active:scale-95 border-0 shadow-none"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
               <Heart
@@ -196,11 +196,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* ── PRODUCT IMAGES DISPLAY SECTION ── */}
           <div className="grid grid-cols-12 gap-3 mb-4">
-            {/* Main Large Image Container (Pure dark background for maximum image contrast) */}
+            {/* Main Large Image Container (Dark Mode subtle border) */}
             <div
               onMouseEnter={() => setIsHoveringMain(true)}
               onMouseLeave={() => setIsHoveringMain(false)}
-              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-black shadow-inner flex items-center justify-center border-0"
+              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-black flex items-center justify-center border-0 dark:border dark:border-zinc-800/80 shadow-none"
             >
               <motion.div
                 className="w-full h-full relative"
@@ -229,7 +229,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </div>
             </div>
 
-            {/* Right Vertical Stack (3 Thumbnail Boxes - Pure dark bg, sharp vivid contrast) */}
+            {/* Right Vertical Stack (3 Thumbnail Boxes) */}
             <div className="col-span-4 sm:col-span-3 flex flex-col justify-between gap-2">
               {stackThumbnails.map((imgUrl, thumbIdx) => {
                 const isHovered = hoveredImage === imgUrl;
@@ -243,9 +243,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     }}
                     onMouseEnter={() => setHoveredImage(imgUrl)}
                     onMouseLeave={() => setHoveredImage(null)}
-                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-black border-0 ${
+                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-black border-0 shadow-none ${
                       isSelected || isHovered
-                        ? "ring-2 ring-amber-500 scale-[1.03] shadow-md opacity-100"
+                        ? "ring-2 ring-amber-500 scale-[1.03] opacity-100"
                         : "opacity-90 hover:opacity-100"
                     }`}
                     title={`معاينة الصورة ${thumbIdx + 1}`}
@@ -266,7 +266,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 (_, emptyIdx) => (
                   <div
                     key={`empty-${emptyIdx}`}
-                    className="aspect-square rounded-xl bg-zinc-900/60 flex items-center justify-center text-zinc-600 text-[10px] font-black border-0"
+                    className="aspect-square rounded-xl bg-zinc-900/60 flex items-center justify-center text-zinc-600 text-[10px] font-black border-0 shadow-none"
                   >
                     LUNO
                   </div>
@@ -363,7 +363,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-12 h-12 rounded-xl sm:rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 dark:text-white flex items-center justify-center transition-all active:scale-95 shadow-md flex-shrink-0 border-0"
+              className="w-12 h-12 rounded-xl sm:rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 dark:text-white flex items-center justify-center transition-all active:scale-95 flex-shrink-0 border-0 shadow-none"
               title="إضافة سريعة للسلة"
             >
               <ShoppingBag size={18} />
@@ -373,7 +373,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <button
               type="button"
               onClick={handleAddToCart}
-              className="flex-1 h-12 rounded-xl sm:rounded-2xl bg-[#D4B886] hover:bg-[#C5A775] text-zinc-950 font-black text-xs sm:text-sm tracking-widest uppercase flex items-center justify-center transition-all shadow-xl active:scale-95 cursor-pointer border-0"
+              className="flex-1 h-12 rounded-xl sm:rounded-2xl bg-[#D4B886] hover:bg-[#C5A775] text-zinc-950 font-black text-xs sm:text-sm tracking-widest uppercase flex items-center justify-center transition-all active:scale-95 cursor-pointer border-0 shadow-none"
             >
               ADD TO CART
             </button>
