@@ -147,7 +147,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       }}
       className="group relative h-full flex flex-col"
     >
-      {/* Main Card Wrapper — Borderless, Light & Dark Mode Compatible */}
+      {/* Main Card Wrapper — Borderless, Floating in Dark Mode, Light Mode Compatible */}
       <div
         onClick={navigateToProduct}
         onMouseLeave={() => {
@@ -155,7 +155,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           setHoveredImage(null);
           setClickedImage(null);
         }}
-        className="block bg-white dark:bg-[#111113] rounded-[2rem] p-4 sm:p-5 shadow-xl shadow-zinc-200/60 dark:shadow-2xl dark:shadow-black/60 transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
+        className="block bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-4 sm:p-5 shadow-xl shadow-zinc-200/50 dark:shadow-none transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
       >
         <div>
           {/* Top Badges & Actions Overlay */}
@@ -184,7 +184,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 e.stopPropagation();
                 toggleWishlist(product);
               }}
-              className="w-9 h-9 rounded-full bg-zinc-100/90 hover:bg-zinc-200/90 dark:bg-black/50 dark:hover:bg-black/80 text-zinc-700 dark:text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95 border-0"
+              className="w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white flex items-center justify-center transition-all backdrop-blur-md shadow-md hover:scale-110 active:scale-95 border-0"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
               <Heart
@@ -196,11 +196,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* ── PRODUCT IMAGES DISPLAY SECTION ── */}
           <div className="grid grid-cols-12 gap-3 mb-4">
-            {/* Main Large Image Container (Left - Col 8/9) */}
+            {/* Main Large Image Container (Pure dark background for maximum image contrast) */}
             <div
               onMouseEnter={() => setIsHoveringMain(true)}
               onMouseLeave={() => setIsHoveringMain(false)}
-              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-100/90 dark:bg-zinc-900/90 shadow-inner flex items-center justify-center border-0"
+              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-black shadow-inner flex items-center justify-center border-0"
             >
               <motion.div
                 className="w-full h-full relative"
@@ -216,20 +216,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   quality={95}
                   crossOrigin="anonymous"
                   sizes="(max-width: 640px) 70vw, 30vw"
-                  className="object-contain object-center p-2 transition-all duration-500"
+                  className="object-contain object-center p-1.5 transition-all duration-500"
                 />
               </motion.div>
 
               {/* Quick Hover Overlay */}
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                <span className="bg-black/75 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
+                <span className="bg-black/80 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
                   <Eye size={12} />
                   عرض التفاصيل
                 </span>
               </div>
             </div>
 
-            {/* Right Vertical Stack (3 Thumbnail Boxes - Col 4/3) */}
+            {/* Right Vertical Stack (3 Thumbnail Boxes - Pure dark bg, sharp vivid contrast) */}
             <div className="col-span-4 sm:col-span-3 flex flex-col justify-between gap-2">
               {stackThumbnails.map((imgUrl, thumbIdx) => {
                 const isHovered = hoveredImage === imgUrl;
@@ -243,10 +243,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     }}
                     onMouseEnter={() => setHoveredImage(imgUrl)}
                     onMouseLeave={() => setHoveredImage(null)}
-                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-zinc-100/90 dark:bg-zinc-900/80 border-0 ${
+                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-black border-0 ${
                       isSelected || isHovered
-                        ? "ring-2 ring-amber-500/80 dark:ring-amber-400/80 scale-[1.03] shadow-md opacity-100"
-                        : "opacity-70 hover:opacity-100"
+                        ? "ring-2 ring-amber-500 scale-[1.03] shadow-md opacity-100"
+                        : "opacity-90 hover:opacity-100"
                     }`}
                     title={`معاينة الصورة ${thumbIdx + 1}`}
                   >
@@ -261,12 +261,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 );
               })}
 
-              {/* Fallback empty thumb slots if product has fewer than 3 images */}
+              {/* Fallback empty thumb slots */}
               {Array.from({ length: Math.max(0, 3 - stackThumbnails.length) }).map(
                 (_, emptyIdx) => (
                   <div
                     key={`empty-${emptyIdx}`}
-                    className="aspect-square rounded-xl bg-zinc-100/60 dark:bg-zinc-900/40 flex items-center justify-center text-zinc-400 dark:text-zinc-700 text-[10px] font-black border-0"
+                    className="aspect-square rounded-xl bg-zinc-900/60 flex items-center justify-center text-zinc-600 text-[10px] font-black border-0"
                   >
                     LUNO
                   </div>
@@ -276,7 +276,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
 
-        {/* ── PRODUCT INFO & DETAILS SECTION (Flex-1 & Always aligned) ── */}
+        {/* ── PRODUCT INFO & DETAILS SECTION ── */}
         <div className="flex-1 flex flex-col justify-between space-y-3 pt-1">
           <div>
             {/* Header Row: Title & Price */}
@@ -302,7 +302,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </div>
             </div>
 
-            {/* Specifications Row (Icon Badges) — Fixed Height */}
+            {/* Specifications Row (Icon Badges) */}
             <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium pt-1 pb-2 h-7 overflow-hidden">
               <span className="flex items-center gap-1.5 whitespace-nowrap">
                 <Shirt size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
@@ -316,7 +316,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 {product.weight || "230 GSM"}
               </span>
 
-              <span className="text-zinc-300 dark:text-zinc-700">|</span>
+              <span className="text-zinc-600">|</span>
 
               <span className="flex items-center gap-1.5 whitespace-nowrap">
                 <Users size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
@@ -324,7 +324,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </span>
             </div>
 
-            {/* Color Swatches selection — Fixed height block (h-7) for uniform card alignment */}
+            {/* Color Swatches selection */}
             <div className="h-7 flex items-center pt-1.5">
               {product.variants && product.variants.length > 1 ? (
                 <div className="flex items-center gap-2">
