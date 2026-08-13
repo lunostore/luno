@@ -10,8 +10,6 @@ import {
   Plus,
   X,
   MessageSquare,
-  ThumbsUp,
-  Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -238,7 +236,7 @@ export default function AdminReviewsPage() {
 
                   {/* Review Text */}
                   <p className="text-zinc-700 text-xs leading-relaxed font-medium bg-zinc-50 p-3 rounded-xl border border-zinc-100/80 mb-4">
-                    "{review.message}"
+                    &quot;{review.message}&quot;
                   </p>
                 </div>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ThumbsUp, Plus, X, MessageSquare, ShieldCheck, User, Sparkles } from "lucide-react";
+import { Star, ThumbsUp, Plus, X, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
   subscribeApprovedReviews,
@@ -235,7 +235,7 @@ export function CustomerReviewsSection() {
 
                     {/* Review Message Body */}
                     <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed font-medium mb-6">
-                      "{review.message}"
+                      &quot;{review.message}&quot;
                     </p>
                   </div>
 
