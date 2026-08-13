@@ -21,6 +21,16 @@ import {
   X,
   Activity,
   Bot,
+  ChevronDown,
+  ChevronUp,
+  Ruler,
+  Sparkles,
+  Info,
+  Shield,
+  Type,
+  CreditCard,
+  Share2,
+  ShieldAlert,
 } from "lucide-react";
 import { signOut } from "@/lib/firebase/auth";
 import { toast } from "sonner";
@@ -41,6 +51,17 @@ const navItems = [
   { href: "/admin/settings", label: "الإعدادات", icon: Settings },
 ];
 
+const SETTINGS_SUBITEMS = [
+  { tab: "maintenance", label: "الصيانة والتايمر", icon: ShieldAlert },
+  { tab: "media", label: "وسائط الهيرو والإنترو", icon: Sparkles },
+  { tab: "sizeCharts", label: "جداول المقاسات المخصصة", icon: Ruler },
+  { tab: "about", label: "صفحة من نحن", icon: Info },
+  { tab: "policies", label: "الشروط والسياسات", icon: Shield },
+  { tab: "copy", label: "نصوص وعناوين المتجر", icon: Type },
+  { tab: "payments", label: "بيانات الدفع والتواصل", icon: CreditCard },
+  { tab: "social", label: "روابط التواصل الاجتماعي", icon: Share2 },
+] as const;
+
 export default function AdminLayout({
   children,
 }: {
@@ -51,6 +72,14 @@ export default function AdminLayout({
   const { user, loading } = useAuth();
   const isLoginPage = pathname === "/admin/login";
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [settingsSubmenuOpen, setSettingsSubmenuOpen] = useState(true);
+
+  // Auto-expand settings submenu if currently inside /admin/settings
+  useEffect(() => {
+    if (pathname.startsWith("/admin/settings")) {
+      setSettingsSubmenuOpen(true);
+    }
+  }, [pathname]);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -144,10 +173,86 @@ export default function AdminLayout({
       {/* Navigation Items */}
       <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
         {navItems.map(({ href, label, icon: Icon }) => {
+          const isSettings = href === "/admin/settings";
           const isActive =
             href === "/admin"
               ? pathname === "/admin"
               : pathname.startsWith(href);
+
+          if (isSettings) {
+            return (
+              <div key={href} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={href}
+                    onClick={() => setSettingsSubmenuOpen(true)}
+                    className={`flex-1 group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 relative ${
+                      isActive
+                        ? "bg-white text-zinc-950 shadow-lg shadow-white/10"
+                        : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon
+                        size={16}
+                        className={`transition-transform duration-300 group-hover:scale-110 ${
+                          isActive ? "text-zinc-950" : "text-zinc-400 group-hover:text-amber-400"
+                        }`}
+                      />
+                      <span>{label}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSettingsSubmenuOpen((prev) => !prev);
+                      }}
+                      className="p-1 rounded-lg hover:bg-zinc-800/80 text-zinc-400 hover:text-white transition-colors"
+                      title="فتح/إغلاق أفرع الإعدادات"
+                    >
+                      {settingsSubmenuOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicatorAdmin"
+                        className="absolute right-3 w-1.5 h-1.5 rounded-full bg-zinc-950"
+                        transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                      />
+                    )}
+                  </Link>
+                </div>
+
+                {/* Submenu Accordion Rectangle */}
+                <AnimatePresence>
+                  {settingsSubmenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden bg-zinc-900/80 rounded-2xl border border-zinc-800 p-2 space-y-1 shadow-inner mr-2"
+                    >
+                      {SETTINGS_SUBITEMS.map((sub) => {
+                        const SubIcon = sub.icon;
+                        const subHref = `/admin/settings?tab=${sub.tab}`;
+                        return (
+                          <Link
+                            key={sub.tab}
+                            href={subHref}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-bold text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all group"
+                          >
+                            <SubIcon size={13} className="text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                            <span className="truncate">{sub.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          }
 
           return (
             <Link

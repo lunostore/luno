@@ -54,6 +54,34 @@ export default function AdminOrdersPage() {
     window.open(`https://wa.me/${waNumber}?text=${encoded}`, "_blank");
   };
 
+  const handleCopyText = (text: string, label: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    toast.success(`تم نسخ ${label} بنجاح!`);
+  };
+
+  const handleCopyFullShippingData = (order: Order) => {
+    const itemsList = order.items
+      .map((item, idx) => `${idx + 1}. ${item.productName} (اللون: ${item.selectedColor.name} | المقاس: ${item.selectedSize} | الكمية: ${item.quantity})`)
+      .join("\n");
+
+    const fullData = `📦 بيانات الشحن للطلب #${order.id.slice(0, 8).toUpperCase()}
+👤 اسم العميل: ${order.customerName}
+📱 رقم الهاتف الأول: ${order.phone}
+📞 رقم الهاتف الثاني: ${order.secondaryPhone || "غير مدخل"}
+📍 المحافظة: ${order.governorate || "غير محدد"}
+🏙️ المنطقة/الحي: ${order.city}
+🏠 العنوان بالتفصيل: ${order.address}
+🛍️ المنتجات:
+${itemsList}
+💵 المبلغ المطلوب تحصيله: ${order.total} ج.م (شامل الشحن)
+💳 طريقة الدفع: ${PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
+📝 ملاحظات: ${order.notes || "لا يوجد"}`;
+
+    navigator.clipboard.writeText(fullData);
+    toast.success("تم نسخ كامل بيانات الشحن لشركة الشحن بنجاح! 🚀");
+  };
+
   const handleCopyWhatsAppMessage = (order: Order) => {
     const messageText = buildWhatsAppConfirmationMessage(order, "LUNO");
     navigator.clipboard.writeText(messageText);
@@ -390,55 +418,168 @@ export default function AdminOrdersPage() {
                   </span>
                 </div>
 
-                {/* Customer Details */}
-                <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
-                    <Sparkles size={11} /> بيانات العميل
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4 text-xs bg-white border border-zinc-100 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.005)]">
+                {/* Customer Details with Quick Copy Buttons */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                      <Sparkles size={11} /> بيانات العميل والشحن
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyFullShippingData(selectedOrder)}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 self-start sm:self-auto"
+                    >
+                      <Copy size={13} className="text-amber-400" />
+                      <span>نسخ كافة بيانات الشحن لشركة الشحن 🚚</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-white border border-zinc-100 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.005)]">
                     <div>
-                      <p className="text-zinc-400 font-medium">الاسم</p>
-                      <p className="font-bold text-zinc-900 mt-0.5">{selectedOrder.customerName}</p>
+                      <p className="text-zinc-400 font-medium text-[11px]">الاسم</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="font-bold text-zinc-900">{selectedOrder.customerName}</p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(selectedOrder.customerName, "اسم العميل")}
+                          className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                          title="نسخ الاسم"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </div>
                     </div>
+
                     <div>
-                      <p className="text-zinc-400 font-medium">الهاتف</p>
-                      <p className="font-mono font-bold text-zinc-900 mt-0.5 flex items-center gap-2">
-                        {selectedOrder.phone}
+                      <p className="text-zinc-400 font-medium text-[11px]">الهاتف الأساسي</p>
+                      <div className="flex items-center gap-2 mt-0.5 font-mono">
+                        <p className="font-bold text-zinc-900">{selectedOrder.phone}</p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(selectedOrder.phone, "رقم الهاتف الأساسي")}
+                          className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                          title="نسخ الرقم"
+                        >
+                          <Copy size={12} />
+                        </button>
                         <a
-                          href={`https://wa.me/${selectedOrder.whatsappPhone?.replace(/^0/, "20") || selectedOrder.phone.replace(/^0/, "20")}`}
+                          href={`https://wa.me/${selectedOrder.phone.replace(/^0/, "20")}`}
                           target="_blank"
                           rel="noreferrer"
                           className="text-green-600 hover:text-green-700"
                           title="فتح واتساب"
                         >
-                          <MessageCircle size={13} />
+                          <MessageCircle size={14} />
                         </a>
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-zinc-400 font-medium">المحافظة</p>
-                      <p className="font-bold text-zinc-900 mt-0.5">{selectedOrder.governorate || "—"}</p>
-                    </div>
-                    <div>
-                      <p className="text-zinc-400 font-medium">الدفع</p>
-                      <p className="font-bold text-zinc-900 mt-0.5">
-                        {PAYMENT_METHOD_LABELS[selectedOrder.paymentMethod] || selectedOrder.paymentMethod}
-                      </p>
-                    </div>
-                    {selectedOrder.transferPhone && (
-                      <div>
-                        <p className="text-zinc-400 font-medium">رقم التحويل</p>
-                        <p className="font-mono font-bold text-zinc-900 mt-0.5">{selectedOrder.transferPhone}</p>
                       </div>
-                    )}
-                    <div className="col-span-2 border-t border-zinc-50 pt-3">
-                      <p className="text-zinc-400 font-medium">العنوان</p>
-                      <p className="font-bold text-zinc-800 mt-0.5">{selectedOrder.address}</p>
                     </div>
+
+                    <div>
+                      <p className="text-zinc-400 font-medium text-[11px]">رقم الهاتف الثاني (البديل)</p>
+                      <div className="flex items-center gap-2 mt-0.5 font-mono">
+                        <p className="font-bold text-zinc-900">{selectedOrder.secondaryPhone || "غير مدخل"}</p>
+                        {selectedOrder.secondaryPhone && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyText(selectedOrder.secondaryPhone, "رقم الهاتف البديل")}
+                              className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                              title="نسخ الرقم البديل"
+                            >
+                              <Copy size={12} />
+                            </button>
+                            <a
+                              href={`https://wa.me/${selectedOrder.secondaryPhone.replace(/^0/, "20")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-green-600 hover:text-green-700"
+                              title="فتح واتساب البديل"
+                            >
+                              <MessageCircle size={14} />
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-zinc-400 font-medium text-[11px]">المحافظة والمنطقة</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="font-bold text-zinc-900">
+                          {selectedOrder.governorate || "—"} ({selectedOrder.city})
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(`${selectedOrder.governorate || ""} - ${selectedOrder.city}`, "المحافظة والمنطقة")}
+                          className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                          title="نسخ المحافظة والمنطقة"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-zinc-400 font-medium text-[11px]">طريقة الدفع</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="font-bold text-zinc-900">
+                          {PAYMENT_METHOD_LABELS[selectedOrder.paymentMethod] || selectedOrder.paymentMethod}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(PAYMENT_METHOD_LABELS[selectedOrder.paymentMethod] || selectedOrder.paymentMethod, "طريقة الدفع")}
+                          className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                          title="نسخ طريقة الدفع"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-zinc-400 font-medium text-[11px]">المبلغ الإجمالي (شامل الشحن)</p>
+                      <div className="flex items-center gap-2 mt-0.5 font-mono">
+                        <p className="font-extrabold text-amber-600">{selectedOrder.total} ج.م</p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(`${selectedOrder.total} ج.م`, "المبلغ الإجمالي")}
+                          className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                          title="نسخ المبلغ الإجمالي"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-2 border-t border-zinc-50 pt-3">
+                      <p className="text-zinc-400 font-medium text-[11px]">العنوان بالتفصيل</p>
+                      <div className="flex items-start justify-between gap-2 mt-0.5">
+                        <p className="font-bold text-zinc-800 leading-relaxed">{selectedOrder.address}</p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(selectedOrder.address, "العنوان بالتفصيل")}
+                          className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors shrink-0"
+                          title="نسخ العنوان"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </div>
+                    </div>
+
                     {selectedOrder.notes && (
-                      <div className="col-span-2 border-t border-zinc-50 pt-3">
-                        <p className="text-zinc-400 font-medium">ملاحظات</p>
-                        <p className="font-bold text-zinc-700 italic mt-0.5">&ldquo;{selectedOrder.notes}&rdquo;</p>
+                      <div className="sm:col-span-2 border-t border-zinc-50 pt-3">
+                        <p className="text-zinc-400 font-medium text-[11px]">ملاحظات الطلب</p>
+                        <div className="flex items-start justify-between gap-2 mt-0.5">
+                          <p className="font-bold text-zinc-700 italic">&ldquo;{selectedOrder.notes}&rdquo;</p>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyText(selectedOrder.notes!, "ملاحظات الطلب")}
+                            className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors shrink-0"
+                            title="نسخ الملاحظات"
+                          >
+                            <Copy size={12} />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -8,6 +8,7 @@ export const checkoutSchema = z
   .object({
     customerName: z.string().min(2, "الاسم يجب أن يكون حرفين على الأقل"),
     phone: egyptPhone,
+    secondaryPhone: egyptPhone,
     whatsappPhone: z
       .string()
       .optional()

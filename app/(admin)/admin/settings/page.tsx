@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Trash2,
@@ -41,10 +42,19 @@ type SettingsTab =
   | "payments"
   | "social";
 
-export default function AdminSettingsPage() {
+function AdminSettingsContent() {
+  const searchParams = useSearchParams();
+  const urlTab = searchParams.get("tab") as SettingsTab | null;
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>("maintenance");
+
+  useEffect(() => {
+    if (urlTab) {
+      setActiveTab(urlTab);
+    }
+  }, [urlTab]);
 
   // New size chart form state
   const [newSizeChartName, setNewSizeChartName] = useState("");
@@ -1233,5 +1243,19 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminSettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 flex items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <AdminSettingsContent />
+    </Suspense>
   );
 }

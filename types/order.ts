@@ -27,6 +27,7 @@ export interface Order {
   id: string;
   customerName: string;
   phone: string;
+  secondaryPhone: string;      // رقم الهاتف الثاني الإجباري للتأكيد
   customerPhone?: string;
   whatsappPhone?: string;
   governorate?: string;
@@ -47,6 +48,7 @@ export interface Order {
 export interface CreateOrderInput {
   customerName: string;
   phone: string;
+  secondaryPhone: string;      // رقم الهاتف الثاني الإجباري للتأكيد
   whatsappPhone?: string;
   governorate?: string;
   city: string;

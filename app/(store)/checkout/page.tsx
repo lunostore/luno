@@ -222,6 +222,7 @@ export default function CheckoutPage() {
       const orderPayload: CreateOrderInput = {
         customerName: data.customerName.trim(),
         phone: data.phone.trim(),
+        secondaryPhone: data.secondaryPhone.trim(),
         whatsappPhone: data.whatsappPhone?.trim() || data.phone.trim(),
         governorate: data.governorate.trim(),
         city: data.city.trim(),
@@ -295,12 +296,20 @@ export default function CheckoutPage() {
                     error={errors.customerName?.message}
                     {...register("customerName")}
                   />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     id="phone"
-                    label="رقم الهاتف *"
+                    label="رقم الهاتف الأساسي *"
                     placeholder="01012345678"
                     error={errors.phone?.message}
                     {...register("phone")}
+                  />
+                  <Input
+                    id="secondaryPhone"
+                    label="رقم هاتف إضافي / بديـل (إجباري للتأكيد) *"
+                    placeholder="01112345678"
+                    error={errors.secondaryPhone?.message}
+                    {...register("secondaryPhone")}
                   />
                 </div>
 
