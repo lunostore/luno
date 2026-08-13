@@ -1245,7 +1245,7 @@ export function subscribeApprovedReviews(
         .map((d) => ({
           id: d.id,
           ...d.data(),
-        }) as CustomerReview[])
+        } as unknown as CustomerReview))
         .filter((r) => r.status === "approved");
 
       // Sort in JS memory to avoid requiring a Firestore composite index!
