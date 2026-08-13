@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ThumbsUp, Plus, X, MessageSquare, ShieldCheck } from "lucide-react";
+import {
+  Star,
+  ThumbsUp,
+  Plus,
+  X,
+  MessageSquare,
+  ShieldCheck,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   subscribeApprovedReviews,
@@ -18,8 +27,12 @@ export function CustomerReviewsSection() {
   const [modalOpen, setModalOpen] = useState(false);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
 
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+
   // Review Form State
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [gender, setGender] = useState<"male" | "female">("male");
   const [rating, setRating] = useState(5);
   const [message, setMessage] = useState("");
@@ -43,6 +56,38 @@ export function CustomerReviewsSection() {
 
     return () => unsubscribe();
   }, []);
+
+  // Auto-scroll track effect (slow smooth horizontal motion)
+  useEffect(() => {
+    if (loading || reviews.length <= 1 || isPaused) return;
+
+    const interval = setInterval(() => {
+      if (!sliderRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      const currentScroll = Math.abs(scrollLeft);
+
+      if (currentScroll >= maxScroll - 20) {
+        sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        sliderRef.current.scrollBy({ left: -280, behavior: "smooth" });
+      }
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [loading, reviews.length, isPaused]);
+
+  const scrollPrev = () => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: 280, behavior: "smooth" });
+    }
+  };
+
+  const scrollNext = () => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: -280, behavior: "smooth" });
+    }
+  };
 
   const handleToggleLike = async (reviewId: string) => {
     const isLiked = likedMap[reviewId];
@@ -75,6 +120,15 @@ export function CustomerReviewsSection() {
       toast.error("يرجى كتابة اسمك");
       return;
     }
+    const cleanPhone = phone.trim();
+    if (!cleanPhone) {
+      toast.error("يرجى إدخال رقم الهاتف للتأكيد (إجباري)");
+      return;
+    }
+    if (!/^01[0125][0-9]{8}$/.test(cleanPhone)) {
+      toast.error("يرجى إدخال رقم هاتف مصري صحيح يتكون من 11 رقم (مثال: 01012345678)");
+      return;
+    }
     if (!message.trim()) {
       toast.error("يرجى كتابة رأيك وتجربتك");
       return;
@@ -84,6 +138,7 @@ export function CustomerReviewsSection() {
     try {
       await createCustomerReview({
         name: name.trim(),
+        phone: cleanPhone,
         gender,
         rating,
         message: message.trim(),
@@ -92,6 +147,7 @@ export function CustomerReviewsSection() {
 
       toast.success("شكراً لمشاركتك! تم إرسال تقييمك بنجاح وسيعرض بالموقع فور موافقة الأدمن ❤️");
       setName("");
+      setPhone("");
       setMessage("");
       setRating(5);
       setGender("male");
@@ -104,31 +160,55 @@ export function CustomerReviewsSection() {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white relative overflow-hidden transition-colors duration-300" dir="rtl">
+    <section className="py-12 md:py-20 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white relative overflow-hidden transition-colors duration-300" dir="rtl">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-zinc-200 dark:border-zinc-800/80 pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 border-b border-zinc-200 dark:border-zinc-800/80 pb-6">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
               ماذا يقول عملاء LUNO؟
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed font-medium">
+            <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm mt-1.5 max-w-xl leading-relaxed font-medium">
               آراء حقيقية من عملائنا في جميع محافظات مصر — شاركنا رأيك وتجربتك الآن!
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-zinc-950 rounded-2xl text-xs font-black transition-all duration-300 shadow-lg shadow-amber-400/20 active:scale-95 shrink-0 cursor-pointer"
-          >
-            <Plus size={16} />
-            <span>✍️ أضف رأيك وتجربتك</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Slider Navigation Arrows */}
+            {reviews.length > 1 && (
+              <div className="hidden sm:flex items-center gap-2 mr-2">
+                <button
+                  type="button"
+                  onClick={scrollPrev}
+                  className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer active:scale-95"
+                  title="السابق"
+                >
+                  <ChevronRight size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollNext}
+                  className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer active:scale-95"
+                  title="التالي"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 rounded-2xl text-xs font-black transition-all duration-300 shadow-md shadow-amber-400/20 active:scale-95 shrink-0 cursor-pointer"
+            >
+              <Plus size={16} />
+              <span>✍️ أضف رأيك وتجربتك</span>
+            </button>
+          </div>
         </div>
 
         {/* Reviews Content */}
@@ -139,7 +219,7 @@ export function CustomerReviewsSection() {
           </div>
         ) : reviews.length === 0 ? (
           /* Clean Empty State when 0 real reviews exist */
-          <div className="py-16 px-6 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm max-w-xl mx-auto space-y-4">
+          <div className="py-14 px-6 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm max-w-xl mx-auto space-y-4">
             <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-500 flex items-center justify-center mx-auto text-2xl">
               💬
             </div>
@@ -158,7 +238,15 @@ export function CustomerReviewsSection() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          /* Horizontal Auto-Scrolling Track (Compact Mobile & PC) */
+          <div
+            ref={sliderRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+            className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory scroll-smooth py-2 px-1 cursor-grab active:cursor-grabbing"
+          >
             {reviews.map((review, idx) => {
               const isMale = review.gender !== "female";
               const isLiked = likedMap[review.id];
@@ -166,18 +254,18 @@ export function CustomerReviewsSection() {
               return (
                 <motion.div
                   key={review.id || idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: idx * 0.08 }}
-                  className="bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-md dark:shadow-xl group hover:-translate-y-1"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  className="w-[270px] sm:w-[310px] md:w-[340px] shrink-0 snap-center bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm dark:shadow-lg group hover:-translate-y-0.5"
                 >
                   {/* Card Header: Avatar & Stars */}
                   <div>
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between gap-2.5 mb-3">
+                      <div className="flex items-center gap-2.5">
                         {/* Avatar Icon */}
                         <div
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold border shadow-inner shrink-0 ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border shadow-inner shrink-0 ${
                             isMale
                               ? "bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-500/40 text-blue-600 dark:text-blue-400"
                               : "bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-500/40 text-rose-600 dark:text-rose-400"
@@ -187,26 +275,28 @@ export function CustomerReviewsSection() {
                         </div>
 
                         <div>
-                          <div className="flex items-center gap-1.5">
-                            <h3 className="text-sm font-black text-zinc-900 dark:text-white">{review.name}</h3>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                              <ShieldCheck size={10} />
-                              {isMale ? "عميل موثوق ✓" : "عميلة موثوقة ✓"}
+                          <div className="flex items-center gap-1">
+                            <h3 className="text-xs font-black text-zinc-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">
+                              {review.name}
+                            </h3>
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[8px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                              <ShieldCheck size={9} />
+                              {isMale ? "موثوق ✓" : "موثوقة ✓"}
                             </span>
                           </div>
 
-                          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
+                          <span className="text-[9px] text-zinc-500 dark:text-zinc-400 font-mono block mt-0.5">
                             {isMale ? "شاب" : "بنت"} • تقييم معتمد
                           </span>
                         </div>
                       </div>
 
                       {/* Stars Rating */}
-                      <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-950 px-2.5 py-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                      <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            size={12}
+                            size={10}
                             className={
                               i < (review.rating || 5)
                                 ? "fill-amber-400 text-amber-400"
@@ -218,25 +308,25 @@ export function CustomerReviewsSection() {
                     </div>
 
                     {/* Review Message Body */}
-                    <p className="text-zinc-700 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-medium mb-6">
+                    <p className="text-zinc-700 dark:text-zinc-300 text-xs leading-relaxed font-medium mb-4 line-clamp-4">
                       &quot;{review.message}&quot;
                     </p>
                   </div>
 
                   {/* Card Footer: Likes Counter Button */}
-                  <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
-                    <span className="text-[10px] text-zinc-500 font-medium">هل كان هذا التقييم مفيداً؟</span>
+                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
+                    <span className="text-[9px] text-zinc-400 font-medium">مفيد؟</span>
 
                     <button
                       type="button"
                       onClick={() => handleToggleLike(review.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all duration-300 border cursor-pointer ${
                         isLiked
-                          ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-md shadow-amber-400/20"
+                          ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-sm"
                           : "bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700/80"
                       }`}
                     >
-                      <ThumbsUp size={13} className={isLiked ? "fill-zinc-950" : ""} />
+                      <ThumbsUp size={12} className={isLiked ? "fill-zinc-950" : ""} />
                       <span>{review.likes || 0} إعجاب</span>
                     </button>
                   </div>
@@ -296,6 +386,21 @@ export function CustomerReviewsSection() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+
+                  {/* Phone Input */}
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">
+                      رقم الهاتف (إجباري للتأكيد - سري للأدمن فقط) *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="01xxxxxxxxx"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-amber-400 font-mono font-semibold"
                     />
                   </div>
 

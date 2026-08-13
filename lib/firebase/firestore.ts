@@ -1193,6 +1193,7 @@ export async function clearAllNotifications(notifications: AdminNotification[]):
 export interface CustomerReview {
   id: string;
   name: string;
+  phone?: string;
   gender: "male" | "female";
   rating: number; // 1 to 5
   message: string;
@@ -1203,6 +1204,7 @@ export interface CustomerReview {
 
 export async function createCustomerReview(data: {
   name: string;
+  phone?: string;
   gender: "male" | "female";
   rating: number;
   message: string;
@@ -1211,6 +1213,7 @@ export async function createCustomerReview(data: {
   const reviewStatus = data.status || "pending";
   const docRef = await addDoc(collection(db, "customer_reviews"), cleanUndefined({
     name: data.name.trim(),
+    phone: data.phone ? data.phone.trim() : "",
     gender: data.gender || "male",
     rating: Math.min(5, Math.max(1, data.rating || 5)),
     message: data.message.trim(),
@@ -1223,7 +1226,7 @@ export async function createCustomerReview(data: {
   createAdminNotification({
     type: "system",
     title: `تقييم ورأي جديد من ${data.name} ⭐ (بانتظار الموافقة)`,
-    message: `التقييم: ${data.rating}/5 نجوم - "${data.message.slice(0, 50)}..."`,
+    message: `الهاتف: ${data.phone || "غير مدخل"} | التقييم: ${data.rating}/5 - "${data.message.slice(0, 40)}..."`,
     link: "/admin/reviews",
   }).catch(console.error);
 

@@ -10,6 +10,8 @@ import {
   Plus,
   X,
   MessageSquare,
+  Phone,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -31,6 +33,7 @@ export default function AdminReviewsPage() {
 
   // Manual Review Form State
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [gender, setGender] = useState<"male" | "female">("male");
   const [rating, setRating] = useState(5);
   const [message, setMessage] = useState("");
@@ -79,6 +82,7 @@ export default function AdminReviewsPage() {
     try {
       await createCustomerReview({
         name: name.trim(),
+        phone: phone.trim(),
         gender,
         rating,
         message: message.trim(),
@@ -87,6 +91,7 @@ export default function AdminReviewsPage() {
 
       toast.success("تمت إضافة التقييم بنجاح وإدراجه في قائمة بانتظار الموافقة ⏳");
       setName("");
+      setPhone("");
       setMessage("");
       setRating(5);
       setGender("male");
@@ -210,9 +215,38 @@ export default function AdminReviewsPage() {
                       </div>
                       <div>
                         <h3 className="text-xs font-black text-zinc-900">{review.name}</h3>
-                        <span className="text-[10px] text-zinc-400 font-medium">
+                        <span className="text-[10px] text-zinc-400 font-medium block">
                           {isMale ? "شاب (ذكر)" : "بنت (أنثى)"} • {review.likes || 0} إعجاب 👍
                         </span>
+
+                        {review.phone ? (
+                          <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-mono font-bold text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-lg border border-zinc-200/80 w-fit">
+                            <Phone size={11} className="text-emerald-600" />
+                            <span>{review.phone}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(review.phone!);
+                                toast.success("تم نسخ رقم الهاتف 📋");
+                              }}
+                              className="text-zinc-400 hover:text-zinc-900 transition-colors mr-1 cursor-pointer"
+                              title="نسخ رقم الهاتف"
+                            >
+                              <Copy size={11} />
+                            </button>
+                            <a
+                              href={`https://wa.me/2${review.phone.replace(/^0/, "")}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-600 hover:underline mr-1 font-sans text-[10px] font-bold"
+                              title="مراسلة واتساب"
+                            >
+                              💬 واتساب
+                            </a>
+                          </div>
+                        ) : (
+                          <span className="text-[9px] text-zinc-400 italic block mt-0.5">بدون رقم هاتف</span>
+                        )}
                       </div>
                     </div>
 
@@ -322,6 +356,17 @@ export default function AdminReviewsPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-3.5 py-2 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1">رقم الهاتف (اختياري)</label>
+                  <input
+                    type="tel"
+                    placeholder="01xxxxxxxxx"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-zinc-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-zinc-900"
                   />
                 </div>
 
