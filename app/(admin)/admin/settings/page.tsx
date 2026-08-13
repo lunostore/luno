@@ -130,24 +130,24 @@ Luno Store is not responsible for delays caused by courier services or events be
   }
 
   return (
-    <div className="space-y-8 max-w-4xl pb-16">
+    <div className="space-y-8 max-w-4xl pb-16" dir="rtl">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
           <Sliders size={14} />
-          CMS & Site Control Center
+          مركز التحكم في إعدادات ومحتوى الموقع (CMS)
         </div>
         <h1 className="text-3xl font-black tracking-tight text-zinc-900">
-          Website Settings & Copy Editor
+          إعدادات الموقع والنصوص
         </h1>
         <p className="text-zinc-500 text-xs mt-1">
-          Manage homepage hero media, customize website text, edit the About Us page, update Privacy Policy & Terms of Service, and configure payment options.
+          إدارة وسائط الهيرو، نصوص الصفحة الرئيسية، صفحة "من نحن"، سياسات الشحن والخصوصية، ووسائل الدفع الأونلاين.
         </p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* SECTION 0: MAINTENANCE & RESTOCK MODE */}
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-zinc-800 space-y-6" dir="rtl">
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-zinc-800 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -323,24 +323,20 @@ Luno Store is not responsible for delays caused by courier services or events be
         </div>
 
         {/* SECTION 1: HOMEPAGE HERO MEDIA */}
-
         <div className="bg-white rounded-2xl border border-zinc-100 p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.015)] space-y-6">
           <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div className="flex items-center gap-2">
               <Sparkles size={18} className="text-amber-500" />
               <h2 className="font-black text-sm text-zinc-900 uppercase tracking-wider">
-                Home Hero Banner & Video Settings
+                إعدادات وسائط الهيرو والبنر (Home Hero Banner & Video)
               </h2>
             </div>
-            <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full uppercase tracking-wider">
-              Live Customizer
-            </span>
           </div>
 
           {/* Media Type Toggle */}
           <div>
             <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-              Hero Media Type
+              نوع وسائط الهيرو
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -353,7 +349,7 @@ Luno Store is not responsible for delays caused by courier services or events be
                 }`}
               >
                 <ImageIcon size={16} />
-                Image Banner / Slideshow
+                بنر صور ثابتة / سلايد شو
               </button>
               <button
                 type="button"
@@ -365,7 +361,7 @@ Luno Store is not responsible for delays caused by courier services or events be
                 }`}
               >
                 <Video size={16} />
-                Video Banner (mp4 / WebM)
+                فيديو بنر (.mp4 / .webm)
               </button>
             </div>
           </div>
@@ -375,7 +371,7 @@ Luno Store is not responsible for delays caused by courier services or events be
             <div className="space-y-4 pt-2 border-t border-zinc-100">
               <div>
                 <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
-                  Light Mode Video URL (.mp4)
+                  رابط فيديو الوضع الفاتح (Light Mode Video URL)
                 </label>
                 <input
                   type="text"
@@ -387,7 +383,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
-                  Dark Mode Video URL (.mp4)
+                  رابط فيديو الوضع الداكن (Dark Mode Video URL)
                 </label>
                 <input
                   type="text"
@@ -406,7 +402,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               {/* Light Mode Images */}
               <div>
                 <label className="block text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-3">
-                  Light Mode Banner Images (White Mode)
+                  صور البنر للوضع الفاتح (Light Mode)
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
                   {settings.heroImagesLight?.map((img, i) => (
@@ -417,7 +413,7 @@ Luno Store is not responsible for delays caused by courier services or events be
                         type="button"
                         onClick={() => removeImageLight(i)}
                         className="absolute top-1.5 right-1.5 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete image"
+                        title="حذف الصورة"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -435,7 +431,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               {/* Dark Mode Images */}
               <div>
                 <label className="block text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-3">
-                  Dark Mode Banner Images (Dark Mode)
+                  صور البنر للوضع الداكن (Dark Mode)
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
                   {settings.heroImagesDark?.map((img, i) => (
@@ -446,7 +442,7 @@ Luno Store is not responsible for delays caused by courier services or events be
                         type="button"
                         onClick={() => removeImageDark(i)}
                         className="absolute top-1.5 right-1.5 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete image"
+                        title="حذف الصورة"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -466,7 +462,7 @@ Luno Store is not responsible for delays caused by courier services or events be
           {/* DEDICATED INTRO SCREEN PHOTOS CMS */}
           <div className="pt-4 border-t border-zinc-100 space-y-3">
             <label className="block text-xs font-bold text-zinc-900 uppercase tracking-wider">
-              Dedicated Intro Background Photos (صور الإنترو الخاصة)
+              صور خلفية الإنترو الخاصة (Intro Photos)
             </label>
             <p className="text-xs text-zinc-500">
               ارفع صوراً خاصة بعرض الإنترو السينمائي (ستظهر بدلاً من صور الهيرو في خلفية الإنترو)
@@ -485,7 +481,7 @@ Luno Store is not responsible for delays caused by courier services or events be
           <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
             <Info size={18} className="text-zinc-900" />
             <h2 className="font-black text-sm text-zinc-900 uppercase tracking-wider">
-              About Us Page Content & Images
+              محتوى وصور صفحة "من نحن" (About Us)
             </h2>
           </div>
 
@@ -493,7 +489,7 @@ Luno Store is not responsible for delays caused by courier services or events be
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                  About Page Title
+                  عنوان صفحة من نحن الرئيسي
                 </label>
                 <input
                   type="text"
@@ -505,7 +501,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                  About Page Subtitle / Tagline
+                  العنوان الفرعي لصفحة من نحن
                 </label>
                 <input
                   type="text"
@@ -518,10 +514,10 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             {/* Section 1 Edit */}
             <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200/60 space-y-3">
-              <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">Section 1: Modern Minimalism</h3>
+              <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">الجزء الأول: الفلسفة والتصميم (Modern Minimalism)</h3>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Section 1 Title
+                  عنوان الجزء الأول
                 </label>
                 <input
                   type="text"
@@ -532,7 +528,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Section 1 Description Paragraph
+                  فقرة الوصف للجزء الأول
                 </label>
                 <textarea
                   rows={3}
@@ -543,7 +539,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Section 1 Image URL / Upload
+                  صورة الجزء الأول
                 </label>
                 <ImageUploader
                   id="about-section-1-image-uploader"
@@ -556,10 +552,10 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             {/* Section 2 Edit */}
             <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200/60 space-y-3">
-              <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">Section 2: Uncompromising Quality</h3>
+              <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">الجزء الثاني: الجودة والخامات (Uncompromising Quality)</h3>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Section 2 Title
+                  عنوان الجزء الثاني
                 </label>
                 <input
                   type="text"
@@ -570,7 +566,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Section 2 Description Paragraph
+                  فقرة الوصف للجزء الثاني
                 </label>
                 <textarea
                   rows={3}
@@ -581,7 +577,7 @@ Luno Store is not responsible for delays caused by courier services or events be
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Section 2 Image URL / Upload
+                  صورة الجزء الثاني
                 </label>
                 <ImageUploader
                   id="about-section-2-image-uploader"
@@ -599,7 +595,7 @@ Luno Store is not responsible for delays caused by courier services or events be
           <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
             <Shield size={18} className="text-zinc-900" />
             <h2 className="font-black text-sm text-zinc-900 uppercase tracking-wider">
-              Privacy Policy & Terms of Service CMS
+              نصوص سياسة الخصوصية والشروط وسياسة الشحن
             </h2>
           </div>
 
@@ -607,13 +603,13 @@ Luno Store is not responsible for delays caused by courier services or events be
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-zinc-800 uppercase tracking-wider mb-2">
                 <FileText size={14} />
-                Privacy Policy Text Content
+                نص سياسة الخصوصية (Privacy Policy)
               </label>
               <textarea
                 rows={8}
                 value={settings.privacyPolicyText || ""}
                 onChange={(e) => setSettings({ ...settings, privacyPolicyText: e.target.value })}
-                placeholder="Enter custom privacy policy content..."
+                placeholder="أدخل نص سياسة الخصوصية..."
                 className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 leading-relaxed font-mono"
               />
             </div>
@@ -621,13 +617,13 @@ Luno Store is not responsible for delays caused by courier services or events be
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-zinc-800 uppercase tracking-wider mb-2">
                 <FileText size={14} />
-                Terms of Service Text Content
+                نص الشروط والأحكام (Terms of Service)
               </label>
               <textarea
                 rows={8}
                 value={settings.termsOfServiceText || ""}
                 onChange={(e) => setSettings({ ...settings, termsOfServiceText: e.target.value })}
-                placeholder="Enter custom terms of service content..."
+                placeholder="أدخل نص الشروط والأحكام..."
                 className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 leading-relaxed font-mono"
               />
             </div>
@@ -635,7 +631,7 @@ Luno Store is not responsible for delays caused by courier services or events be
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-zinc-800 uppercase tracking-wider mb-2">
                 <FileText size={14} />
-                Shipping & Returns Policy (سياسة الشحن والاسترجاع)
+                سياسة الشحن والاسترجاع (Shipping & Returns Policy)
               </label>
               <textarea
                 rows={12}
@@ -654,14 +650,14 @@ Luno Store is not responsible for delays caused by courier services or events be
           <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
             <Type size={18} className="text-zinc-900" />
             <h2 className="font-black text-sm text-zinc-900 uppercase tracking-wider">
-              Website Copy Control
+              عناوين ونصوص المتجر
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Store Name
+                اسم المتجر
               </label>
               <input
                 type="text"
@@ -673,7 +669,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Currency Symbol
+                رمز العملة
               </label>
               <input
                 type="text"
@@ -685,7 +681,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Home Hero Subtitle / Tagline
+                شعار الهيرو الفرعي (Tagline)
               </label>
               <input
                 type="text"
@@ -697,7 +693,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Home Hero Button Text
+                نص زر الشراء الرئيسي بالهيرو
               </label>
               <input
                 type="text"
@@ -709,7 +705,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Catalog Section Title
+                عنوان قسم الكتالوج بالرئيسية
               </label>
               <input
                 type="text"
@@ -721,7 +717,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Catalog Section Subtitle
+                العنوان الفرعي لقسم الكتالوج
               </label>
               <input
                 type="text"
@@ -733,7 +729,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div className="sm:col-span-2">
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Intro Screen Animated Tagline
+                الشعار المتحرك بالإنترو (Intro Tagline)
               </label>
               <input
                 type="text"
@@ -745,7 +741,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div className="sm:col-span-2">
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Footer Description Paragraph
+                وصف الفوتر أسفل الموقع
               </label>
               <textarea
                 rows={3}
@@ -762,13 +758,13 @@ Luno Store is not responsible for delays caused by courier services or events be
           <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
             <CreditCard size={18} className="text-zinc-900" />
             <h2 className="font-black text-sm text-zinc-900 uppercase tracking-wider">
-              Contact & Payment Details
+              بيانات الدفع والتواصل
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Vodafone Cash Toggle & Input */}
-            <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 space-y-3" dir="rtl">
+            <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold text-zinc-900">
@@ -805,7 +801,7 @@ Luno Store is not responsible for delays caused by courier services or events be
             </div>
 
             {/* InstaPay Toggle & Input */}
-            <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 space-y-3" dir="rtl">
+            <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold text-zinc-900">
@@ -876,7 +872,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Support Email Address
+                البريد الإلكتروني للدعم
               </label>
               <input
                 type="email"
@@ -888,7 +884,7 @@ Luno Store is not responsible for delays caused by courier services or events be
 
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Support Phone Number
+                رقم الهاتف للدعم
               </label>
               <input
                 type="text"
@@ -905,14 +901,14 @@ Luno Store is not responsible for delays caused by courier services or events be
           <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
             <Share2 size={18} className="text-zinc-900" />
             <h2 className="font-black text-sm text-zinc-900 uppercase tracking-wider">
-              Social Media Links
+              روابط التواصل الاجتماعي
             </h2>
           </div>
 
           <div className="space-y-3">
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Instagram Profile Link
+                رابط حساب إنستجرام (Instagram)
               </label>
               <input
                 type="text"
@@ -923,7 +919,7 @@ Luno Store is not responsible for delays caused by courier services or events be
             </div>
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Facebook Page Link
+                رابط صفحة فيسبوك (Facebook)
               </label>
               <input
                 type="text"
@@ -934,7 +930,7 @@ Luno Store is not responsible for delays caused by courier services or events be
             </div>
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                TikTok Profile Link
+                رابط حساب تيك توك (TikTok)
               </label>
               <input
                 type="text"
@@ -953,7 +949,7 @@ Luno Store is not responsible for delays caused by courier services or events be
           className="inline-flex items-center justify-center gap-2 bg-zinc-900 text-white px-8 py-4 rounded-xl font-bold text-xs hover:bg-zinc-800 transition-all duration-300 shadow-xl shadow-zinc-900/10 disabled:opacity-50"
         >
           {saving ? <Spinner size="sm" className="border-white border-t-transparent" /> : <Save size={16} />}
-          Save All Settings & Website Legal Copy
+          حفظ كافة الإعدادات والنصوص
         </button>
       </form>
     </div>

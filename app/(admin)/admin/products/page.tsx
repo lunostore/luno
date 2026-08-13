@@ -53,10 +53,10 @@ export default function AdminProductsPage() {
     setDeleting(true);
     try {
       await deleteProduct(deleteId);
-      toast.success("Product deleted successfully");
+      toast.success("تم حذف المنتج بنجاح");
       setDeleteId(null);
     } catch {
-      toast.error("Failed to delete product");
+      toast.error("فشل حذف المنتج");
     } finally {
       setDeleting(false);
     }
@@ -67,9 +67,9 @@ export default function AdminProductsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900">Products</h1>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900">المنتجات</h1>
           <p className="text-zinc-400 text-xs mt-1">
-            {products.length} total catalog products registered in Firestore
+            إجمالي {products.length} منتج مسجل في الكتالوج بقاعدة البيانات
           </p>
         </div>
         <Link
@@ -77,7 +77,7 @@ export default function AdminProductsPage() {
           className="inline-flex items-center gap-2 bg-zinc-900 text-white px-5 py-3 rounded-xl font-bold text-xs hover:bg-zinc-800 transition-all duration-300 shadow-md shadow-zinc-900/10 self-start sm:self-auto"
         >
           <Plus size={14} />
-          Add Product
+          إضافة منتج جديد
         </Link>
       </div>
 
@@ -90,7 +90,7 @@ export default function AdminProductsPage() {
           />
           <input
             type="text"
-            placeholder="Search catalog by name, brand, category..."
+            placeholder="ابحث باسم المنتج، الماركة، أو القسم..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 focus:ring-1 focus:ring-zinc-200/50 shadow-[0_8px_30px_rgba(0,0,0,0.015)] transition-all placeholder:text-zinc-400"
@@ -102,13 +102,13 @@ export default function AdminProductsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <Spinner size="lg" />
-          <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Loading catalog</p>
+          <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">جارٍ تحميل كتالوج المنتجات...</p>
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No products found"
+          title="لم يتم العثور على منتجات"
           description={
-            search ? "Try searching for another keyword." : "Add your first product to get started."
+            search ? "جرب البحث بكلمة مفتاحية أخرى." : "قم بإضافة أول منتج للبدء."
           }
           action={
             !search ? (
@@ -117,7 +117,7 @@ export default function AdminProductsPage() {
                 className="inline-flex items-center gap-2 bg-zinc-900 text-white px-5 py-3 rounded-xl font-bold text-xs hover:bg-zinc-800 transition-all duration-300"
               >
                 <Plus size={14} />
-                Add Product
+                إضافة منتج جديد
               </Link>
             ) : undefined
           }
@@ -128,12 +128,12 @@ export default function AdminProductsPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-zinc-50/50 border-b border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                  <th className="px-6 py-4 text-left">Product Detail</th>
-                  <th className="px-6 py-4 text-left">Category</th>
-                  <th className="px-6 py-4 text-left">Price</th>
-                  <th className="px-6 py-4 text-left">Stock Level</th>
-                  <th className="px-6 py-4 text-left">Tags</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-right">المنتج</th>
+                  <th className="px-6 py-4 text-right">القسم</th>
+                  <th className="px-6 py-4 text-right">السعر</th>
+                  <th className="px-6 py-4 text-right">المخزون المتاح</th>
+                  <th className="px-6 py-4 text-right">الشارات والتاجات</th>
+                  <th className="px-6 py-4 text-left">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
@@ -211,7 +211,7 @@ export default function AdminProductsPage() {
                               }`}
                             />
                             <span className="text-xs font-bold text-zinc-800">
-                              {totalStock === 0 ? "Out of Stock" : `${totalStock} units`}
+                              {totalStock === 0 ? "نفذت الكمية" : `${totalStock} قطعة`}
                             </span>
                           </div>
                         </td>
@@ -221,17 +221,17 @@ export default function AdminProductsPage() {
                           <div className="flex flex-wrap gap-1">
                             {product.featured && (
                               <span className="text-[9px] bg-zinc-900 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                                Featured
+                                مميز
                               </span>
                             )}
                             {product.bestSeller && (
                               <span className="text-[9px] bg-zinc-100 text-zinc-800 border border-zinc-200 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                                Best Seller
+                                الأكثر مبيعاً
                               </span>
                             )}
                             {!product.featured && !product.bestSeller && (
                               <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">
-                                Standard
+                                عادية
                               </span>
                             )}
                           </div>
@@ -243,12 +243,14 @@ export default function AdminProductsPage() {
                             <Link
                               href={`/admin/products/edit?id=${product.id}`}
                               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-100 transition-all text-zinc-500 hover:text-zinc-900"
+                              title="تعديل"
                             >
                               <Edit size={13} />
                             </Link>
                             <button
                               onClick={() => setDeleteId(product.id)}
                               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 border border-transparent hover:border-red-100 transition-all text-zinc-400 hover:text-red-600"
+                              title="حذف"
                             >
                               <Trash2 size={13} />
                             </button>
@@ -278,16 +280,16 @@ export default function AdminProductsPage() {
               <div className="w-12 h-12 bg-red-50 border border-red-100 rounded-xl flex items-center justify-center mb-4">
                 <AlertTriangle className="text-red-500" size={18} />
               </div>
-              <h3 className="font-black text-sm text-zinc-900 uppercase tracking-wider mb-2">Delete Product</h3>
+              <h3 className="font-black text-sm text-zinc-900 uppercase tracking-wider mb-2">حذف المنتج</h3>
               <p className="text-zinc-400 text-xs leading-relaxed mb-6">
-                Are you sure you want to delete this product? This action is permanent and cannot be undone on Firestore.
+                هل أنت تأكد من رغبتك في حذف هذا المنتج؟ هذا الإجراء نهائي ولا يمكن التراجع عنه في قاعدة البيانات.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteId(null)}
                   className="flex-1 py-2.5 border border-zinc-200 rounded-xl text-xs font-bold hover:bg-zinc-50 transition-colors"
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   onClick={handleDelete}
@@ -297,7 +299,7 @@ export default function AdminProductsPage() {
                   {deleting ? (
                     <Spinner size="sm" className="border-white border-t-transparent" />
                   ) : (
-                    "Delete"
+                    "تأكيد الحذف"
                   )}
                 </button>
               </div>

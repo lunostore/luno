@@ -33,25 +33,25 @@ export default function AdminCategoriesPage() {
         order: categories.length,
       });
       setNewName("");
-      toast.success("Category added successfully");
+      toast.success("تم إضافة القسم بنجاح");
       loadCategories();
     } catch {
-      toast.error("Failed to add category");
+      toast.error("فشل إضافة القسم");
     } finally {
       setAdding(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    const isConfirmed = window.confirm(`Are you sure you want to delete category "${name}"?`);
+    const isConfirmed = window.confirm(`هل أنت تأكد من رغبتك في حذف قسم "${name}"؟`);
     if (!isConfirmed) return;
     
     try {
       await deleteCategory(id);
-      toast.success("Category deleted successfully");
+      toast.success("تم حذف القسم بنجاح");
       loadCategories();
     } catch {
-      toast.error("Failed to delete category");
+      toast.error("فشل حذف القسم");
     }
   };
 
@@ -59,9 +59,9 @@ export default function AdminCategoriesPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900">Categories</h1>
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900">الأقسام والفئات</h1>
         <p className="text-zinc-400 text-xs mt-1">
-          {categories.length} total categories for product catalog organization
+          إجمالي {categories.length} قسم لتنظيم كتالوج المنتجات
         </p>
       </div>
 
@@ -70,7 +70,7 @@ export default function AdminCategoriesPage() {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Enter category name (e.g. T-Shirts, Hoodies)..."
+            placeholder="ادخل اسم القسم الجديد (مثال: تيشرتات، هوديز، بناطيل)..."
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
@@ -87,7 +87,7 @@ export default function AdminCategoriesPage() {
           ) : (
             <Plus size={14} />
           )}
-          Add Category
+          إضافة قسم جديد
         </button>
       </div>
 
@@ -95,14 +95,14 @@ export default function AdminCategoriesPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center h-48 space-y-4">
           <Spinner size="lg" />
-          <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Loading categories</p>
+          <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">جارٍ تحميل الأقسام...</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-zinc-100/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] overflow-hidden">
           <div className="divide-y divide-zinc-100">
             {categories.length === 0 ? (
               <div className="px-6 py-16 text-center text-zinc-400 text-xs font-medium">
-                No categories registered yet. Use the field above to add one.
+                لا توجد أقسام مسجلة حتى الآن. استخدم الحقل أعلاه لإضافة قسم جديد.
               </div>
             ) : (
               categories.map((cat) => (
@@ -112,11 +112,12 @@ export default function AdminCategoriesPage() {
                 >
                   <div>
                     <p className="font-bold text-xs text-zinc-950 capitalize">{cat.name}</p>
-                    <p className="text-[10px] text-zinc-400 font-mono mt-0.5">slug: /{cat.slug}</p>
+                    <p className="text-[10px] text-zinc-400 font-mono mt-0.5">الرابط: /{cat.slug}</p>
                   </div>
                   <button
                     onClick={() => handleDelete(cat.id, cat.name)}
                     className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 border border-transparent hover:border-red-100 transition-all text-zinc-400 hover:text-red-600"
+                    title="حذف القسم"
                   >
                     <Trash2 size={13} />
                   </button>

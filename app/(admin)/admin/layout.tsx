@@ -135,7 +135,7 @@ export default function AdminLayout({
             A
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-bold truncate text-zinc-100">Admin Account</p>
+            <p className="text-xs font-bold truncate text-zinc-100">حساب المدير</p>
             <p className="text-[10px] text-zinc-400 truncate font-mono">lunoegypt@gmail.com</p>
           </div>
         </div>
@@ -236,7 +236,7 @@ export default function AdminLayout({
             </button>
 
             <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium">
-              <span className="font-bold text-zinc-400 uppercase tracking-wider text-[10px] hidden sm:inline">Dashboard</span>
+              <span className="font-bold text-zinc-400 uppercase tracking-wider text-[10px] hidden sm:inline">لوحة التحكم</span>
               <ChevronRight size={12} className="hidden sm:inline" />
               <span className="text-zinc-900 font-bold capitalize truncate max-w-[150px] sm:max-w-none">
                 {pathname.split("/").filter(Boolean).slice(1).join(" / ") || "لوحة التحكم"}

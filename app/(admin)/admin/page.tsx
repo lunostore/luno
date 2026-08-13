@@ -66,36 +66,36 @@ export default function AdminDashboardPage() {
 
   const statCards = [
     {
-      title: "Total Revenue",
+      title: "إجمالي المبيعات",
       value: formatPrice(stats?.totalRevenue ?? 0),
       icon: TrendingUp,
       href: "/admin/orders",
-      progress: "85%", // Simulated target completion
-      desc: "Gross sales (excl. cancelled)",
+      progress: "85%",
+      desc: "إجمالي أرباح المبيعات (المؤكدة والمشحونة)",
     },
     {
-      title: "Active Orders",
+      title: "إجمالي الطلبات",
       value: stats?.totalOrders ?? 0,
       icon: ShoppingCart,
       href: "/admin/orders",
       progress: "60%",
-      desc: "Total lifetime orders placed",
+      desc: "إجمالي الطلبات المسجلة في النظام",
     },
     {
-      title: "Pending Orders",
+      title: "طلبات قيد الانتظار",
       value: stats?.pendingOrders ?? 0,
       icon: Clock,
       href: "/admin/orders?status=pending",
       progress: "35%",
-      desc: "Awaiting fulfillment",
+      desc: "بانتظار التأكيد والشحن",
     },
     {
-      title: "Store Products",
+      title: "منتجات المتجر",
       value: stats?.totalProducts ?? 0,
       icon: Package,
       href: "/admin/products",
       progress: "100%",
-      desc: "Active listed items",
+      desc: "عدد المنتجات النشطة بالمتجر",
     },
   ];
 
@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-96 space-y-4">
         <Spinner size="lg" />
-        <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Loading stats</p>
+        <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">جارٍ تحميل الإحصائيات...</p>
       </div>
     );
   }
@@ -113,9 +113,9 @@ export default function AdminDashboardPage() {
       {/* Welcome header with action */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900">Overview</h1>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900">نظرة عامة</h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Real-time analytics and management controls for Luno Store.
+            التحليلات المباشرة وعناصر التحكم الخاصة بمتجر LUNO Store.
           </p>
         </div>
         <div className="flex gap-3">
@@ -131,7 +131,7 @@ export default function AdminDashboardPage() {
             className="inline-flex items-center gap-2 bg-zinc-900 text-white px-5 py-3 rounded-xl font-bold text-xs hover:bg-zinc-800 transition-all duration-300 shadow-md shadow-zinc-900/10"
           >
             <Plus size={14} />
-            Manage Products
+            إدارة المنتجات
           </Link>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
                 className="block bg-white rounded-2xl p-6 border border-zinc-100/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:border-zinc-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-all duration-300 group"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] tracking-wider text-zinc-400 font-bold uppercase">
+                  <span className="text-xs tracking-wider text-zinc-400 font-bold">
                     {card.title}
                   </span>
                   <div className="w-8 h-8 rounded-lg bg-zinc-50 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all duration-300">
@@ -160,7 +160,7 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <h3 className="text-2xl font-black text-zinc-900 tracking-tight mb-1">{card.value}</h3>
-                <p className="text-[10px] text-zinc-400 font-medium">{card.desc}</p>
+                <p className="text-[11px] text-zinc-400 font-medium">{card.desc}</p>
                 
                 {/* Clean Micro progress bar */}
                 <div className="w-full h-1 bg-zinc-50 rounded-full mt-5 overflow-hidden">
@@ -179,33 +179,33 @@ export default function AdminDashboardPage() {
       <div className="bg-white rounded-2xl border border-zinc-100/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-100">
           <div>
-            <h2 className="font-black text-sm text-zinc-900 uppercase tracking-widest">Recent Orders</h2>
-            <p className="text-zinc-400 text-xs mt-0.5">Showing the latest orders registered on Firestore</p>
+            <h2 className="font-black text-sm text-zinc-900 tracking-widest">أحدث الطلبات</h2>
+            <p className="text-zinc-400 text-xs mt-0.5">عرض أحدث الطلبات المسجلة في قاعدة البيانات</p>
           </div>
           <Link
             href="/admin/orders"
             className="text-xs font-bold text-zinc-400 hover:text-zinc-900 transition-colors flex items-center gap-1 group"
           >
-            View all orders
+            عرض كل الطلبات
             <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
         {recentOrders.length === 0 ? (
           <div className="px-6 py-16 text-center text-zinc-400 text-xs font-medium">
-            No orders registered in the system yet.
+            لا توجد طلبات مسجلة في النظام حتى الآن.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-zinc-50/50 border-b border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                  <th className="px-6 py-4 text-left">Order ID</th>
-                  <th className="px-6 py-4 text-left">Customer</th>
-                  <th className="px-6 py-4 text-left">Date</th>
-                  <th className="px-6 py-4 text-left">Total</th>
-                  <th className="px-6 py-4 text-left">Fulfillment</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                  <th className="px-6 py-4 text-right">رقم الطلب</th>
+                  <th className="px-6 py-4 text-right">العميل</th>
+                  <th className="px-6 py-4 text-right">التاريخ</th>
+                  <th className="px-6 py-4 text-right">الإجمالي</th>
+                  <th className="px-6 py-4 text-right">حالة الطلب</th>
+                  <th className="px-6 py-4 text-left">إجراء</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
@@ -233,15 +233,15 @@ export default function AdminDashboardPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 font-bold text-xs text-zinc-800 capitalize">
                         <span className={`w-1.5 h-1.5 rounded-full ${statusDots[order.status] || "bg-zinc-300"}`} />
-                        {order.status}
+                        {order.status === "pending" ? "في الانتظار" : order.status === "confirmed" ? "مؤكد" : order.status === "shipping" ? "جارٍ الشحن" : order.status === "delivered" ? "تم التسليم" : "ملغي"}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-left">
                       <Link
                         href={`/admin/orders?id=${order.id}`}
                         className="inline-flex items-center gap-1 text-[10px] font-bold bg-zinc-50 text-zinc-700 hover:bg-zinc-900 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-300"
                       >
-                        Manage
+                        إدارة
                         <ChevronRight size={10} />
                       </Link>
                     </td>

@@ -33,9 +33,9 @@ export default function AdminCustomersPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900">Customers</h1>
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900">العملاء المسجلون</h1>
         <p className="text-zinc-400 text-xs mt-1">
-          {customers.length} registered customer accounts in database
+          {customers.length} حساب عميل مسجل في قاعدة البيانات
         </p>
       </div>
 
@@ -47,7 +47,7 @@ export default function AdminCustomersPage() {
         />
         <input
           type="text"
-          placeholder="Search by customer name or email address..."
+          placeholder="ابحث باسم العميل أو البريد الإلكتروني..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 focus:ring-1 focus:ring-zinc-200/50 shadow-[0_8px_30px_rgba(0,0,0,0.015)] transition-all placeholder:text-zinc-400"
@@ -58,11 +58,11 @@ export default function AdminCustomersPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <Spinner size="lg" />
-          <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Loading accounts</p>
+          <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">جارٍ تحميل حسابات العملاء...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-zinc-100/80 p-16 text-center text-zinc-400 text-xs font-medium">
-          {search ? "No customers match your search filters." : "No registered customers yet."}
+          {search ? "لا يوجد عملاء يطابقون كلمة البحث." : "لا يوجد عملاء مسجلون حتى الآن."}
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-zinc-100/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] overflow-hidden">
@@ -70,10 +70,10 @@ export default function AdminCustomersPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-zinc-50/50 border-b border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                  <th className="px-6 py-4 text-left">Customer Profile</th>
-                  <th className="px-6 py-4 text-left">Email Address</th>
-                  <th className="px-6 py-4 text-left">Registration Date</th>
-                  <th className="px-6 py-4 text-right">Orders Placed</th>
+                  <th className="px-6 py-4 text-right">العميل</th>
+                  <th className="px-6 py-4 text-right">البريد الإلكتروني</th>
+                  <th className="px-6 py-4 text-right">تاريخ التسجيل</th>
+                  <th className="px-6 py-4 text-left">عدد الطلبات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
@@ -99,7 +99,7 @@ export default function AdminCustomersPage() {
                           )
                         : "—"}
                     </td>
-                    <td className="px-6 py-4 text-right text-xs font-black text-zinc-950 pr-8">
+                    <td className="px-6 py-4 text-left text-xs font-black text-zinc-950 pr-8">
                       {customer.orderCount || 0}
                     </td>
                   </tr>

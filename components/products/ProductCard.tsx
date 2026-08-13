@@ -37,40 +37,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       ? product.variants[selectedVariantIdx]
       : null;
 
-  // Compute available gallery images for thumbnails:
-  // 1. Explicit detailImages (3 images: logo detail, fabric detail, back/extra detail)
-  // 2. Or images from active variant / hoverImage / general images array
-  const detailImages = product.detailImages && product.detailImages.length > 0
-    ? product.detailImages
-    : (function () {
-        const list: string[] = [];
-        if (product.hoverImage) list.push(product.hoverImage);
-        if (product.images) {
-          product.images.forEach((img) => {
-            if (img && !list.includes(img) && img !== product.mainImage) list.push(img);
-          });
-        }
-        if (product.variants) {
-          product.variants.forEach((v) => {
-            if (v.image && !list.includes(v.image) && v.image !== product.mainImage) list.push(v.image);
-            if (v.images) {
-              v.images.forEach((img) => {
-                if (img && !list.includes(img) && img !== product.mainImage) list.push(img);
-              });
-            }
-          });
-        }
-        return list;
-      })();
-
-  // Thumbnail list for the right vertical stack (maximum 3 thumbnails)
-  const stackThumbnails = detailImages.slice(0, 3);
-
   // Second Image for hover effect over the main image area
   const secondImage =
     product.hoverImage ||
     (product.images && product.images.length > 0 ? product.images[0] : null) ||
-    stackThumbnails[0] ||
     null;
 
   // Base primary image (ALWAYS product.mainImage initially unless user selected a specific color)
@@ -80,21 +50,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   // Mouse hover state over main image container
   const [isHoveringMain, setIsHoveringMain] = useState(false);
 
-  // Hovered thumbnail preview state (resets to null onMouseLeave)
-  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
-
-  // Explicit clicked thumbnail override state
-  const [clickedImage, setClickedImage] = useState<string | null>(null);
-
   // Active display image priority:
-  // 1. hoveredImage (hovering right thumbnails)
-  // 2. clickedImage (explicit thumbnail click)
-  // 3. secondImage (hovering main image area)
-  // 4. basePrimaryImage (product.mainImage)
+  // 1. Hover state -> secondImage (if available)
+  // 2. Default state -> basePrimaryImage (product.mainImage)
   const currentDisplayImage =
-    hoveredImage ||
-    clickedImage ||
-    (isHoveringMain && secondImage ? secondImage : basePrimaryImage);
+    isHoveringMain && secondImage ? secondImage : basePrimaryImage;
 
   // Open product in modal overlay (no page navigation = no reload)
   const navigateToProduct = () => {
@@ -152,8 +112,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         onClick={navigateToProduct}
         onMouseLeave={() => {
           setIsHoveringMain(false);
-          setHoveredImage(null);
-          setClickedImage(null);
         }}
         className="block bg-transparent rounded-[2rem] p-4 sm:p-5 shadow-none transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
       >
@@ -195,83 +153,35 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* ── PRODUCT IMAGES DISPLAY SECTION ── */}
-          <div className="grid grid-cols-12 gap-3 mb-4">
-            {/* Main Large Image Container (Dark Mode subtle border) */}
-            <div
-              onMouseEnter={() => setIsHoveringMain(true)}
-              onMouseLeave={() => setIsHoveringMain(false)}
-              className="col-span-8 sm:col-span-9 relative aspect-[4/5] rounded-2xl overflow-hidden bg-black flex items-center justify-center border-0 dark:border dark:border-zinc-800/80 shadow-none"
+          <div
+            onMouseEnter={() => setIsHoveringMain(true)}
+            onMouseLeave={() => setIsHoveringMain(false)}
+            className="w-full relative aspect-[4/5] rounded-2xl overflow-hidden bg-black flex items-center justify-center border-0 dark:border dark:border-zinc-800/80 shadow-none mb-4"
+          >
+            <motion.div
+              className="w-full h-full relative"
+              whileHover={{ scale: 1.04 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              <motion.div
-                className="w-full h-full relative"
-                whileHover={{ scale: 1.04 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <Image
-                  key={currentDisplayImage}
-                  src={currentDisplayImage}
-                  alt={product.name}
-                  fill
-                  priority={index < 4}
-                  quality={95}
-                  crossOrigin="anonymous"
-                  sizes="(max-width: 640px) 70vw, 30vw"
-                  className="object-contain object-center p-1.5 transition-all duration-500"
-                />
-              </motion.div>
+              <Image
+                key={currentDisplayImage}
+                src={currentDisplayImage}
+                alt={product.name}
+                fill
+                priority={index < 4}
+                quality={95}
+                crossOrigin="anonymous"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-contain object-center p-1.5 transition-all duration-500"
+              />
+            </motion.div>
 
-              {/* Quick Hover Overlay */}
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                <span className="bg-black/80 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
-                  <Eye size={12} />
-                  عرض التفاصيل
-                </span>
-              </div>
-            </div>
-
-            {/* Right Vertical Stack (3 Thumbnail Boxes) */}
-            <div className="col-span-4 sm:col-span-3 flex flex-col justify-between gap-2">
-              {stackThumbnails.map((imgUrl, thumbIdx) => {
-                const isHovered = hoveredImage === imgUrl;
-                const isSelected = currentDisplayImage === imgUrl;
-                return (
-                  <div
-                    key={imgUrl + thumbIdx}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setClickedImage(imgUrl);
-                    }}
-                    onMouseEnter={() => setHoveredImage(imgUrl)}
-                    onMouseLeave={() => setHoveredImage(null)}
-                    className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 cursor-pointer relative bg-black border-0 shadow-none ${
-                      isSelected || isHovered
-                        ? "ring-2 ring-amber-500 scale-[1.03] opacity-100"
-                        : "opacity-90 hover:opacity-100"
-                    }`}
-                    title={`معاينة الصورة ${thumbIdx + 1}`}
-                  >
-                    <Image
-                      src={imgUrl}
-                      alt={`${product.name} detail ${thumbIdx + 1}`}
-                      fill
-                      sizes="100px"
-                      className="object-cover object-center p-0.5"
-                    />
-                  </div>
-                );
-              })}
-
-              {/* Fallback empty thumb slots */}
-              {Array.from({ length: Math.max(0, 3 - stackThumbnails.length) }).map(
-                (_, emptyIdx) => (
-                  <div
-                    key={`empty-${emptyIdx}`}
-                    className="aspect-square rounded-xl bg-zinc-900/60 flex items-center justify-center text-zinc-600 text-[10px] font-black border-0 shadow-none"
-                  >
-                    LUNO
-                  </div>
-                )
-              )}
+            {/* Quick Hover Overlay */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+              <span className="bg-black/80 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
+                <Eye size={12} />
+                عرض التفاصيل
+              </span>
             </div>
           </div>
         </div>
@@ -339,8 +249,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedVariantIdx(vIdx);
-                          setClickedImage(null);
-                          setHoveredImage(null);
                         }}
                         className={`w-3.5 h-3.5 rounded-full transition-all border-0 ${
                           selectedVariantIdx === vIdx

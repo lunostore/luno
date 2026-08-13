@@ -503,9 +503,9 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
 
       {/* 2. Cover / Main Image Card */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
-        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">Main Catalog Image</h2>
+        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">صورة غلاف المنتج الرئيسية</h2>
         <p className="text-[10px] text-zinc-400 font-medium mb-6">
-          Primary cover image shown on the product card inside the shop listing.
+          الصورة الغلافية الرئيسية المعروضة على كرت المنتج في قائمة المتجر.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -514,14 +514,14 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={watchedMainImage} alt="Main Preview" className="object-contain w-full h-full" />
             ) : (
-              <span className="text-[10px] text-zinc-300 font-black">LUNO COVER</span>
+              <span className="text-[10px] text-zinc-300 font-black">غلاف المنتج</span>
             )}
           </div>
           
           <div className="flex-1 space-y-3">
             <label className="inline-flex items-center gap-2 bg-zinc-900 text-white px-4 py-2.5 rounded-xl font-bold text-[10px] hover:bg-zinc-800 transition-all cursor-pointer shadow-md shadow-zinc-900/10">
               <Upload size={12} />
-              Upload Card Cover
+              رفع صورة الغلاف
               <input 
                 type="file" 
                 accept="image/*" 
@@ -530,7 +530,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               />
             </label>
             <p className="text-[9px] text-zinc-400 font-mono leading-none truncate max-w-md">
-              {watchedMainImage || "No cover image uploaded yet"}
+              {watchedMainImage || "لم يتم رفع صورة الغلاف بعد"}
             </p>
           </div>
         </div>
@@ -538,7 +538,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
 
       {/* 2b. Hover Second Image Card (صورة الهوفر الثانية) */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
-        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">Hover Secondary Image (صورة الهوفر)</h2>
+        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">صورة الهوفر الثانوية (Hover Image)</h2>
         <p className="text-[10px] text-zinc-400 font-medium mb-6">
           الصورة الثانية التي تظهر بسلاسة عند تمرير الماوس فوق كارت المنتج في المتجر (اختياري).
         </p>
@@ -549,7 +549,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={watchedHoverImage} alt="Hover Preview" className="object-contain w-full h-full" />
             ) : (
-              <span className="text-[10px] text-zinc-300 font-black">LUNO HOVER</span>
+              <span className="text-[10px] text-zinc-300 font-black">صورة الهوفر</span>
             )}
           </div>
           
@@ -582,29 +582,29 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
 
       {/* 3. Pricing */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
-        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-6">PRICING (السعر)</h2>
+        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-6">أسعار المنتج</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-              Price (EGP) — السعر الأساسي
+              السعر الأساسي (ج.م)
             </label>
             <input
               type="number"
               className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800 placeholder:text-zinc-400"
-              placeholder="e.g. 1200"
+              placeholder="مثال: 1200"
               {...register("price", { valueAsNumber: true })}
             />
           </div>
 
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-              Sale Price (EGP) — سعر الخصم (اختياري)
+              سعر الخصم (ج.م) (اختياري)
             </label>
             <input
               type="number"
               className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800 placeholder:text-zinc-400"
-              placeholder="e.g. 950"
+              placeholder="مثال: 950"
               {...register("salePrice", { valueAsNumber: true })}
             />
           </div>
@@ -686,9 +686,9 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest">Color Variants & Stock</h2>
+            <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest">الألوان والكميات المتاحة (Variants & Stock)</h2>
             <p className="text-[10px] text-zinc-400 font-medium mt-1">
-              Add colors and customize sizes for each color variant.
+              أضف ألوان المنتج وحدد الكميات والمقاسات المتاحة لكل لون على حدة.
             </p>
           </div>
         </div>
@@ -708,7 +708,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           <div className="flex-1 w-full">
             <input
               type="text"
-              placeholder="Color name (e.g. Black, Navy, Off-White)"
+              placeholder="اسم اللون (مثال: أسود، كحلي، أوف وايت...)"
               value={newColorName}
               onChange={(e) => setNewColorName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addColorVariant())}
@@ -722,7 +722,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
             className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors shadow-md shadow-zinc-900/10"
           >
             <Plus size={12} />
-            Add Variant
+            إضافة لون
           </button>
         </div>
 
@@ -759,7 +759,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                 <div className="md:col-span-5 flex flex-col items-center justify-center border border-dashed border-zinc-200 rounded-2xl p-4 bg-zinc-50/50 space-y-3">
                   <div className="w-full">
                     <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-2 text-center">
-                      Color Variant Photos ({(variant.images && variant.images.length > 0) ? variant.images.length : (variant.image ? 1 : 0)})
+                      صور هذا اللون ({(variant.images && variant.images.length > 0) ? variant.images.length : (variant.image ? 1 : 0)})
                     </span>
 
                     <div className="flex flex-wrap items-center justify-center gap-2 max-h-36 overflow-y-auto p-1">
@@ -776,7 +776,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                             type="button"
                             onClick={() => removeVariantImage(variantIdx, imgIdx)}
                             className="absolute top-0.5 right-0.5 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-110"
-                            title="Remove image"
+                            title="إزالة الصورة"
                           >
                             <X size={10} />
                           </button>
@@ -793,7 +793,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
 
                   <label className="inline-flex items-center gap-1.5 bg-zinc-900 text-white px-3.5 py-2 rounded-xl font-bold text-[10px] hover:bg-zinc-800 transition-all cursor-pointer shadow-sm active:scale-95">
                     <Upload size={12} />
-                    Upload Color Photos
+                    رفع صور هذا اللون
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -808,7 +808,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                 <div className="md:col-span-8 space-y-4">
                   <div>
                     <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-                      FULFILLMENT STOCK LEVELS
+                      كميات ومقاسات هذا اللون
                     </span>
                     
                     {/* Quick Add size tags */}
@@ -860,7 +860,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                     {/* Size and stock inputs list */}
                     {variant.sizes.length === 0 ? (
                       <p className="text-[10px] text-zinc-400 font-medium italic py-2">
-                        No sizes configured. Add sizes using the buttons above.
+                        لم يتم إضافة مقاسات لهذا اللون بعد. استخدم خيارات الأعلى لإضافة المقاسات.
                       </p>
                     ) : (
                       <div className="grid grid-cols-2 gap-2.5">
@@ -871,7 +871,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                           >
                             <span className="text-[10px] font-black text-zinc-800 min-w-[32px]">{sizeStock.size}</span>
                             <div className="flex-1 flex items-center gap-1 bg-white border border-zinc-100 rounded-lg px-2 py-0.5">
-                              <span className="text-[8px] font-bold text-zinc-400 uppercase">Stock</span>
+                              <span className="text-[8px] font-bold text-zinc-400 uppercase">الكمية</span>
                               <input 
                                 type="number"
                                 min="0"
@@ -907,14 +907,14 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           onClick={() => router.push("/admin/products")}
           className="px-5 py-3 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors"
         >
-          Cancel
+          إلغاء
         </button>
         <button
           type="submit"
           disabled={saving}
           className="px-6 py-3 bg-zinc-900 text-white rounded-xl text-xs font-black hover:bg-zinc-800 transition-all shadow-md shadow-zinc-900/10 disabled:opacity-50"
         >
-          {saving ? "Saving..." : productId ? "Save Changes" : "Create Product"}
+          {saving ? "جارٍ الحفظ..." : productId ? "حفظ التعديلات" : "حفظ وإنشاء المنتج"}
         </button>
       </div>
     </form>

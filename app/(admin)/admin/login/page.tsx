@@ -11,8 +11,8 @@ import { signInAdmin } from "@/lib/firebase/auth";
 import { toast } from "sonner";
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("برجاء إدخال بريد إلكتروني صحيح"),
+  password: z.string().min(6, "كلمة المرور يجب أن لا تقل عن 6 أحرف"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       await signInAdmin(data.email, data.password);
-      toast.success("Welcome back!");
+      toast.success("أهلاً بك! تم تسجيل الدخول بنجاح.");
       router.push("/admin");
     } catch (err: any) {
       console.error("Admin Login Error:", err);
@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4" dir="rtl">
       <motion.div
         className="w-full max-w-md"
         initial={{ opacity: 0, y: 30 }}
@@ -62,17 +62,17 @@ export default function AdminLoginPage() {
         {/* Logo */}
         <div className="text-center mb-10">
           <span className="text-5xl font-black text-white tracking-tighter">LUNO STORE</span>
-          <p className="text-gray-400 text-sm mt-2">Admin Dashboard</p>
+          <p className="text-gray-400 text-sm mt-2">لوحة التحكم والإدارة</p>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl p-8 shadow-2xl space-y-6">
-          <h1 className="text-2xl font-bold">Sign In</h1>
+          <h1 className="text-2xl font-bold text-zinc-900">تسجيل الدخول</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email
+                البريد الإلكتروني
               </label>
               <input
                 type="email"
@@ -87,19 +87,19 @@ export default function AdminLoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Password
+                كلمة المرور
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white pr-10"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white pl-10 pr-4"
                   {...register("password")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -117,7 +117,7 @@ export default function AdminLoginPage() {
               {loading ? (
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                "Sign In"
+                "تسجيل الدخول"
               )}
             </button>
           </form>

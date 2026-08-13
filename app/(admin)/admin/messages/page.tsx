@@ -120,19 +120,19 @@ export default function AdminMessagesPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16">
+    <div className="space-y-8 max-w-6xl pb-16" dir="rtl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
             <MessageSquare size={14} />
-            Customer Support & Complaints
+            خدمة العملاء والشكاوي والاستفسارات
           </div>
           <h1 className="text-3xl font-black tracking-tight text-zinc-900">
-            Messages & Inquiries (الرسائل والشكاوي)
+            الرسائل والشكاوي
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
-            View, manage, and respond to messages submitted by customers via the Contact Us form.
+            متابعة وإدارة وإجابة رسائل واستفسارات العملاء المرسلة عبر نموذج "تواصل معنا".
           </p>
         </div>
 
@@ -140,7 +140,7 @@ export default function AdminMessagesPage() {
           onClick={loadMessages}
           className="inline-flex items-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 px-4 py-2.5 rounded-xl font-bold text-xs transition-colors self-start sm:self-auto"
         >
-          Refresh Inbox
+          تحديث الصندوق
         </button>
       </div>
 
@@ -148,7 +148,7 @@ export default function AdminMessagesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-zinc-100 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Total Inbox</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">إجمالي الرسائل</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-600">
               <Inbox size={16} />
             </div>
@@ -158,7 +158,7 @@ export default function AdminMessagesPage() {
 
         <div className="bg-white rounded-2xl border border-amber-100/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Unread Messages</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">رسائل غير مقروءة</span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
               <Clock size={16} />
             </div>
@@ -168,7 +168,7 @@ export default function AdminMessagesPage() {
 
         <div className="bg-white rounded-2xl border border-zinc-100 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Reviewed</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">تمت مراجعتها</span>
             <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
               <CheckCircle size={16} />
             </div>
@@ -185,15 +185,15 @@ export default function AdminMessagesPage() {
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 filter === tab
                   ? "bg-zinc-900 text-white shadow-sm"
                   : "bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
               }`}
             >
-              {tab === "all" ? "All Messages" : tab}
+              {tab === "all" ? "جميع الرسائل" : tab === "unread" ? "غير مقروءة" : "تمت قراءتها"}
               {tab === "unread" && unreadCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[9px]">
+                <span className="mr-1.5 px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[9px]">
                   {unreadCount}
                 </span>
               )}
@@ -203,13 +203,13 @@ export default function AdminMessagesPage() {
 
         {/* Search Input */}
         <div className="relative w-full sm:w-64">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
-            placeholder="Search by name, email..."
+            placeholder="ابحث بالاسم أو البريد..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 bg-zinc-50/50"
+            className="w-full pr-9 pl-4 py-2 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 bg-zinc-50/50"
           />
         </div>
       </div>
@@ -220,9 +220,9 @@ export default function AdminMessagesPage() {
           <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto text-zinc-400">
             <Inbox size={24} />
           </div>
-          <h3 className="font-bold text-zinc-800 text-sm">No Messages Found</h3>
+          <h3 className="font-bold text-zinc-800 text-sm">لا توجد رسائل</h3>
           <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-            {search ? "No customer inquiries match your search filter." : "Your contact form inbox is clear! New customer messages will appear here."}
+            {search ? "لا توجد استفسارات تطابق البحث." : "صندوق الرسائل فارغ حالياً! ستظهر رسائل العملاء الجديدة هنا."}
           </p>
         </div>
       ) : (
@@ -247,7 +247,7 @@ export default function AdminMessagesPage() {
                       <h3 className="font-black text-sm text-zinc-900">{msg.name}</h3>
                       {msg.status === "unread" && (
                         <span className="text-[9px] font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          New Message
+                          رسالة جديدة
                         </span>
                       )}
                     </div>
@@ -262,7 +262,7 @@ export default function AdminMessagesPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 self-end sm:self-auto">
+                <div className="flex items-center gap-3 self-start sm:self-auto">
                   <span className="text-[11px] font-medium text-zinc-400">
                     {formatDate(msg.createdAt)}
                   </span>
@@ -274,15 +274,15 @@ export default function AdminMessagesPage() {
                         ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
                         : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                     }`}
-                    title={msg.status === "unread" ? "Mark as Read" : "Mark as Unread"}
+                    title={msg.status === "unread" ? "تحديد كمقروء" : "تحديد كغير مقروء"}
                   >
-                    {msg.status === "unread" ? "Mark Read" : "Mark Unread"}
+                    {msg.status === "unread" ? "مقروء" : "غير مقروء"}
                   </button>
 
                   <button
                     onClick={() => handleDelete(msg.id)}
                     className="p-2 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                    title="Delete message"
+                    title="حذف الرسالة"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -299,11 +299,11 @@ export default function AdminMessagesPage() {
               {/* Quick Reply Button */}
               <div className="mt-4 flex justify-end">
                 <a
-                  href={`mailto:${msg.email}?subject=RE: Luno Store Inquiry Response&body=Hi ${encodeURIComponent(msg.name)},\n\nThank you for reaching out to Luno Store.\n\n`}
+                  href={`mailto:${msg.email}?subject=رد من متجر لونو Luno Store&body=مرحباً ${encodeURIComponent(msg.name)},\n\nشكراً لتواصلك مع متجر لونو Luno Store.\n\n`}
                   className="inline-flex items-center gap-1.5 text-xs font-bold bg-zinc-900 text-white px-4 py-2.5 rounded-xl hover:bg-zinc-800 transition-all shadow-md shadow-zinc-900/10"
                 >
                   <Mail size={14} />
-                  Reply via Email
+                  رد عبر الإيميل
                 </a>
               </div>
             </div>

@@ -131,16 +131,16 @@ export default function AdminErrorLogsPage() {
   };
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-8 font-sans" dir="rtl">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-zinc-200/80 shadow-sm">
         <div>
           <h1 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
             <AlertTriangle className="text-amber-500" size={22} />
-            System Error & Runtime Logs
+            سجل أخطاء النظام والموقع (System Error & Runtime Logs)
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Real-time automated error tracking and diagnostic logs from storefront and admin panel
+            متابعة حية وتلقائية لأخطاء التشغيل والاستثناءات الواردة من المتجر ولوحة التحكم.
           </p>
         </div>
 
@@ -150,7 +150,7 @@ export default function AdminErrorLogsPage() {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50 transition-colors"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            Refresh
+            تحديث
           </button>
 
           {logs.length > 0 && (
@@ -159,7 +159,7 @@ export default function AdminErrorLogsPage() {
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 transition-colors"
             >
               <Trash2 size={14} />
-              Clear All Logs
+              مسح كافة الأخطاء
             </button>
           )}
         </div>
@@ -169,7 +169,7 @@ export default function AdminErrorLogsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">Total Recorded Errors</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">إجمالي الأخطاء المسجلة</p>
             <p className="text-2xl font-black text-zinc-900 mt-1">{logs.length}</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-700 font-bold">
@@ -179,7 +179,7 @@ export default function AdminErrorLogsPage() {
 
         <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500">Unresolved Errors</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500">أخطاء نشطة لم تحل</p>
             <p className="text-2xl font-black text-amber-600 mt-1">{unresolvedCount}</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
@@ -189,7 +189,7 @@ export default function AdminErrorLogsPage() {
 
         <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500">Resolved Errors</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500">أخطاء معالجة ومحلولة</p>
             <p className="text-2xl font-black text-emerald-600 mt-1">{resolvedCount}</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
@@ -201,29 +201,29 @@ export default function AdminErrorLogsPage() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-zinc-200/80 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
-            placeholder="Search error message, stack, or URL..."
+            placeholder="ابحث بالنص أو الرابط أو كود الخطأ..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 transition-colors"
+            className="w-full pr-9 pl-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-medium focus:outline-none focus:border-zinc-900 transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <Filter size={14} className="text-zinc-400 mr-1" />
+          <Filter size={14} className="text-zinc-400 ml-1" />
           {(["all", "unresolved", "resolved"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 filter === f
                   ? "bg-zinc-900 text-white shadow-sm"
                   : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
               }`}
             >
-              {f} {f === "unresolved" ? `(${unresolvedCount})` : f === "resolved" ? `(${resolvedCount})` : ""}
+              {f === "all" ? "الكل" : f === "unresolved" ? "نشط" : "محلول"} {f === "unresolved" ? `(${unresolvedCount})` : f === "resolved" ? `(${resolvedCount})` : ""}
             </button>
           ))}
         </div>
@@ -234,17 +234,17 @@ export default function AdminErrorLogsPage() {
         <div className="bg-white rounded-2xl border border-zinc-200/80 p-16 flex items-center justify-center">
           <div className="text-center space-y-3">
             <Spinner size="lg" />
-            <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Loading System Logs...</p>
+            <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">جارٍ تحميل سجل الأخطاء...</p>
           </div>
         </div>
       ) : filteredLogs.length === 0 ? (
         <div className="bg-white rounded-2xl border border-zinc-200/80 p-16 text-center space-y-3">
           <CheckCircle2 size={40} className="mx-auto text-emerald-500" />
-          <h3 className="text-base font-bold text-zinc-900">No System Errors Recorded</h3>
+          <h3 className="text-base font-bold text-zinc-900">لا توجد أخطاء مسجلة</h3>
           <p className="text-xs text-zinc-400 max-w-sm mx-auto">
             {search || filter !== "all"
-              ? "No errors match your current search filter."
-              : "Your website is running cleanly with 0 active runtime errors!"}
+              ? "لا توجد أخطاء تطابق تصفية البحث الحالية."
+              : "الموقع يعمل بكل كفاءة وسلاسة مع 0 أخطاء تشغيلية!"}
           </p>
         </div>
       ) : (
@@ -270,7 +270,7 @@ export default function AdminErrorLogsPage() {
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {log.resolved ? "Resolved" : "Active Error"}
+                      {log.resolved ? "تم حله" : "خطأ نشط"}
                     </span>
 
                     {log.context && (
@@ -305,13 +305,13 @@ export default function AdminErrorLogsPage() {
                         : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                     }`}
                   >
-                    {log.resolved ? "Reopen Error" : "Mark Resolved"}
+                    {log.resolved ? "إعادة فتح" : "تحديد كمحلول"}
                   </button>
 
                   <button
                     onClick={() => handleDelete(log.id)}
                     className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                    title="Delete log entry"
+                    title="حذف السجل"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -323,14 +323,14 @@ export default function AdminErrorLogsPage() {
                 <div className="mt-4 pt-4 border-t border-zinc-100">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">
-                      Stack Trace
+                      تتبع البرمجيات (Stack Trace)
                     </span>
                     <button
                       onClick={() => handleCopyStack(log.stack!, log.id)}
                       className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-500 hover:text-zinc-900 bg-zinc-100 px-2 py-1 rounded-md transition-colors"
                     >
                       {copiedId === log.id ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
-                      {copiedId === log.id ? "Copied" : "Copy Trace"}
+                      {copiedId === log.id ? "تم النسخ" : "نسخ الكود"}
                     </button>
                   </div>
                   <pre className="p-3 bg-zinc-950 text-zinc-300 rounded-xl text-[11px] font-mono leading-relaxed overflow-x-auto max-h-48 scrollbar-thin">
