@@ -157,6 +157,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
     ? getDiscountPercentage(product.price, product.salePrice!)
     : 0;
 
+  const inWishlist = product ? isInWishlist(product.id) : false;
   const availableSizes = activeVariant?.sizes || [];
   const sizeStock = hasVariants
     ? activeVariant?.sizes?.find((s) => s.size === selectedSize)?.stock ?? 99

@@ -27,6 +27,7 @@ export const productSchema = z.object({
   brand: z.string().min(1, "البراند مطلوب"),
   mainImage: z.string().url("صورة الغلاف الرئيسية مطلوبة"),
   hoverImage: z.string().url("رابط الصورة غير صحيح").or(z.literal("")).optional(),
+  images: z.array(z.string()).optional(),
   subtitle: z.string().optional(),
   detailImages: z.array(z.string()).optional(),
   material: z.string().optional(),

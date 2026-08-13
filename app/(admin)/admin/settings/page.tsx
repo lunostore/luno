@@ -202,7 +202,7 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
     );
   }
 
-  const SETTINGS_TABS: { id: SettingsTab; label: string; icon: any; badge?: number }[] = [
+  const SETTINGS_TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; badge?: number }[] = [
     { id: "maintenance", label: "الصيانة والتايمر", icon: ShieldAlert },
     { id: "media", label: "وسائط الهيرو والإنترو", icon: Sparkles },
     { id: "sizeCharts", label: "جداول المقاسات المخصصة", icon: Ruler, badge: settings.sizeCharts?.length || 0 },

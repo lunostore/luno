@@ -110,11 +110,9 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
         },
   });
 
-  const watchedName = watch("name");
   const watchedVariants = watch("variants") || [];
   const watchedMainImage = watch("mainImage");
   const watchedHoverImage = watch("hoverImage");
-  const watchedImages = watch("images") || [];
   const watchedSizeChartId = watch("sizeChartId");
   const watchedSizeChartUrl = watch("sizeChartUrl");
   const watchedDetailImages = watch("detailImages") || [];
@@ -123,10 +121,6 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     const val = e.target.value;
     setValue("name", val, { shouldValidate: true });
     setValue("slug", generateSlug(val), { shouldValidate: true });
-  };
-
-  const handleGenerateSKU = () => {
-    setValue("sku", generateSKU(), { shouldValidate: true });
   };
 
   // Upload main cover image to Cloudinary
