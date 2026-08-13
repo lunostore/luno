@@ -288,14 +288,14 @@ export default function CheckoutPage() {
                   بيانات الشحن
                 </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input
-                    id="customerName"
-                    label="الاسم بالكامل *"
-                    placeholder="أحمد محمد"
-                    error={errors.customerName?.message}
-                    {...register("customerName")}
-                  />
+                <Input
+                  id="customerName"
+                  label="الاسم بالكامل *"
+                  placeholder="أحمد محمد"
+                  error={errors.customerName?.message}
+                  {...register("customerName")}
+                />
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     id="phone"
