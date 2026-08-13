@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Star,
@@ -9,8 +9,6 @@ import {
   X,
   MessageSquare,
   ShieldCheck,
-  ChevronRight,
-  ChevronLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -26,8 +24,6 @@ export function CustomerReviewsSection() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
-
-  const sliderRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   // Review Form State
@@ -56,38 +52,6 @@ export function CustomerReviewsSection() {
 
     return () => unsubscribe();
   }, []);
-
-  // Auto-scroll track effect (slow smooth horizontal motion)
-  useEffect(() => {
-    if (loading || reviews.length <= 1 || isPaused) return;
-
-    const interval = setInterval(() => {
-      if (!sliderRef.current) return;
-      const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
-      const maxScroll = scrollWidth - clientWidth;
-      const currentScroll = Math.abs(scrollLeft);
-
-      if (currentScroll >= maxScroll - 20) {
-        sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        sliderRef.current.scrollBy({ left: -280, behavior: "smooth" });
-      }
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [loading, reviews.length, isPaused]);
-
-  const scrollPrev = () => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: 280, behavior: "smooth" });
-    }
-  };
-
-  const scrollNext = () => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: -280, behavior: "smooth" });
-    }
-  };
 
   const handleToggleLike = async (reviewId: string) => {
     const isLiked = likedMap[reviewId];
@@ -159,6 +123,10 @@ export function CustomerReviewsSection() {
     }
   };
 
+  // Duplicate reviews to create a smooth, 360° infinite continuous marquee loop
+  const marqueeMultiplier = reviews.length > 0 ? Math.max(4, Math.ceil(10 / reviews.length)) : 0;
+  const marqueeReviews = marqueeMultiplier > 0 ? Array(marqueeMultiplier).fill(reviews).flat() : [];
+
   return (
     <section className="py-12 md:py-20 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white relative overflow-hidden transition-colors duration-300" dir="rtl">
       {/* Background ambient lighting */}
@@ -177,38 +145,14 @@ export function CustomerReviewsSection() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Slider Navigation Arrows */}
-            {reviews.length > 1 && (
-              <div className="hidden sm:flex items-center gap-2 mr-2">
-                <button
-                  type="button"
-                  onClick={scrollPrev}
-                  className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer active:scale-95"
-                  title="السابق"
-                >
-                  <ChevronRight size={18} />
-                </button>
-                <button
-                  type="button"
-                  onClick={scrollNext}
-                  className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer active:scale-95"
-                  title="التالي"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 rounded-2xl text-xs font-black transition-all duration-300 shadow-md shadow-amber-400/20 active:scale-95 shrink-0 cursor-pointer"
-            >
-              <Plus size={16} />
-              <span>✍️ أضف رأيك وتجربتك</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 rounded-2xl text-xs font-black transition-all duration-300 shadow-md shadow-amber-400/20 active:scale-95 shrink-0 cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>✍️ أضف رأيك وتجربتك</span>
+          </button>
         </div>
 
         {/* Reviews Content */}
@@ -238,101 +182,114 @@ export function CustomerReviewsSection() {
             </button>
           </div>
         ) : (
-          /* Horizontal Auto-Scrolling Track (Compact Mobile & PC) */
+          /* 360° Infinite Continuous Marquee Track */
           <div
-            ref={sliderRef}
+            className="relative overflow-hidden py-4 -mx-4 px-4"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             onTouchStart={() => setIsPaused(true)}
             onTouchEnd={() => setIsPaused(false)}
-            className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory scroll-smooth py-2 px-1 cursor-grab active:cursor-grabbing"
           >
-            {reviews.map((review, idx) => {
-              const isMale = review.gender !== "female";
-              const isLiked = likedMap[review.id];
+            {/* Soft gradient edge blurs */}
+            <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+            <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
 
-              return (
-                <motion.div
-                  key={review.id || idx}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
-                  className="w-[270px] sm:w-[310px] md:w-[340px] shrink-0 snap-center bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm dark:shadow-lg group hover:-translate-y-0.5"
-                >
-                  {/* Card Header: Avatar & Stars */}
-                  <div>
-                    <div className="flex items-start justify-between gap-2.5 mb-3">
-                      <div className="flex items-center gap-2.5">
-                        {/* Avatar Icon */}
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border shadow-inner shrink-0 ${
-                            isMale
-                              ? "bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-500/40 text-blue-600 dark:text-blue-400"
-                              : "bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-500/40 text-rose-600 dark:text-rose-400"
-                          }`}
-                        >
-                          {isMale ? "👨‍🦱" : "👩‍🦰"}
-                        </div>
+            <motion.div
+              className="flex gap-4 w-max"
+              animate={isPaused ? {} : { x: ["0%", "50%"] }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: Math.max(16, reviews.length * 6),
+                  ease: "linear",
+                },
+              }}
+            >
+              {marqueeReviews.map((review, idx) => {
+                const isMale = review.gender !== "female";
+                const isLiked = likedMap[review.id];
 
-                        <div>
-                          <div className="flex items-center gap-1">
-                            <h3 className="text-xs font-black text-zinc-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">
-                              {review.name}
-                            </h3>
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[8px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                              <ShieldCheck size={9} />
-                              {isMale ? "موثوق ✓" : "موثوقة ✓"}
-                            </span>
+                return (
+                  <div
+                    key={`${review.id}-${idx}`}
+                    className="w-[260px] sm:w-[300px] md:w-[330px] shrink-0 bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm dark:shadow-lg group"
+                  >
+                    {/* Card Header: Avatar & Stars */}
+                    <div>
+                      <div className="flex items-start justify-between gap-2.5 mb-3">
+                        <div className="flex items-center gap-2.5">
+                          {/* Avatar Icon */}
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border shadow-inner shrink-0 ${
+                              isMale
+                                ? "bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-500/40 text-blue-600 dark:text-blue-400"
+                                : "bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-500/40 text-rose-600 dark:text-rose-400"
+                            }`}
+                          >
+                            {isMale ? "👨‍🦱" : "👩‍🦰"}
                           </div>
 
-                          <span className="text-[9px] text-zinc-500 dark:text-zinc-400 font-mono block mt-0.5">
-                            {isMale ? "شاب" : "بنت"} • تقييم معتمد
-                          </span>
+                          <div>
+                            <div className="flex items-center gap-1">
+                              <h3 className="text-xs font-black text-zinc-900 dark:text-white truncate max-w-[95px] sm:max-w-[115px]">
+                                {review.name}
+                              </h3>
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[8px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                <ShieldCheck size={9} />
+                                {isMale ? "موثوق ✓" : "موثوقة ✓"}
+                              </span>
+                            </div>
+
+                            <span className="text-[9px] text-zinc-500 dark:text-zinc-400 font-mono block mt-0.5">
+                              {isMale ? "شاب" : "بنت"} • تقييم معتمد
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Stars Rating */}
+                        <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={10}
+                              className={
+                                i < (review.rating || 5)
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-zinc-300 dark:text-zinc-700"
+                              }
+                            />
+                          ))}
                         </div>
                       </div>
 
-                      {/* Stars Rating */}
-                      <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={10}
-                            className={
-                              i < (review.rating || 5)
-                                ? "fill-amber-400 text-amber-400"
-                                : "text-zinc-300 dark:text-zinc-700"
-                            }
-                          />
-                        ))}
-                      </div>
+                      {/* Review Message Body */}
+                      <p className="text-zinc-700 dark:text-zinc-300 text-xs leading-relaxed font-medium mb-4 line-clamp-4">
+                        &quot;{review.message}&quot;
+                      </p>
                     </div>
 
-                    {/* Review Message Body */}
-                    <p className="text-zinc-700 dark:text-zinc-300 text-xs leading-relaxed font-medium mb-4 line-clamp-4">
-                      &quot;{review.message}&quot;
-                    </p>
-                  </div>
+                    {/* Card Footer: Likes Counter Button */}
+                    <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
+                      <span className="text-[9px] text-zinc-400 font-medium">مفيد؟</span>
 
-                  {/* Card Footer: Likes Counter Button */}
-                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
-                    <span className="text-[9px] text-zinc-400 font-medium">مفيد؟</span>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleLike(review.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all duration-300 border cursor-pointer ${
-                        isLiked
-                          ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-sm"
-                          : "bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700/80"
-                      }`}
-                    >
-                      <ThumbsUp size={12} className={isLiked ? "fill-zinc-950" : ""} />
-                      <span>{review.likes || 0} إعجاب</span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleLike(review.id)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all duration-300 border cursor-pointer ${
+                          isLiked
+                            ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-sm"
+                            : "bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700/80"
+                        }`}
+                      >
+                        <ThumbsUp size={12} className={isLiked ? "fill-zinc-950" : ""} />
+                        <span>{review.likes || 0} إعجاب</span>
+                      </button>
+                    </div>
                   </div>
-                </motion.div>
-              );
-            })}
+                );
+              })}
+            </motion.div>
           </div>
         )}
 
