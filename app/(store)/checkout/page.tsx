@@ -443,38 +443,42 @@ export default function CheckoutPage() {
                       className="overflow-hidden space-y-4"
                     >
                       {/* Vodafone / InstaPay choice */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setOnlineMethod("vodafone_cash")}
-                          className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all ${
-                            onlineMethod === "vodafone_cash"
-                              ? "border-red-500 bg-red-50 dark:bg-red-950/30"
-                              : "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
-                          }`}
-                        >
-                          <Smartphone size={18} className={onlineMethod === "vodafone_cash" ? "text-red-500" : ""} />
-                          <div className="text-right">
-                            <p className="text-xs font-black">فودافون كاش</p>
-                            <p className="text-[10px] text-gray-500 font-mono">{vodafoneNumber || "غير مدخل بالأدمن"}</p>
-                          </div>
-                        </button>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {vodafoneCashEnabled && (
+                          <button
+                            type="button"
+                            onClick={() => setOnlineMethod("vodafone_cash")}
+                            className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all ${
+                              onlineMethod === "vodafone_cash"
+                                ? "border-red-500 bg-red-50 dark:bg-red-950/30"
+                                : "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                            }`}
+                          >
+                            <Smartphone size={18} className={onlineMethod === "vodafone_cash" ? "text-red-500" : ""} />
+                            <div className="text-right">
+                              <p className="text-xs font-black">فودافون كاش</p>
+                              <p className="text-[10px] text-gray-500 font-mono">{vodafoneNumber || "غير مدخل بالأدمن"}</p>
+                            </div>
+                          </button>
+                        )}
 
-                        <button
-                          type="button"
-                          onClick={() => setOnlineMethod("instapay")}
-                          className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all ${
-                            onlineMethod === "instapay"
-                              ? "border-purple-500 bg-purple-50 dark:bg-purple-950/30"
-                              : "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
-                          }`}
-                        >
-                          <CreditCard size={18} className={onlineMethod === "instapay" ? "text-purple-500" : ""} />
-                          <div className="text-right">
-                            <p className="text-xs font-black">انستاباي</p>
-                            <p className="text-[10px] text-gray-500 font-mono">{instapayUsername}</p>
-                          </div>
-                        </button>
+                        {instapayEnabled && (
+                          <button
+                            type="button"
+                            onClick={() => setOnlineMethod("instapay")}
+                            className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all ${
+                              onlineMethod === "instapay"
+                                ? "border-purple-500 bg-purple-50 dark:bg-purple-950/30"
+                                : "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                            }`}
+                          >
+                            <CreditCard size={18} className={onlineMethod === "instapay" ? "text-purple-500" : ""} />
+                            <div className="text-right">
+                              <p className="text-xs font-black">انستاباي</p>
+                              <p className="text-[10px] text-gray-500 font-mono">{instapayUsername}</p>
+                            </div>
+                          </button>
+                        )}
                       </div>
 
                       {/* Transfer instructions */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Instagram, Send } from "lucide-react";
 import { toast } from "sonner";

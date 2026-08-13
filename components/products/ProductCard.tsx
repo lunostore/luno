@@ -3,12 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Heart, ShoppingBag, Eye, Shirt, Layers, Users } from "lucide-react";
+import { Heart, Eye, Shirt, Layers, Users } from "lucide-react";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
-import { useCart } from "@/features/cart/CartProvider";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
-import { toast } from "sonner";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -18,7 +16,6 @@ interface ProductCardProps {
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const { addItem, openCart } = useCart();
   const { openProduct } = useProductModal();
 
   const isFavorite = isInWishlist(product.id);
@@ -59,34 +56,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   // Open product in modal overlay (no page navigation = no reload)
   const navigateToProduct = () => {
     openProduct(product.id);
-  };
-
-  // Add to cart directly
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const selectedColor = activeVariant
-      ? {
-          name: activeVariant.colorName,
-          hex: activeVariant.colorHex,
-          image: activeVariant.image || product.mainImage,
-        }
-      : {
-          name: product.variants?.[0]?.colorName || "Standard",
-          hex: product.variants?.[0]?.colorHex || "#000000",
-          image: product.mainImage,
-        };
-
-    const firstAvailableSize =
-      activeVariant?.sizes?.find((s) => s.stock > 0)?.size ||
-      product.variants?.[0]?.sizes?.find((s) => s.stock > 0)?.size ||
-      "M";
-
-    addItem(product, 1, firstAvailableSize, selectedColor);
-    toast.success(`تمت إضافة ${product.name} إلى السلة! 🛒`, {
-      description: `المقاس: ${firstAvailableSize} | اللون: ${selectedColor.name}`,
-    });
-    openCart();
   };
 
   const isNewProduct =

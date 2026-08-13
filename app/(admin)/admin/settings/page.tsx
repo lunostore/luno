@@ -9,7 +9,6 @@ import {
   Image as ImageIcon,
   Save,
   Sparkles,
-  Sliders,
   Type,
   CreditCard,
   Share2,
@@ -55,6 +54,11 @@ function AdminSettingsContent() {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
+
+  // New size chart form state
+  const [newSizeChartName, setNewSizeChartName] = useState("");
+  const [newSizeChartImages, setNewSizeChartImages] = useState<string[]>([]);
+  const [previewChart, setPreviewChart] = useState<CustomSizeChart | null>(null);
 
   const [testingTelegram, setTestingTelegram] = useState(false);
 
