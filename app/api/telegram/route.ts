@@ -12,41 +12,72 @@ export async function POST(req: Request) {
     // Fetch site settings for bot credentials if not provided directly
     const siteSettings = await getSiteSettings();
     const token = customBotToken || siteSettings?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = customChatId || siteSettings?.telegramChatId || process.env.TELEGRAM_CHAT_ID;
+    const rawChatId = customChatId || siteSettings?.telegramChatId || process.env.TELEGRAM_CHAT_ID;
 
-    if (!token || !chatId) {
+    if (!token || !rawChatId) {
       return NextResponse.json(
         { error: "بيانات بوت التلجرام غير مكتملة (يرجى إدخال Bot Token و Chat ID بالأدمن)" },
         { status: 400 }
       );
     }
 
+    // Split multiple Chat IDs by comma, semicolon, space, or newline
+    const chatIds = String(rawChatId)
+      .split(/[,;\n\s]+/)
+      .map((id) => id.trim())
+      .filter(Boolean);
+
+    if (chatIds.length === 0) {
+      return NextResponse.json({ error: "لم يتم العثور على أي Chat ID صحيح" }, { status: 400 });
+    }
+
+    // Helper to send message to a single Telegram Chat ID
+    const sendTelegramMessage = async (id: string, text: string) => {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: id,
+          text: text,
+          parse_mode: "HTML",
+        }),
+      });
+      const data = await res.json();
+      return { id, ok: data.ok, description: data.description, result: data.result };
+    };
+
     // Handle Test Message Trigger
     if (isTest) {
       const testText = `<b>🧪 اختبار اتصال بوت تلجرام LUNO Store</b>
 ━━━━━━━━━━━━━━━━━━
 ✅ البوت يعمل بنجاح ومستعد لاستقبال التنبيهات المباشرة للطلبات الجديدة!
+👥 عدد المستلمين المحددين: ${chatIds.length} مستلم
 ⏰ <i>الوقت: ${new Date().toLocaleString("ar-EG")}</i>`;
 
-      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: testText,
-          parse_mode: "HTML",
-        }),
-      });
+      const results = await Promise.allSettled(
+        chatIds.map((id) => sendTelegramMessage(id, testText))
+      );
 
-      const data = await res.json();
-      if (!data.ok) {
+      const successful = results.filter(
+        (r) => r.status === "fulfilled" && r.value.ok
+      );
+
+      if (successful.length === 0) {
+        const firstError = results.find((r) => r.status === "fulfilled" && !r.value.ok);
+        const errorDesc =
+          firstError && firstError.status === "fulfilled"
+            ? firstError.value.description
+            : "خطأ غير معروف";
         return NextResponse.json(
-          { error: `فشل الاتصال بتلجرام: ${data.description || "خطأ غير معروف"}` },
+          { error: `فشل الاتصال بتلجرام لكل الحسابات: ${errorDesc}` },
           { status: 400 }
         );
       }
 
-      return NextResponse.json({ success: true, message: "تم إرسال رسالة الاختبار بنجاح!" });
+      return NextResponse.json({
+        success: true,
+        message: `تم إرسال رسالة الاختبار بنجاح إلى ${successful.length} من أصل ${chatIds.length} مستلم!`,
+      });
     }
 
     // Handle New Order Notification
@@ -87,26 +118,20 @@ ${order.transferPhone ? `📱 <b>رقم التحويل:</b> <code>${order.transf
 ━━━━━━━━━━━━━━━━━━
 ⏰ <i>تاريخ الطلب: ${new Date().toLocaleString("ar-EG")}</i>`;
 
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: orderText,
-        parse_mode: "HTML",
-      }),
+    // Send order notification to ALL Chat IDs simultaneously
+    const results = await Promise.allSettled(
+      chatIds.map((id) => sendTelegramMessage(id, orderText))
+    );
+
+    const successCount = results.filter(
+      (r) => r.status === "fulfilled" && r.value.ok
+    ).length;
+
+    return NextResponse.json({
+      success: true,
+      recipientsCount: chatIds.length,
+      deliveredCount: successCount,
     });
-
-    const data = await res.json();
-    if (!data.ok) {
-      console.error("Telegram API Error:", data);
-      return NextResponse.json(
-        { error: `فشل إرسال الإشعار لتلجرام: ${data.description || "خطأ غير معروف"}` },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({ success: true, messageId: data.result?.message_id });
   } catch (err: any) {
     console.error("Telegram Notification Exception:", err);
     return NextResponse.json({ error: err.message || "حدث خطأ غير متوقع" }, { status: 500 });

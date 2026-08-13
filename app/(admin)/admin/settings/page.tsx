@@ -1187,7 +1187,7 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-4 pt-2">
                   <div>
                     <label className="block text-[10px] font-bold text-blue-900 uppercase tracking-wider mb-1">
                       توكن البوت (Telegram Bot Token)
@@ -1203,21 +1203,21 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
 
                   <div>
                     <label className="block text-[10px] font-bold text-blue-900 uppercase tracking-wider mb-1">
-                      معرف الشات/القناة (Telegram Chat ID)
+                      معرفات الشات والقنوات (Telegram Chat IDs) — يمكنك إضافة أكثر من حساب بفصلهم بفصلة (,)
                     </label>
-                    <input
-                      type="text"
-                      placeholder="-100xxxxxxxxx أو @your_channel"
+                    <textarea
+                      rows={2}
+                      placeholder="مثال: 7854847724, 123456789, @luno_channel"
                       value={settings.telegramChatId || ""}
                       onChange={(e) => setSettings({ ...settings, telegramChatId: e.target.value })}
-                      className="w-full px-3.5 py-2.5 border border-blue-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-blue-600 bg-white"
+                      className="w-full px-3.5 py-2 border border-blue-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-blue-600 bg-white leading-relaxed"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-blue-100/80">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-blue-100/80">
                   <p className="text-[10px] text-blue-700 font-medium">
-                    💡 يمكنك إنشائه مجاناً من BotFather وكتابة الـ Chat ID هنا.
+                    💡 يمكنك إضافة أكثر من Chat ID لشخص أو قناة بفصلهم بفصلة (,) وسيقوم البوت بإرسال الأوردر للجميع فوراً!
                   </p>
                   <button
                     type="button"
