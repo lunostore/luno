@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ThumbsUp, Plus, X, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
+import { Star, ThumbsUp, Plus, X, MessageSquare, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   subscribeApprovedReviews,
@@ -112,10 +112,6 @@ export function CustomerReviewsSection() {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-zinc-200 dark:border-zinc-800/80 pb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
-              <Sparkles size={14} />
-              آراء وتجارب العملاء
-            </div>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
               ماذا يقول عملاء LUNO؟
             </h2>
