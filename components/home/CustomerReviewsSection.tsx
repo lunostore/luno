@@ -12,37 +12,6 @@ import {
 } from "@/lib/firebase/firestore";
 import { Spinner } from "@/components/ui/Spinner";
 
-// Pre-seeded initial reviews if none in Firestore yet
-const SEEDED_REVIEWS: Partial<CustomerReview>[] = [
-  {
-    id: "seed_1",
-    name: "عمر أحمد",
-    gender: "male",
-    rating: 5,
-    message: "الخامة تحفة بجد والمقاس مظبوط جداً زي الوصف بالضبط! التوصيل كان في خلال 48 ساعة فقط، شكراً LUNO 🔥",
-    likes: 24,
-    status: "approved",
-  },
-  {
-    id: "seed_2",
-    name: "سارة محمود",
-    gender: "female",
-    rating: 5,
-    message: "التفاصيل والألوان على الحقيقة أحلى بكتير من الصور! التعامل راقي جداً وخدمة العملاء ممتازة وسريعة ❤️",
-    likes: 31,
-    status: "approved",
-  },
-  {
-    id: "seed_3",
-    name: "كريم يوسف",
-    gender: "male",
-    rating: 5,
-    message: "أفضل تجربة شراء أونلاين السنة دي، التغليف شيك والمنتج أوريجينال بنسبة 100% 👍",
-    likes: 18,
-    status: "approved",
-  },
-];
-
 export function CustomerReviewsSection() {
   const [reviews, setReviews] = useState<CustomerReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,27 +102,25 @@ export function CustomerReviewsSection() {
     }
   };
 
-  const displayReviews = reviews.length > 0 ? reviews : (SEEDED_REVIEWS as CustomerReview[]);
-
   return (
-    <section className="py-16 md:py-24 bg-zinc-950 text-white relative overflow-hidden" dir="rtl">
+    <section className="py-16 md:py-24 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white relative overflow-hidden transition-colors duration-300" dir="rtl">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-zinc-800/80 pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-zinc-200 dark:border-zinc-800/80 pb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
               <Sparkles size={14} />
-              آراء وتجارب العملاء الحقيقية
+              آراء وتجارب العملاء
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
               ماذا يقول عملاء LUNO؟
             </h2>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-              ثقة وآراء أكثر من 5,000+ عميل في جميع محافظات مصر — انضم إلى عائلة LUNO الآن!
+            <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed font-medium">
+              آراء حقيقية من عملائنا في جميع محافظات مصر — شاركنا رأيك وتجربتك الآن!
             </p>
           </div>
 
@@ -167,15 +134,35 @@ export function CustomerReviewsSection() {
           </button>
         </div>
 
-        {/* Reviews Cards Grid */}
+        {/* Reviews Content */}
         {loading ? (
           <div className="py-16 text-center space-y-3">
             <Spinner size="lg" className="border-amber-400 border-t-transparent mx-auto" />
             <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">جاري تحميل آراء العملاء...</p>
           </div>
+        ) : reviews.length === 0 ? (
+          /* Clean Empty State when 0 real reviews exist */
+          <div className="py-16 px-6 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm max-w-xl mx-auto space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-500 flex items-center justify-center mx-auto text-2xl">
+              💬
+            </div>
+            <div>
+              <h3 className="text-base font-black text-zinc-900 dark:text-white">لا توجد تقييمات معروضة حالياً</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                كن أول من يشارك رأيه وتجربته مع LUNO Store وتظهر تجربتك هنا للجميع!
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-2xl text-xs font-black transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              <span>✍️ أضف أول تقييم لك الآن</span>
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayReviews.map((review, idx) => {
+            {reviews.map((review, idx) => {
               const isMale = review.gender !== "female";
               const isLiked = likedMap[review.id];
 
@@ -185,7 +172,7 @@ export function CustomerReviewsSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.08 }}
-                  className="bg-zinc-900/90 border border-zinc-800/80 rounded-3xl p-6 flex flex-col justify-between hover:border-zinc-700 transition-all duration-300 shadow-xl group hover:-translate-y-1"
+                  className="bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-md dark:shadow-xl group hover:-translate-y-1"
                 >
                   {/* Card Header: Avatar & Stars */}
                   <div>
@@ -195,8 +182,8 @@ export function CustomerReviewsSection() {
                         <div
                           className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold border shadow-inner shrink-0 ${
                             isMale
-                              ? "bg-blue-950/60 border-blue-500/40 text-blue-400"
-                              : "bg-rose-950/60 border-rose-500/40 text-rose-400"
+                              ? "bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-500/40 text-blue-600 dark:text-blue-400"
+                              : "bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-500/40 text-rose-600 dark:text-rose-400"
                           }`}
                         >
                           {isMale ? "👨‍🦱" : "👩‍🦰"}
@@ -204,21 +191,21 @@ export function CustomerReviewsSection() {
 
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <h3 className="text-sm font-black text-white">{review.name}</h3>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            <h3 className="text-sm font-black text-zinc-900 dark:text-white">{review.name}</h3>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                               <ShieldCheck size={10} />
                               {isMale ? "عميل موثوق ✓" : "عميلة موثوقة ✓"}
                             </span>
                           </div>
 
-                          <span className="text-[10px] text-zinc-500 font-mono">
-                            {isMale ? "شاب" : "بنت"} • مشتري مؤكد
+                          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
+                            {isMale ? "شاب" : "بنت"} • تقييم معتمد
                           </span>
                         </div>
                       </div>
 
                       {/* Stars Rating */}
-                      <div className="flex items-center gap-1 bg-zinc-950 px-2.5 py-1 rounded-xl border border-zinc-800">
+                      <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-950 px-2.5 py-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
@@ -226,7 +213,7 @@ export function CustomerReviewsSection() {
                             className={
                               i < (review.rating || 5)
                                 ? "fill-amber-400 text-amber-400"
-                                : "text-zinc-700"
+                                : "text-zinc-300 dark:text-zinc-700"
                             }
                           />
                         ))}
@@ -234,13 +221,13 @@ export function CustomerReviewsSection() {
                     </div>
 
                     {/* Review Message Body */}
-                    <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed font-medium mb-6">
+                    <p className="text-zinc-700 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-medium mb-6">
                       &quot;{review.message}&quot;
                     </p>
                   </div>
 
                   {/* Card Footer: Likes Counter Button */}
-                  <div className="pt-4 border-t border-zinc-800/60 flex items-center justify-between">
+                  <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
                     <span className="text-[10px] text-zinc-500 font-medium">هل كان هذا التقييم مفيداً؟</span>
 
                     <button
@@ -249,7 +236,7 @@ export function CustomerReviewsSection() {
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border cursor-pointer ${
                         isLiked
                           ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-md shadow-amber-400/20"
-                          : "bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 border-zinc-700/80"
+                          : "bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700/80"
                       }`}
                     >
                       <ThumbsUp size={13} className={isLiked ? "fill-zinc-950" : ""} />
@@ -262,69 +249,70 @@ export function CustomerReviewsSection() {
           </div>
         )}
 
-        {/* Submit Review Modal */}
+        {/* Submit Review Modal - Z-INDEX FIXED TO Z-[9999] */}
         <AnimatePresence>
           {modalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[9999] overflow-y-auto p-4 sm:p-6 flex items-center justify-center">
               {/* Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setModalOpen(false)}
-                className="fixed inset-0 bg-black/80 backdrop-blur-md"
+                className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9998]"
               />
 
-              {/* Modal Card */}
+              {/* Modal Card Box */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 text-right"
+                className="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl z-[9999] text-right my-auto max-h-[88vh] overflow-y-auto scrollbar-none"
               >
-                {/* Close Button */}
+                {/* Close Button X (Prominent & High Z-index) */}
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="absolute top-4 left-4 p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                  className="absolute top-4 left-4 p-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all z-20 border border-zinc-200 dark:border-zinc-700/60 shadow-sm cursor-pointer"
+                  title="إغلاق النافذة"
                 >
                   <X size={18} />
                 </button>
 
                 {/* Modal Title */}
-                <div className="mb-6">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-400 flex items-center justify-center mb-3">
-                    <MessageSquare size={20} />
+                <div className="mb-6 pt-2">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-500 flex items-center justify-center mb-3">
+                    <MessageSquare size={22} />
                   </div>
-                  <h3 className="text-xl font-black text-white">شاركنا رأيك وتجربتك في LUNO</h3>
-                  <p className="text-zinc-400 text-xs mt-1">رأيك يهمنا ويسعدنا جداً لتحسين تجربة جميع العملاء ❤️</p>
+                  <h3 className="text-xl font-black text-zinc-900 dark:text-white">شاركنا رأيك وتجربتك في LUNO</h3>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1 font-medium">رأيك يهمنا ويسعدنا جداً لتحسين تجربة جميع العملاء ❤️</p>
                 </div>
 
                 <form onSubmit={handleSubmitReview} className="space-y-5">
                   {/* Name Input */}
                   <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-2">اسمك الكريم *</label>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">اسمك الكريم *</label>
                     <input
                       type="text"
                       required
                       placeholder="أدخل اسمك بالكامل"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
                   {/* Gender Selector (Character) */}
                   <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-2">تحديد الجنس / الشخصية *</label>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">تحديد الجنس / الشخصية *</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={() => setGender("male")}
                         className={`flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
                           gender === "male"
-                            ? "border-blue-500 bg-blue-950/40 text-white font-black"
-                            : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700"
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-white font-black"
+                            : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700"
                         }`}
                       >
                         <span className="text-2xl">👨‍🦱</span>
@@ -336,8 +324,8 @@ export function CustomerReviewsSection() {
                         onClick={() => setGender("female")}
                         className={`flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
                           gender === "female"
-                            ? "border-rose-500 bg-rose-950/40 text-white font-black"
-                            : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700"
+                            ? "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-white font-black"
+                            : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700"
                         }`}
                       >
                         <span className="text-2xl">👩‍🦰</span>
@@ -348,8 +336,8 @@ export function CustomerReviewsSection() {
 
                   {/* Rating Stars Picker */}
                   <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-2">تقييمك للمنتجات والخدمة *</label>
-                    <div className="flex items-center gap-2 bg-zinc-950 p-3 rounded-2xl border border-zinc-800 justify-center">
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">تقييمك للمنتجات والخدمة *</label>
+                    <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 justify-center">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
@@ -362,25 +350,25 @@ export function CustomerReviewsSection() {
                             className={
                               star <= rating
                                 ? "fill-amber-400 text-amber-400"
-                                : "text-zinc-700"
+                                : "text-zinc-300 dark:text-zinc-700"
                             }
                           />
                         </button>
                       ))}
-                      <span className="text-xs font-bold text-amber-400 mr-2">({rating}/5)</span>
+                      <span className="text-xs font-bold text-amber-500 dark:text-amber-400 mr-2">({rating}/5)</span>
                     </div>
                   </div>
 
                   {/* Review Textarea */}
                   <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-2">رأيك وتجربتك بالكامل *</label>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">رأيك وتجربتك بالكامل *</label>
                     <textarea
                       required
                       rows={4}
                       placeholder="اكتب انطباعك عن الجودة، المقاسات، سرعة التوصيل والمعاملة..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400 font-medium leading-relaxed"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-amber-400 font-medium leading-relaxed"
                     />
                   </div>
 
