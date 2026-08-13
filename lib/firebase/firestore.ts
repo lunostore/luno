@@ -1226,9 +1226,7 @@ export function subscribeApprovedReviews(
 ): () => void {
   const q = query(
     collection(db, "customer_reviews"),
-    where("status", "==", "approved"),
-    orderBy("createdAt", "desc"),
-    limit(50)
+    where("status", "==", "approved")
   );
 
   return onSnapshot(
@@ -1238,6 +1236,14 @@ export function subscribeApprovedReviews(
         id: d.id,
         ...d.data(),
       })) as CustomerReview[];
+
+      // Sort in JS memory to avoid requiring a Firestore composite index!
+      items.sort((a, b) => {
+        const tA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+        const tB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+        return tB - tA;
+      });
+
       callback(items);
     },
     (err) => {
@@ -1250,11 +1256,7 @@ export function subscribeApprovedReviews(
 export function subscribeAllReviews(
   callback: (reviews: CustomerReview[]) => void
 ): () => void {
-  const q = query(
-    collection(db, "customer_reviews"),
-    orderBy("createdAt", "desc"),
-    limit(100)
-  );
+  const q = query(collection(db, "customer_reviews"));
 
   return onSnapshot(
     q,
@@ -1263,6 +1265,14 @@ export function subscribeAllReviews(
         id: d.id,
         ...d.data(),
       })) as CustomerReview[];
+
+      // Sort in JS memory
+      items.sort((a, b) => {
+        const tA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+        const tB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+        return tB - tA;
+      });
+
       callback(items);
     },
     (err) => {
