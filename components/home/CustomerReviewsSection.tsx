@@ -195,6 +195,7 @@ export function CustomerReviewsSection() {
             <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
 
             <motion.div
+              key={`marquee-track-${reviews.length}-${reviews.map((r) => r.id).join("_")}`}
               className="flex gap-4 w-max"
               animate={isPaused ? {} : { x: ["0%", "50%"] }}
               transition={{
