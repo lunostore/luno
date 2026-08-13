@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { IntroScreen } from "@/components/home/IntroScreen";
+import { CustomerReviewsSection } from "@/components/home/CustomerReviewsSection";
 import type { Product } from "@/types/product";
 import { subscribeToProducts } from "@/lib/firebase/firestore";
 
@@ -29,6 +30,7 @@ export default function HomePage() {
       <div id="products">
         <FeaturedProducts products={products} />
       </div>
+      <CustomerReviewsSection />
     </>
   );
 }

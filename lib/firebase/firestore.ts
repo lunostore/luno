@@ -1179,4 +1179,114 @@ export async function clearAllNotifications(notifications: AdminNotification[]):
   await batch.commit();
 }
 
+// ─── Customer Reviews System ──────────────────────────────
+
+export interface CustomerReview {
+  id: string;
+  name: string;
+  gender: "male" | "female";
+  rating: number; // 1 to 5
+  message: string;
+  likes: number;
+  status: "approved" | "pending" | "rejected";
+  createdAt: Timestamp | Date;
+}
+
+export async function createCustomerReview(data: {
+  name: string;
+  gender: "male" | "female";
+  rating: number;
+  message: string;
+}): Promise<string> {
+  const docRef = await addDoc(collection(db, "customer_reviews"), cleanUndefined({
+    name: data.name.trim(),
+    gender: data.gender || "male",
+    rating: Math.min(5, Math.max(1, data.rating || 5)),
+    message: data.message.trim(),
+    likes: 0,
+    status: "approved", // Auto-approved for immediate delight, admin can reject/moderate anytime
+    createdAt: Timestamp.now(),
+  }));
+
+  // Auto-generate notification for Admin
+  createAdminNotification({
+    type: "system",
+    title: `تقييم ورأي جديد من ${data.name} ⭐`,
+    message: `التقييم: ${data.rating}/5 نجوم - "${data.message.slice(0, 50)}..."`,
+    link: "/admin/reviews",
+  }).catch(console.error);
+
+  return docRef.id;
+}
+
+export function subscribeApprovedReviews(
+  callback: (reviews: CustomerReview[]) => void
+): () => void {
+  const q = query(
+    collection(db, "customer_reviews"),
+    where("status", "==", "approved"),
+    orderBy("createdAt", "desc"),
+    limit(50)
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const items: CustomerReview[] = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as CustomerReview[];
+      callback(items);
+    },
+    (err) => {
+      console.error("Failed to subscribe to approved reviews:", err);
+      callback([]);
+    }
+  );
+}
+
+export function subscribeAllReviews(
+  callback: (reviews: CustomerReview[]) => void
+): () => void {
+  const q = query(
+    collection(db, "customer_reviews"),
+    orderBy("createdAt", "desc"),
+    limit(100)
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const items: CustomerReview[] = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as CustomerReview[];
+      callback(items);
+    },
+    (err) => {
+      console.error("Failed to subscribe to all reviews:", err);
+      callback([]);
+    }
+  );
+}
+
+export async function toggleReviewLike(id: string, delta: number): Promise<void> {
+  const docRef = doc(db, "customer_reviews", id);
+  await updateDoc(docRef, {
+    likes: increment(delta),
+  });
+}
+
+export async function updateReviewStatus(
+  id: string,
+  status: "approved" | "pending" | "rejected"
+): Promise<void> {
+  const docRef = doc(db, "customer_reviews", id);
+  await updateDoc(docRef, { status });
+}
+
+export async function deleteCustomerReview(id: string): Promise<void> {
+  await deleteDoc(doc(db, "customer_reviews", id));
+}
+
 

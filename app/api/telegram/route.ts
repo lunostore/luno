@@ -21,9 +21,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Split multiple Chat IDs by comma, semicolon, space, or newline
+    // Split multiple Chat IDs by comma, semicolon, or newline
     const chatIds = String(rawChatId)
-      .split(/[,;\n\s]+/)
+      .split(/[,;\n]+/)
       .map((id) => id.trim())
       .filter(Boolean);
 

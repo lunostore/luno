@@ -31,6 +31,7 @@ import {
   CreditCard,
   Share2,
   ShieldAlert,
+  Star,
 } from "lucide-react";
 import { signOut } from "@/lib/firebase/auth";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ const navItems = [
   { href: "/admin/orders", label: "الطلبات", icon: ShoppingCart },
   { href: "/admin/shipping", label: "أسعار الشحن", icon: Truck },
   { href: "/admin/products", label: "المنتجات", icon: Package },
+  { href: "/admin/reviews", label: "آراء العملاء", icon: Star },
   { href: "/admin/messages", label: "الرسائل والشكاوى", icon: MessageSquare },
   { href: "/admin/errors", label: "أخطاء النظام", icon: AlertTriangle },
   { href: "/admin/customers", label: "العملاء", icon: Users },
