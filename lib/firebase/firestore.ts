@@ -1197,21 +1197,23 @@ export async function createCustomerReview(data: {
   gender: "male" | "female";
   rating: number;
   message: string;
+  status?: "approved" | "pending" | "rejected";
 }): Promise<string> {
+  const reviewStatus = data.status || "pending";
   const docRef = await addDoc(collection(db, "customer_reviews"), cleanUndefined({
     name: data.name.trim(),
     gender: data.gender || "male",
     rating: Math.min(5, Math.max(1, data.rating || 5)),
     message: data.message.trim(),
     likes: 0,
-    status: "approved", // Auto-approved for immediate delight, admin can reject/moderate anytime
+    status: reviewStatus,
     createdAt: Timestamp.now(),
   }));
 
   // Auto-generate notification for Admin
   createAdminNotification({
     type: "system",
-    title: `تقييم ورأي جديد من ${data.name} ⭐`,
+    title: `تقييم ورأي جديد من ${data.name} ⭐ (بانتظار الموافقة)`,
     message: `التقييم: ${data.rating}/5 نجوم - "${data.message.slice(0, 50)}..."`,
     link: "/admin/reviews",
   }).catch(console.error);

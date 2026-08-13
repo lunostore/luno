@@ -82,9 +82,10 @@ export default function AdminReviewsPage() {
         gender,
         rating,
         message: message.trim(),
+        status: "pending",
       });
 
-      toast.success("تمت إضافة التقييم اليدوي بنجاح! ✨");
+      toast.success("تمت إضافة التقييم بنجاح وإدراجه في قائمة بانتظار الموافقة ⏳");
       setName("");
       setMessage("");
       setRating(5);
@@ -247,11 +248,11 @@ export default function AdminReviewsPage() {
                       <button
                         type="button"
                         onClick={() => handleUpdateStatus(review.id, "approved")}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                        title="اعتماد ونشر التقييم"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+                        title="اعتماد ونشر التقييم فورا على الموقع"
                       >
-                        <CheckCircle size={13} />
-                        <span>قبول وإظهار</span>
+                        <CheckCircle size={14} />
+                        <span>✅ موافقة وعرض بالموقع</span>
                       </button>
                     )}
 
@@ -259,11 +260,11 @@ export default function AdminReviewsPage() {
                       <button
                         type="button"
                         onClick={() => handleUpdateStatus(review.id, "rejected")}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                        title="رفض وإخفاء التقييم"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer"
+                        title="رفض وإخفاء التقييم من الموقع"
                       >
-                        <XCircle size={13} />
-                        <span>رفض وإخفاء</span>
+                        <XCircle size={14} />
+                        <span>❌ رفض وإخفاء</span>
                       </button>
                     )}
                   </div>

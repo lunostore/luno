@@ -87,9 +87,10 @@ export function CustomerReviewsSection() {
         gender,
         rating,
         message: message.trim(),
+        status: "pending",
       });
 
-      toast.success("شكراً لمشاركتك! تم إدراج رأيك وتقييمك بنجاح ❤️");
+      toast.success("شكراً لمشاركتك! تم إرسال تقييمك بنجاح وسيعرض بالموقع فور موافقة الأدمن ❤️");
       setName("");
       setMessage("");
       setRating(5);
