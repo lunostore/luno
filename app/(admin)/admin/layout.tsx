@@ -36,6 +36,7 @@ import { signOut } from "@/lib/firebase/auth";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { Spinner } from "@/components/ui/Spinner";
+import { AdminNotificationCenter } from "@/components/admin/AdminNotificationCenter";
 
 const navItems = [
   { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -350,6 +351,9 @@ export default function AdminLayout({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Real-time Notification Center Bell Icon */}
+            <AdminNotificationCenter />
+
             <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
               <ShieldCheck size={12} />
               <span className="hidden sm:inline">لوحة إدارة آمنة</span>

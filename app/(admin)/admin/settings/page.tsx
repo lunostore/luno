@@ -56,10 +56,36 @@ function AdminSettingsContent() {
     }
   }, [urlTab]);
 
-  // New size chart form state
-  const [newSizeChartName, setNewSizeChartName] = useState("");
-  const [newSizeChartImages, setNewSizeChartImages] = useState<string[]>([]);
-  const [previewChart, setPreviewChart] = useState<CustomSizeChart | null>(null);
+  const [testingTelegram, setTestingTelegram] = useState(false);
+
+  const handleTestTelegram = async () => {
+    if (!settings.telegramBotToken || !settings.telegramChatId) {
+      toast.error("يرجى كتابة توكن البوت (Bot Token) و (Chat ID) أولاً تجربة الإشعار");
+      return;
+    }
+    setTestingTelegram(true);
+    try {
+      const res = await fetch("/api/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isTest: true,
+          botToken: settings.telegramBotToken.trim(),
+          chatId: settings.telegramChatId.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("تم إرسال الإشعار التجريبي لبوت التلجرام بنجاح! 🚀");
+      } else {
+        toast.error(data.error || "فشل إرسال الإشعار التجريبي");
+      }
+    } catch {
+      toast.error("حدث خطأ في الاتصال بالبوت");
+    } finally {
+      setTestingTelegram(false);
+    }
+  };
 
   const [settings, setSettings] = useState<SiteSettings>({
     storeName: "Luno Store",
@@ -1123,6 +1149,81 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                   onChange={(e) => setSettings({ ...settings, storePhone: e.target.value })}
                   className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900"
                 />
+              </div>
+
+              {/* Telegram Bot Integration Card */}
+              <div className="sm:col-span-2 p-5 rounded-3xl border border-blue-100 bg-blue-50/50 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-500/20">
+                      ✈️
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-blue-950 uppercase tracking-wider">
+                        إشعارات بوت التلجرام للطلبات (Telegram Order Bot)
+                      </h3>
+                      <p className="text-[11px] text-blue-800 font-medium">
+                        إرسال رسالة تلقائية منسقة فوراً لتلجرام مع كل أوردر جديد
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSettings({ ...settings, telegramEnabled: settings.telegramEnabled === false })}
+                    className={`relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none shadow-inner ${
+                      settings.telegramEnabled !== false ? "bg-blue-600" : "bg-zinc-300"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+                        settings.telegramEnabled !== false ? "right-0.5" : "left-0.5"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="block text-[10px] font-bold text-blue-900 uppercase tracking-wider mb-1">
+                      توكن البوت (Telegram Bot Token)
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                      value={settings.telegramBotToken || ""}
+                      onChange={(e) => setSettings({ ...settings, telegramBotToken: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-blue-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-blue-600 bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-blue-900 uppercase tracking-wider mb-1">
+                      معرف الشات/القناة (Telegram Chat ID)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="-100xxxxxxxxx أو @your_channel"
+                      value={settings.telegramChatId || ""}
+                      onChange={(e) => setSettings({ ...settings, telegramChatId: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-blue-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-blue-600 bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-blue-100/80">
+                  <p className="text-[10px] text-blue-700 font-medium">
+                    💡 يمكنك إنشائه مجاناً من BotFather وكتابة الـ Chat ID هنا.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleTestTelegram}
+                    disabled={testingTelegram}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+                  >
+                    {testingTelegram ? <Spinner size="sm" className="border-white" /> : "🧪 إرسال إشعار تجريبي"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

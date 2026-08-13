@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff, Copy, Check } from "lucide-react";
+import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff, Copy, Check, FileSpreadsheet, Printer } from "lucide-react";
 import { getOrders, updateOrderStatus, deleteOrder } from "@/lib/firebase/firestore";
 import { formatPrice, formatDate, buildWhatsAppConfirmationMessage } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order";
 import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/types/order";
 import { Spinner } from "@/components/ui/Spinner";
 import { toast } from "sonner";
+import { exportOrdersToExcel, printOrdersPDF } from "@/lib/export-orders";
 
 
 const STATUS_TABS: { value: OrderStatus | "all"; label: string }[] = [
@@ -216,14 +217,56 @@ ${itemsList}
     window.open(`https://wa.me/${waNumber.replace(/^0/, "20")}?text=${msg}`, "_blank");
   };
 
+  const handleExportExcel = () => {
+    try {
+      exportOrdersToExcel(filtered, `LUNO_Orders_${statusFilter}_${new Date().toISOString().slice(0, 10)}.csv`);
+      toast.success("تم تصدير الطلبات إلى ملف Excel بنجاح! 📊");
+    } catch (err: any) {
+      toast.error(err.message || "فشل تصدير الطلبات إلى Excel");
+    }
+  };
+
+  const handlePrintPDF = () => {
+    try {
+      printOrdersPDF(filtered);
+      toast.success("تم فتح كشوفات الشحن والفواتير للطباعة و PDF! 🖨️");
+    } catch (err: any) {
+      toast.error(err.message || "فشل فتح نافذة الطباعة والتصدير");
+    }
+  };
+
   return (
     <div className="space-y-8" dir="rtl">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900">إدارة الطلبات</h1>
-        <p className="text-zinc-400 text-xs mt-1">
-          {orders.length} طلب إجمالاً — اضغط على أي طلب لعرض تفاصيله
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900">إدارة الطلبات</h1>
+          <p className="text-zinc-400 text-xs mt-1">
+            {orders.length} طلب إجمالاً ({filtered.length} طلب معروض) — اضغط على أي طلب لعرض تفاصيله
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+            title="تصدير جميع الطلبات المفلترة إلى Excel"
+          >
+            <FileSpreadsheet size={16} />
+            <span>تصدير لـ Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrintPDF}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+            title="طباعة كشوفات الشحن وتصدير فواتير PDF"
+          >
+            <Printer size={16} />
+            <span>طباعة / تصدير PDF</span>
+          </button>
+        </div>
       </div>
 
       {/* Status Tabs */}

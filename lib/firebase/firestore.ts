@@ -15,6 +15,7 @@ import {
   onSnapshot,
   increment,
   serverTimestamp,
+  writeBatch,
   type QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./config";
@@ -243,6 +244,24 @@ export async function createOrder(data: CreateOrderInput): Promise<string> {
     stockDeducted: false, // Track whether stock was deducted for this order
     createdAt: Timestamp.now(),
   }));
+
+  // Auto-generate notification for Admin Dashboard
+  createAdminNotification({
+    type: "order",
+    title: `طلب جديد 🛒 (#${docRef.id.slice(0, 8).toUpperCase()})`,
+    message: `طلب جديد من ${data.customerName} بقيمة ${data.total} ج.م - المحافظة: ${data.governorate || "غير محددة"}`,
+    link: "/admin/orders",
+  }).catch(console.error);
+
+  // Auto-trigger Telegram Bot Notification
+  if (typeof window !== "undefined") {
+    fetch("/api/telegram", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: docRef.id }),
+    }).catch(console.error);
+  }
+
   return docRef.id;
 }
 
@@ -550,6 +569,11 @@ export interface SiteSettings {
   tiktokUrl?: string;
   currency?: string;
 
+  // Telegram Bot Notifications System
+  telegramEnabled?: boolean;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+
   // About Page CMS
   aboutTitle?: string;
   aboutSubtitle?: string;
@@ -663,6 +687,15 @@ export async function createContactMessage(data: {
     status: "unread",
     createdAt: Timestamp.now(),
   }));
+
+  // Auto-generate notification for Admin
+  createAdminNotification({
+    type: "message",
+    title: `رسالة جديدة من ${data.name} 💬`,
+    message: `الموضوع: "${data.message.slice(0, 60)}${data.message.length > 60 ? "..." : ""}"`,
+    link: "/admin/messages",
+  }).catch(console.error);
+
   return docRef.id;
 }
 
@@ -1071,6 +1104,79 @@ export function subscribeChatAnalytics(
       });
     }
   );
+}
+
+// ─── Admin Notifications Center ──────────────────────────
+
+export interface AdminNotification {
+  id: string;
+  type: "order" | "message" | "stock" | "system";
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  createdAt: Timestamp | Date;
+}
+
+export async function createAdminNotification(data: {
+  type: "order" | "message" | "stock" | "system";
+  title: string;
+  message: string;
+  link?: string;
+}): Promise<string> {
+  const docRef = await addDoc(collection(db, "notifications"), cleanUndefined({
+    ...data,
+    read: false,
+    createdAt: Timestamp.now(),
+  }));
+  return docRef.id;
+}
+
+export function subscribeAdminNotifications(
+  callback: (notifications: AdminNotification[]) => void
+): () => void {
+  const q = query(
+    collection(db, "notifications"),
+    orderBy("createdAt", "desc"),
+    limit(30)
+  );
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const items: AdminNotification[] = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as AdminNotification[];
+      callback(items);
+    },
+    (err) => {
+      console.error("Failed to subscribe to notifications:", err);
+      callback([]);
+    }
+  );
+}
+
+export async function markNotificationAsRead(id: string): Promise<void> {
+  await updateDoc(doc(db, "notifications", id), { read: true });
+}
+
+export async function markAllNotificationsAsRead(notifications: AdminNotification[]): Promise<void> {
+  const unreadDocs = notifications.filter((n) => !n.read);
+  if (unreadDocs.length === 0) return;
+  const batch = writeBatch(db);
+  unreadDocs.forEach((n) => {
+    batch.update(doc(db, "notifications", n.id), { read: true });
+  });
+  await batch.commit();
+}
+
+export async function clearAllNotifications(notifications: AdminNotification[]): Promise<void> {
+  if (notifications.length === 0) return;
+  const batch = writeBatch(db);
+  notifications.forEach((n) => {
+    batch.delete(doc(db, "notifications", n.id));
+  });
+  await batch.commit();
 }
 
 
