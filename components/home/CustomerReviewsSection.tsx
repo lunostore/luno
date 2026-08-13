@@ -123,9 +123,10 @@ export function CustomerReviewsSection() {
     }
   };
 
-  // Duplicate reviews to create a smooth, 360° infinite continuous marquee loop
-  const marqueeMultiplier = reviews.length > 0 ? Math.max(4, Math.ceil(10 / reviews.length)) : 0;
-  const marqueeReviews = marqueeMultiplier > 0 ? Array(marqueeMultiplier).fill(reviews).flat() : [];
+  // Enable infinite marquee loop ONLY when there are at least 3 distinct reviews!
+  const isMarquee = reviews.length >= 3;
+  const marqueeMultiplier = isMarquee ? Math.max(2, Math.ceil(8 / reviews.length)) : 1;
+  const displayReviews = reviews.length > 0 ? Array(marqueeMultiplier).fill(reviews).flat() : [];
 
   return (
     <section className="py-12 md:py-20 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white relative overflow-hidden transition-colors duration-300" dir="rtl">
@@ -182,7 +183,7 @@ export function CustomerReviewsSection() {
             </button>
           </div>
         ) : (
-          /* 360° Infinite Continuous Marquee Track */
+          /* Reviews Display Track: Animated Marquee if >=3 reviews, or Centered Grid if <3 reviews */
           <div
             className="relative overflow-hidden py-4 -mx-4 px-4"
             onMouseEnter={() => setIsPaused(true)}
@@ -190,31 +191,39 @@ export function CustomerReviewsSection() {
             onTouchStart={() => setIsPaused(true)}
             onTouchEnd={() => setIsPaused(false)}
           >
-            {/* Soft gradient edge blurs */}
-            <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
-            <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+            {/* Soft gradient edge blurs only for Marquee */}
+            {isMarquee && (
+              <>
+                <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+                <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-zinc-50 dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+              </>
+            )}
 
             <motion.div
-              key={`marquee-track-${reviews.length}-${reviews.map((r) => r.id).join("_")}`}
-              className="flex gap-4 w-max"
-              animate={isPaused ? {} : { x: ["0%", "50%"] }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: Math.max(16, reviews.length * 6),
-                  ease: "linear",
-                },
-              }}
+              key={`reviews-track-${reviews.length}-${reviews.map((r) => r.id).join("_")}`}
+              className={`flex gap-4 ${isMarquee ? "w-max" : "justify-center flex-wrap"}`}
+              animate={isMarquee && !isPaused ? { x: ["0%", "50%"] } : {}}
+              transition={
+                isMarquee
+                  ? {
+                      x: {
+                        repeat: Infinity,
+                        repeatType: "loop",
+                        duration: Math.max(16, reviews.length * 6),
+                        ease: "linear",
+                      },
+                    }
+                  : {}
+              }
             >
-              {marqueeReviews.map((review, idx) => {
+              {displayReviews.map((review, idx) => {
                 const isMale = review.gender !== "female";
                 const isLiked = likedMap[review.id];
 
                 return (
                   <div
                     key={`${review.id}-${idx}`}
-                    className="w-[260px] sm:w-[300px] md:w-[330px] shrink-0 bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm dark:shadow-lg group"
+                    className="w-[270px] sm:w-[300px] md:w-[330px] shrink-0 bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm dark:shadow-lg group"
                   >
                     {/* Card Header: Avatar & Stars */}
                     <div>
@@ -311,7 +320,7 @@ export function CustomerReviewsSection() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                exit={{ opacity: 0, scale: 0.9, y: 0 }}
                 className="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl z-[9999] text-right my-auto max-h-[88vh] overflow-y-auto scrollbar-none"
               >
                 {/* Close Button X (Prominent & High Z-index) */}
