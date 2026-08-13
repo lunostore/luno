@@ -72,32 +72,58 @@ export async function uploadMultipleToCloudinary(files: File[]): Promise<string[
 }
 
 export function getCloudinaryPublicId(url: string): string {
-  // Extract public_id from Cloudinary URL
-  const parts = url.split("/");
-  const uploadIndex = parts.indexOf("upload");
-  if (uploadIndex === -1) return "";
-  // Skip version if present (v1234567)
-  const afterUpload = parts.slice(uploadIndex + 1);
-  const withoutVersion = afterUpload[0]?.startsWith("v")
-    ? afterUpload.slice(1)
-    : afterUpload;
-  const filename = withoutVersion.join("/");
-  // Remove extension
-  return filename.replace(/\.[^/.]+$/, "");
+  if (!url || typeof url !== "string") return "";
+  if (!url.includes("cloudinary.com")) return "";
+
+  try {
+    const cleanUrl = url.split("?")[0];
+    const uploadIndex = cleanUrl.indexOf("/upload/");
+    if (uploadIndex === -1) return "";
+
+    const pathAfterUpload = cleanUrl.substring(uploadIndex + "/upload/".length);
+    const parts = pathAfterUpload.split("/");
+
+    const publicIdParts: string[] = [];
+    for (const part of parts) {
+      // Skip Cloudinary version prefix like v1739000000
+      if (/^v\d+$/.test(part)) continue;
+      // Skip Cloudinary image transformations (parts containing comma or equals)
+      if (part.includes(",") || part.includes("=")) continue;
+      publicIdParts.push(part);
+    }
+
+    if (publicIdParts.length === 0) return "";
+
+    const fullFilename = publicIdParts.join("/");
+    // Strip file extension (.jpg, .png, .webp, .jpeg, etc.)
+    return fullFilename.replace(/\.[^/.]+$/, "");
+  } catch (err) {
+    console.error("Failed to extract Cloudinary public_id from URL:", url, err);
+    return "";
+  }
 }
 
 export async function deleteFromCloudinary(urls: string | string[]): Promise<void> {
   const urlArray = Array.isArray(urls) ? urls : [urls];
-  const publicIds = urlArray.map(getCloudinaryPublicId).filter(Boolean);
+  const publicIds = urlArray
+    .map(getCloudinaryPublicId)
+    .filter((id): id is string => Boolean(id) && id.length > 0);
 
   if (publicIds.length === 0) return;
 
   try {
-    await fetch("/api/admin/cloudinary/delete", {
+    const res = await fetch("/api/admin/cloudinary/delete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ publicIds }),
     });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.warn("Cloudinary delete API call returned error:", errData);
+    } else {
+      console.log("Cloudinary deleted public IDs successfully:", publicIds);
+    }
   } catch (err) {
     console.error("Failed to delete images from Cloudinary:", err);
   }

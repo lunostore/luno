@@ -3,7 +3,7 @@
 import { useCallback, useState, useId } from "react";
 import Image from "next/image";
 import { Upload, X, Plus, Loader2 } from "lucide-react";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
 import { toast } from "sonner";
 
 interface ImageUploaderProps {
@@ -56,7 +56,11 @@ export function ImageUploader({
   );
 
   const removeImage = (index: number) => {
+    const urlToRemove = images[index];
     onChange(images.filter((_, i) => i !== index));
+    if (urlToRemove) {
+      deleteFromCloudinary(urlToRemove).catch(console.error);
+    }
   };
 
   return (

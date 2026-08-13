@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Minus, Plus, ChevronLeft, ChevronRight, Heart, X } from "lucide-react";
 import { toast } from "sonner";
-import { getProductBySlug, subscribeToProducts } from "@/lib/firebase/firestore";
+import { subscribeToProducts } from "@/lib/firebase/firestore";
 import { useCart } from "@/features/cart/CartProvider";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
@@ -161,6 +161,8 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
   const sizeStock = hasVariants
     ? activeVariant?.sizes?.find((s) => s.size === selectedSize)?.stock ?? 99
     : 99;
+
+  const sizeChartImg = product.sizeChartUrl || (product.sizeChartType === "pants" ? "/size-chart-pants.png" : product.sizeChartType === "tshirt" ? "/size-chart-tshirt.png" : null);
 
   const handleColorSelect = (variant: ProductVariant) => {
     setSelectedColor({
@@ -414,13 +416,15 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
                       {selectedSize}
                     </span>
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowSizeGuide(true)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800/60"
-                  >
-                    <span>📏 جدول المقاسات (Size Guide)</span>
-                  </button>
+                  {sizeChartImg && (
+                    <button
+                      type="button"
+                      onClick={() => setShowSizeGuide(true)}
+                      className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800/60"
+                    >
+                      <span>📏 جدول المقاسات (Size Guide)</span>
+                    </button>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {availableSizes.map((sizeStockItem) => {
@@ -450,52 +454,48 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
               <div className="flex items-center border border-gray-200 dark:border-zinc-800 rounded-lg overflow-hidden h-10">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-8 h-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                  className="w-9 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
-                  <Minus size={12} />
+                  <Minus size={14} />
                 </button>
-                <span className="w-8 text-center font-semibold text-xs">
+                <span className="w-10 text-center font-bold text-xs">
                   {quantity}
                 </span>
                 <button
-                  onClick={() =>
-                    setQuantity((q) =>
-                      sizeStock > 0 ? Math.min(sizeStock, q + 1) : q + 1
-                    )
-                  }
-                  className="w-8 h-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                  onClick={() => setQuantity((q) => Math.min(sizeStock, q + 1))}
+                  className="w-9 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
-                  <Plus size={12} />
+                  <Plus size={14} />
                 </button>
               </div>
 
-              <motion.button
+              <button
+                type="button"
                 onClick={handleAddToCart}
                 disabled={adding || sizeStock === 0}
-                className="flex-1 h-10 bg-black text-white dark:bg-white dark:text-black rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                whileTap={{ scale: 0.98 }}
+                className="flex-1 h-10 bg-black text-white dark:bg-white dark:text-black rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {adding ? (
                   <Spinner size="sm" className="border-white dark:border-black border-t-transparent" />
                 ) : (
                   <>
-                    <ShoppingBag size={14} />
-                    {sizeStock === 0 ? "Out of Stock" : "إضافة للسلة / Add to Cart"}
+                    <ShoppingBag size={16} />
+                    <span>إضافة للسلة / Add to Cart</span>
                   </>
                 )}
-              </motion.button>
+              </button>
 
               <button
                 type="button"
                 onClick={() => toggleWishlist(product)}
-                className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all ${
-                  isInWishlist(product.id)
-                    ? "bg-red-50/50 text-red-500 border-red-100 dark:bg-red-950/20 dark:border-red-900/50"
-                    : "bg-white dark:bg-zinc-900 text-zinc-400 border-gray-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50"
+                className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
+                  inWishlist
+                    ? "bg-red-50 text-red-500 border-red-200"
+                    : "border-gray-200 dark:border-zinc-800 text-gray-600 hover:bg-gray-50 dark:hover:bg-zinc-800"
                 }`}
-                title={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+                title="إضافة للمفضلة"
               >
-                <Heart size={16} className={isInWishlist(product.id) ? "fill-red-500 text-red-500" : ""} />
+                <Heart size={16} fill={inWishlist ? "currentColor" : "none"} />
               </button>
             </div>
 
@@ -545,7 +545,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📏</span>
                   <h3 className="font-black text-sm uppercase tracking-wider text-white">
-                    جدول مقاسات Luno Store ({product.sizeChartType === "pants" ? "بناطيل / Pants" : "تيشرتات / T-Shirts"})
+                    جدول مقاسات {product.name}
                   </h3>
                 </div>
                 <button
@@ -559,8 +559,8 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
               <div className="flex justify-center p-2 bg-black rounded-2xl border border-zinc-800/80 overflow-hidden shadow-inner">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={product.sizeChartType === "pants" ? "/size-chart-pants.png" : "/size-chart-tshirt.png"}
-                  alt="Luno Store Size Guide"
+                  src={sizeChartImg || "/size-chart-tshirt.png"}
+                  alt={`${product.name} Size Guide`}
                   className="w-full max-h-[70vh] object-contain rounded-xl"
                 />
               </div>

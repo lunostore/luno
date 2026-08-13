@@ -1,5 +1,11 @@
 import { Timestamp } from "firebase/firestore";
 
+export interface CustomSizeChart {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -22,7 +28,9 @@ export interface Product {
   featured: boolean;
   bestSeller: boolean;
   isNew?: boolean;     // شارة NEW للمنتجات الجديدة
-  sizeChartType?: "tshirt" | "pants"; // نوع جدول المقاسات للمنتج
+  sizeChartType?: string; // دعم توافقي قديم
+  sizeChartId?: string;   // معرف جدول المقاسات المخصص
+  sizeChartUrl?: string;  // رابط صورة جدول المقاسات المخصص
   createdAt: Timestamp | Date;
 }
 

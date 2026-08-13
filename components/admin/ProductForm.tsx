@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, X, Upload, Trash2, Palette, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { createProduct, updateProduct } from "@/lib/firebase/firestore";
+import { createProduct, updateProduct, extractProductImages, getSiteSettings } from "@/lib/firebase/firestore";
 import { generateSlug, generateSKU } from "@/lib/utils";
 import { productSchema, type ProductFormData } from "@/lib/validations/product.schema";
-import { uploadToCloudinary } from "@/lib/cloudinary";
-import type { Product, SizeStock } from "@/types/product";
+import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
+import type { Product, SizeStock, CustomSizeChart } from "@/types/product";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -23,18 +23,26 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
 
-  // Custom states for variant adding inputs
+  const [customSizeInputs, setCustomSizeInputs] = useState<Record<number, string>>({});
   const [newColorName, setNewColorName] = useState("");
   const [newColorHex, setNewColorHex] = useState("#000000");
+  const [customSizeCharts, setCustomSizeCharts] = useState<CustomSizeChart[]>([]);
 
-  // Custom Size Input per Variant Index
-  const [customSizeInputs, setCustomSizeInputs] = useState<Record<number, string>>({});
+  useEffect(() => {
+    getSiteSettings()
+      .then((data) => {
+        if (data?.sizeCharts) {
+          setCustomSizeCharts(data.sizeCharts);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -42,56 +50,83 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       ? {
           name: initialData.name,
           slug: initialData.slug,
-          sku: initialData.sku || generateSKU(),
-          description: initialData.description,
-          subtitle: initialData.subtitle || "Premium Oversized Fit",
-          material: initialData.material || "100% Cotton",
-          weight: initialData.weight || "230 GSM",
-          fit: initialData.fit || "Unisex",
-          isNew: initialData.isNew ?? false,
+          sku: initialData.sku || "",
+          description: initialData.description || "",
+          subtitle: initialData.subtitle || "",
           price: initialData.price,
           salePrice: initialData.salePrice,
-          category: initialData.category || "all",
-          brand: initialData.brand || "Luno Store",
-          mainImage: initialData.mainImage,
+          category: initialData.category || "t-shirts",
+          brand: initialData.brand || "LUNO",
+          mainImage: initialData.mainImage || "",
           hoverImage: initialData.hoverImage || "",
+          images: initialData.images || [],
           detailImages: initialData.detailImages || [],
-          variants: initialData.variants,
-          featured: initialData.featured ?? false,
+          material: initialData.material || "100% Premium Cotton",
+          weight: initialData.weight || "240 GSM",
+          fit: initialData.fit || "Oversized Fit",
+          sizeChartType: initialData.sizeChartType || "",
+          sizeChartId: initialData.sizeChartId || "",
+          sizeChartUrl: initialData.sizeChartUrl || "",
+          featured: initialData.featured ?? true,
           bestSeller: initialData.bestSeller ?? false,
-          sizeChartType: initialData.sizeChartType || "tshirt",
+          isNew: initialData.isNew ?? true,
+          variants: initialData.variants || [],
         }
       : {
-          category: "all",
-          brand: "Luno Store",
-          subtitle: "Premium Oversized Fit",
-          material: "100% Cotton",
-          weight: "230 GSM",
-          fit: "Unisex",
-          isNew: false,
-          detailImages: [],
-          variants: [],
-          featured: false,
-          bestSeller: false,
+          name: "",
+          slug: "",
+          sku: "",
+          description: "",
+          subtitle: "",
           price: 0,
-          sku: generateSKU(),
-          sizeChartType: "tshirt",
+          category: "t-shirts",
+          brand: "LUNO",
+          mainImage: "",
           hoverImage: "",
+          images: [],
+          detailImages: [],
+          material: "100% Premium Cotton",
+          weight: "240 GSM",
+          fit: "Oversized Fit",
+          sizeChartType: "",
+          sizeChartId: "",
+          sizeChartUrl: "",
+          featured: true,
+          bestSeller: false,
+          isNew: true,
+          variants: [
+            {
+              colorName: "أسود (Black)",
+              colorHex: "#000000",
+              image: "",
+              sizes: [
+                { size: "S", stock: 10 },
+                { size: "M", stock: 10 },
+                { size: "L", stock: 10 },
+                { size: "XL", stock: 10 },
+              ],
+            },
+          ],
         },
   });
 
+  const watchedName = watch("name");
+  const watchedVariants = watch("variants") || [];
   const watchedMainImage = watch("mainImage");
   const watchedHoverImage = watch("hoverImage");
+  const watchedImages = watch("images") || [];
+  const watchedSizeChartId = watch("sizeChartId");
+  const watchedSizeChartUrl = watch("sizeChartUrl");
   const watchedDetailImages = watch("detailImages") || [];
-  const watchedVariants = watch("variants") || [];
-  const watchedSizeChartType = watch("sizeChartType") || "tshirt";
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    setValue("name", name);
-    if (!productId) {
-      setValue("slug", generateSlug(name), { shouldValidate: true });
-    }
+    const val = e.target.value;
+    setValue("name", val, { shouldValidate: true });
+    setValue("slug", generateSlug(val), { shouldValidate: true });
+  };
+
+  const handleGenerateSKU = () => {
+    setValue("sku", generateSKU(), { shouldValidate: true });
   };
 
   // Upload main cover image to Cloudinary
@@ -169,6 +204,10 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     const current = [...watchedVariants];
     const variant = current[variantIdx];
     const existingImages = variant.images || (variant.image ? [variant.image] : []);
+    const urlToRemove = existingImages[imgIdx];
+    if (urlToRemove) {
+      deleteFromCloudinary(urlToRemove).catch(console.error);
+    }
     const updatedImages = existingImages.filter((_, idx) => idx !== imgIdx);
     current[variantIdx] = {
       ...variant,
@@ -207,6 +246,13 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   };
 
   const removeColorVariant = (index: number) => {
+    const variantToRemove = watchedVariants[index];
+    if (variantToRemove) {
+      const urlsToRemove = [variantToRemove.image, ...(variantToRemove.images || [])].filter(Boolean);
+      if (urlsToRemove.length > 0) {
+        deleteFromCloudinary(urlsToRemove).catch(console.error);
+      }
+    }
     const updated = watchedVariants.filter((_, idx) => idx !== index);
     setValue("variants", updated, { shouldValidate: true });
   };
@@ -257,7 +303,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     const variant = updatedVariants[variantIndex];
     const sizes = [...variant.sizes];
     
-    const stockVal = rawStock === "" ? ("" as any) : Math.max(0, parseInt(rawStock) || 0);
+    const stockVal = rawStock === "" ? 0 : Math.max(0, parseInt(rawStock) || 0);
     sizes[sizeIndex] = { ...sizes[sizeIndex], stock: stockVal };
     updatedVariants[variantIndex] = { ...variant, sizes };
     
@@ -283,17 +329,26 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
         variants: sanitizedVariants,
       };
 
-      if (productId) {
+      if (productId && initialData) {
+        const oldImages = extractProductImages(initialData);
+        const newImages = extractProductImages(sanitizedData);
+        const removedImages = oldImages.filter((url) => !newImages.includes(url));
+        if (removedImages.length > 0) {
+          deleteFromCloudinary(removedImages).catch(console.error);
+        }
         await updateProduct(productId, sanitizedData);
-        toast.success("Product updated successfully!");
+        toast.success("تم تحديث المنتج بنجاح!");
+      } else if (productId) {
+        await updateProduct(productId, sanitizedData);
+        toast.success("تم تحديث المنتج بنجاح!");
       } else {
         await createProduct(sanitizedData);
-        toast.success("Product created successfully!");
+        toast.success("تم إنشاء المنتج بنجاح!");
       }
       router.refresh();
       router.push("/admin/products");
     } catch {
-      toast.error("Failed to save product. Please check all variant inputs.");
+      toast.error("فشل حفظ المنتج. يرجى التحقق من مدخلات النموذج.");
     } finally {
       setSaving(false);
     }
@@ -611,75 +666,94 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
         </div>
       </div>
 
-      {/* 3.5 Size Chart Selection Panel */}
+      {/* 3.5 Custom Size Chart Selection Panel */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)] space-y-4">
         <div>
-          <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest">جدول المقاسات (SIZE CHART GUIDE)</h2>
-          <p className="text-[10px] text-zinc-400 font-medium mt-1">اختر صورة جدول المقاسات المناسبة للمنتج ليتم عرضها للعميل في صفحة الشراء</p>
+          <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest flex items-center gap-2">
+            <span>📏 جدول المقاسات للمنتج (CUSTOM SIZE CHART)</span>
+          </h2>
+          <p className="text-[10px] text-zinc-400 font-medium mt-1">
+            اختر جدول المقاسات المناسب لهذا المنتج من الجداول التي قمت برفعها وتسميتها في الإعدادات
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label
-            className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-              watchedSizeChartType === "tshirt"
-                ? "border-zinc-900 bg-zinc-900 text-white shadow-lg"
-                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 text-zinc-800"
-            }`}
-          >
-            <input
-              type="radio"
-              value="tshirt"
-              {...register("sizeChartType")}
-              className="hidden"
+        {customSizeCharts.length === 0 ? (
+          <div className="p-4 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-600 text-center space-y-1">
+            <p>لم تقم برفع أي جدول مقاسات في الإعدادات حتى الآن.</p>
+            <p className="text-[11px] text-zinc-400">
+              يمكنك إضافة وتسمية جداول مقاساتك الخاصة بسهولة عبر الانتقال إلى{" "}
+              <a href="/admin/settings" target="_blank" className="font-bold underline text-zinc-900">
+                صفحة الإعدادات &gt; جداول المقاسات المخصصة
+              </a>.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setValue("sizeChartId", "", { shouldValidate: true });
+                setValue("sizeChartUrl", "", { shouldValidate: true });
+              }}
+              className={`p-3 rounded-xl border-2 text-right transition-all flex items-center gap-3 ${
+                !watchedSizeChartUrl
+                  ? "border-zinc-900 bg-zinc-900 text-white shadow-md"
+                  : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 text-zinc-700"
+              }`}
+            >
+              <div className="w-9 h-9 rounded-lg bg-zinc-200/40 flex items-center justify-center font-bold text-xs">
+                🚫
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold">بدون جدول مقاسات</p>
+                <p className="text-[10px] opacity-70">عدم عرض جدول مقاسات للمنتج</p>
+              </div>
+            </button>
+
+            {customSizeCharts.map((chart) => {
+              const isSelected = watchedSizeChartUrl === chart.imageUrl || watchedSizeChartId === chart.id;
+              return (
+                <button
+                  key={chart.id}
+                  type="button"
+                  onClick={() => {
+                    setValue("sizeChartId", chart.id, { shouldValidate: true });
+                    setValue("sizeChartUrl", chart.imageUrl, { shouldValidate: true });
+                  }}
+                  className={`p-3 rounded-xl border-2 text-right transition-all flex items-center gap-3 ${
+                    isSelected
+                      ? "border-zinc-900 bg-zinc-900 text-white shadow-md"
+                      : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 text-zinc-700"
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-lg overflow-hidden border border-zinc-300/30 flex-shrink-0 bg-black">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={chart.imageUrl} alt={chart.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold truncate">{chart.name}</p>
+                    <p className="text-[10px] opacity-70">جدول مقاسات مخصص</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Live Preview of Selected Size Chart */}
+        {watchedSizeChartUrl && (
+          <div className="border border-zinc-100 rounded-xl p-3 bg-zinc-50 flex flex-col items-center mt-3">
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
+              معاينة جدول المقاسات المختار للمنتج:
+            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={watchedSizeChartUrl}
+              alt="Selected Size Chart"
+              className="max-h-56 object-contain rounded-lg border border-zinc-200 shadow-sm"
             />
-            <div className="w-12 h-12 rounded-lg overflow-hidden border border-zinc-300/30 flex-shrink-0 bg-black">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/size-chart-tshirt.png" alt="T-Shirts Size Chart" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="text-xs font-black">👕 جدول مقاسات التيشرتات (T-Shirts)</p>
-              <p className={`text-[10px] ${watchedSizeChartType === "tshirt" ? "text-zinc-300" : "text-zinc-400"}`}>
-                Oversize & Box Fit T-Shirts
-              </p>
-            </div>
-          </label>
-
-          <label
-            className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-              watchedSizeChartType === "pants"
-                ? "border-zinc-900 bg-zinc-900 text-white shadow-lg"
-                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 text-zinc-800"
-            }`}
-          >
-            <input
-              type="radio"
-              value="pants"
-              {...register("sizeChartType")}
-              className="hidden"
-            />
-            <div className="w-12 h-12 rounded-lg overflow-hidden border border-zinc-300/30 flex-shrink-0 bg-black">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/size-chart-pants.png" alt="Pants Size Chart" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="text-xs font-black">👖 جدول مقاسات البناطيل (Pants)</p>
-              <p className={`text-[10px] ${watchedSizeChartType === "pants" ? "text-zinc-300" : "text-zinc-400"}`}>
-                Length & Waist Chart
-              </p>
-            </div>
-          </label>
-        </div>
-
-        {/* Live Size Chart Preview */}
-        <div className="border border-zinc-100 rounded-xl p-3 bg-zinc-50 flex flex-col items-center">
-          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">معاينة جدول المقاسات المختار للمنتج:</p>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={watchedSizeChartType === "pants" ? "/size-chart-pants.png" : "/size-chart-tshirt.png"}
-            alt="Selected Size Chart"
-            className="max-h-56 object-contain rounded-lg border border-zinc-200 shadow-sm"
-          />
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 4. Variants & Stock */}

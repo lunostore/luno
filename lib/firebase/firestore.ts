@@ -18,7 +18,7 @@ import {
   type QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./config";
-import type { Product } from "@/types/product";
+import type { Product, CustomSizeChart } from "@/types/product";
 import type { Order, OrderStatus, CreateOrderInput } from "@/types/order";
 import type { Category } from "@/types/category";
 import { deleteFromCloudinary } from "../cloudinary";
@@ -191,18 +191,39 @@ export async function updateProduct(
   await updateDoc(doc(db, "products", id), cleanUndefined(data));
 }
 
+export function extractProductImages(product: Partial<Product>): string[] {
+  const images = new Set<string>();
+
+  if (product.mainImage) images.add(product.mainImage);
+  if (product.hoverImage) images.add(product.hoverImage);
+
+  if (Array.isArray(product.images)) {
+    product.images.forEach((img) => img && images.add(img));
+  }
+  if (Array.isArray(product.detailImages)) {
+    product.detailImages.forEach((img) => img && images.add(img));
+  }
+
+  if (Array.isArray(product.variants)) {
+    product.variants.forEach((v) => {
+      if (v.image) images.add(v.image);
+      if (Array.isArray(v.images)) {
+        v.images.forEach((img) => img && images.add(img));
+      }
+    });
+  }
+
+  return Array.from(images).filter((url) => typeof url === "string" && url.trim().length > 0);
+}
+
 export async function deleteProduct(id: string): Promise<void> {
-  // Fetch product to collect image URLs before deletion
+  // Fetch product to collect ALL image URLs (main, hover, gallery, variants) before deletion
   try {
     const product = await getProductById(id);
     if (product) {
-      const allImages = [
-        product.mainImage,
-        ...(product.variants?.map((v) => v.image) || []),
-      ].filter(Boolean) as string[];
-
+      const allImages = extractProductImages(product);
       if (allImages.length > 0) {
-        deleteFromCloudinary(allImages).catch(console.error);
+        await deleteFromCloudinary(allImages);
       }
     }
   } catch (err) {
@@ -550,6 +571,9 @@ export interface SiteSettings {
   maintenanceReason?: string;
   maintenanceEndTime?: string; // ISO String (e.g. 2026-08-09T21:00:00.000Z)
   maintenancePin?: string; // Secret PIN to bypass maintenance mode (e.g. "1234")
+
+  // Custom Size Charts Management
+  sizeCharts?: CustomSizeChart[];
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {

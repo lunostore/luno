@@ -34,13 +34,14 @@ export default function AdminLoginPage() {
       await signInAdmin(data.email, data.password);
       toast.success("أهلاً بك! تم تسجيل الدخول بنجاح.");
       router.push("/admin");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Admin Login Error:", err);
 
+      const firebaseErr = err as { code?: string; message?: string };
       let message = "بيانات الدخول غير صحيحة";
-      if (err?.code === "auth/unauthorized-domain") {
+      if (firebaseErr?.code === "auth/unauthorized-domain") {
         message = "الدومين غير مصرح له في Firebase Console (Authorized Domains).";
-      } else if (err?.code === "auth/invalid-credential" || err?.code === "auth/user-not-found" || err?.code === "auth/wrong-password") {
+      } else if (firebaseErr?.code === "auth/invalid-credential" || firebaseErr?.code === "auth/user-not-found" || firebaseErr?.code === "auth/wrong-password") {
         message = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
       } else if (err instanceof Error && err.message) {
         message = err.message;

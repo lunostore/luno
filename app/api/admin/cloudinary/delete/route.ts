@@ -9,6 +9,22 @@ cloudinary.config({
 
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!apiKey || !apiSecret) {
+      console.error(
+        "⚠️ Cloudinary Delete Warning: CLOUDINARY_API_KEY or CLOUDINARY_API_SECRET missing in environment variables."
+      );
+      return NextResponse.json(
+        {
+          error: "CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET must be configured in environment variables to allow image deletion.",
+          success: false,
+        },
+        { status: 400 }
+      );
+    }
+
     const { publicId, publicIds } = await req.json();
     const idsToDelete: string[] = publicIds || (publicId ? [publicId] : []);
 
@@ -20,12 +36,24 @@ export async function POST(req: Request) {
     }
 
     const results = await Promise.all(
-      idsToDelete.map((id) =>
-        cloudinary.uploader.destroy(id, { invalidate: true }).catch((err) => {
-          console.error("Cloudinary destroy error for", id, err);
-          return { result: "error", id };
-        })
-      )
+      idsToDelete.map(async (id) => {
+        try {
+          // 1. Attempt image destroy first
+          const res = await cloudinary.uploader.destroy(id, { invalidate: true });
+          if (res.result !== "ok") {
+            // 2. Try raw resource type if image destroy was not ok
+            const rawRes = await cloudinary.uploader.destroy(id, {
+              resource_type: "raw",
+              invalidate: true,
+            });
+            return { id, result: rawRes.result };
+          }
+          return { id, result: res.result };
+        } catch (err) {
+          console.error("Cloudinary destroy error for ID:", id, err);
+          return { id, result: "error", error: String(err) };
+        }
+      })
     );
 
     return NextResponse.json({ success: true, results });
