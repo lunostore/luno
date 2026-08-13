@@ -4,24 +4,17 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Instagram, Send } from "lucide-react";
 import { toast } from "sonner";
-import { getSiteSettings, createContactMessage, type SiteSettings } from "@/lib/firebase/firestore";
+import { createContactMessage } from "@/lib/firebase/firestore";
+import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function ContactPage() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const { settings } = useSiteSettings();
 
   const [name, setName] = useState("");
   const [emailInput, setEmailInput] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    getSiteSettings()
-      .then((data) => {
-        if (data) setSettings(data);
-      })
-      .catch(console.error);
-  }, []);
 
   const storeEmail = settings?.storeEmail || "lunoegypt@gmail.com";
   const storePhone = settings?.storePhone || "01107108679";

@@ -250,10 +250,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                           e.stopPropagation();
                           setSelectedVariantIdx(vIdx);
                         }}
-                        className={`w-3.5 h-3.5 rounded-full transition-all border-0 ${
+                        className={`w-4 h-4 rounded-full transition-all border-2 border-black dark:border-white shadow-sm ${
                           selectedVariantIdx === vIdx
                             ? "ring-2 ring-amber-500 dark:ring-amber-400 scale-125 z-10"
-                            : "opacity-70 hover:opacity-100 hover:scale-110"
+                            : "opacity-80 hover:opacity-100 hover:scale-110"
                         }`}
                         style={{ backgroundColor: variant.colorHex }}
                         title={variant.colorName}
@@ -263,28 +263,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </div>
               ) : null}
             </div>
-          </div>
-
-          {/* ── ACTION BUTTONS ROW (BAG + ADD TO CART) ── */}
-          <div className="flex items-center gap-2.5 pt-2 mt-auto">
-            {/* Bag Icon Button */}
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="w-12 h-12 rounded-xl sm:rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 dark:text-white flex items-center justify-center transition-all active:scale-95 flex-shrink-0 border-0 shadow-none"
-              title="إضافة سريعة للسلة"
-            >
-              <ShoppingBag size={18} />
-            </button>
-
-            {/* Main ADD TO CART Button */}
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="flex-1 h-12 rounded-xl sm:rounded-2xl bg-[#D4B886] hover:bg-[#C5A775] text-zinc-950 font-black text-xs sm:text-sm tracking-widest uppercase flex items-center justify-center transition-all active:scale-95 cursor-pointer border-0 shadow-none"
-            >
-              ADD TO CART
-            </button>
           </div>
         </div>
       </div>

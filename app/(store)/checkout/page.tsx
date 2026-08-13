@@ -19,7 +19,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCart } from "@/features/cart/CartProvider";
-import { createOrder, getShippingRates, getSiteSettings, validateStockAvailability } from "@/lib/firebase/firestore";
+import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
+import { createOrder, getShippingRates, validateStockAvailability } from "@/lib/firebase/firestore";
 import { formatPrice } from "@/lib/utils";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/validations/checkout.schema";
@@ -35,6 +36,8 @@ type OnlineMethod = "vodafone_cash" | "instapay";
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
+  const { settings: siteSettings } = useSiteSettings();
+
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -51,10 +54,13 @@ export default function CheckoutPage() {
 
   // Shipping & settings
   const [shippingRates, setShippingRates] = useState<GovernorateRate[]>([]);
-  const [vodafoneNumber, setVodafoneNumber] = useState("01107108679");
-  const [instapayUsername, setInstapayUsername] = useState("@lunostore");
 
-  const [onlinePaymentEnabled, setOnlinePaymentEnabled] = useState<boolean>(true);
+  // Derived real-time settings values
+  const vodafoneNumber = siteSettings?.vodafoneCash?.trim() || "";
+  const instapayUsername = siteSettings?.instapayUsername?.trim() || "@lunostore";
+  const onlinePaymentEnabled = siteSettings?.onlinePaymentEnabled !== false;
+  const vodafoneCashEnabled = siteSettings?.vodafoneCashEnabled !== false;
+  const instapayEnabled = siteSettings?.instapayEnabled !== false;
   const [orderSuccess, setOrderSuccess] = useState(false);
 
   const {
@@ -106,19 +112,6 @@ export default function CheckoutPage() {
         }
       })
       .catch(console.error);
-    // Load site settings for payment numbers
-    getSiteSettings()
-      .then((s) => {
-        if (s?.storePhone) setVodafoneNumber(s.storePhone);
-        if (s?.instapayUsername) setInstapayUsername(s.instapayUsername);
-        if (s?.onlinePaymentEnabled !== undefined) {
-          setOnlinePaymentEnabled(s.onlinePaymentEnabled);
-          if (!s.onlinePaymentEnabled) {
-            setPaymentCategory("cash");
-          }
-        }
-      })
-      .catch(() => {});
   }, [items, router, setValue]);
 
   // Sync paymentMethod field with category/method state
@@ -463,7 +456,7 @@ export default function CheckoutPage() {
                           <Smartphone size={18} className={onlineMethod === "vodafone_cash" ? "text-red-500" : ""} />
                           <div className="text-right">
                             <p className="text-xs font-black">فودافون كاش</p>
-                            <p className="text-[10px] text-gray-500 font-mono">{vodafoneNumber}</p>
+                            <p className="text-[10px] text-gray-500 font-mono">{vodafoneNumber || "غير مدخل بالأدمن"}</p>
                           </div>
                         </button>
 

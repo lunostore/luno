@@ -396,10 +396,10 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
                       key={variant.colorHex}
                       onClick={() => handleColorSelect(variant)}
                       title={variant.colorName}
-                      className={`w-7 h-7 rounded-full border-2 transition-all ${
+                      className={`w-7 h-7 rounded-full border-2 border-black dark:border-white transition-all shadow-sm ${
                         selectedColor?.hex === variant.colorHex
-                          ? "border-black dark:border-white scale-110"
-                          : "border-gray-200 hover:border-gray-400"
+                          ? "ring-2 ring-amber-500 dark:ring-amber-400 scale-110 z-10"
+                          : "opacity-75 hover:opacity-100 hover:scale-105"
                       }`}
                       style={{ backgroundColor: variant.colorHex }}
                     />

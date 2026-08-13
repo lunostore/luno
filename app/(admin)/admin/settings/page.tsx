@@ -77,7 +77,7 @@ function AdminSettingsContent() {
     footerDescription: "Premium fashion for modern people. Elevate your style with our curated collections of high-quality clothing and accessories.",
     storeEmail: "lunoegypt@gmail.com",
     storePhone: "01107108679",
-    vodafoneCash: "01107108679",
+    vodafoneCash: "",
     instapayUsername: "@lunostore",
     vodafoneCashEnabled: true,
     instapayEnabled: true,
@@ -212,79 +212,51 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
     );
   }
 
-  const SETTINGS_TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; badge?: number }[] = [
-    { id: "maintenance", label: "الصيانة والتايمر", icon: ShieldAlert },
-    { id: "media", label: "وسائط الهيرو والإنترو", icon: Sparkles },
-    { id: "sizeCharts", label: "جداول المقاسات المخصصة", icon: Ruler, badge: settings.sizeCharts?.length || 0 },
-    { id: "about", label: "صفحة من نحن", icon: Info },
-    { id: "policies", label: "الشروط والسياسات", icon: Shield },
-    { id: "copy", label: "نصوص وعناوين المتجر", icon: Type },
-    { id: "payments", label: "بيانات الدفع والتواصل", icon: CreditCard },
-    { id: "social", label: "روابط التواصل الاجتماعي", icon: Share2 },
-  ];
+  const TAB_DETAILS: Record<SettingsTab, { title: string; subtitle: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
+    maintenance: { title: "الصيانة والتايمر", subtitle: "إعدادات وضع الصيانة والعد التنازلي للمتجر", icon: ShieldAlert },
+    media: { title: "وسائط الهيرو والإنترو", subtitle: "إدارة فيديو وصور البنر الرئيسي وشاشة الدخول", icon: Sparkles },
+    sizeCharts: { title: "جداول المقاسات المخصصة", subtitle: "إضافة وتعديل جداول مقاسات المنتجات", icon: Ruler },
+    about: { title: "محتوى صفحة من نحن (About Us)", subtitle: "تعديل نصوص وصور صفحة من نحن الخاصة بالبراند", icon: Info },
+    policies: { title: "الشروط والسياسات", subtitle: "تعديل سياسات الشحن والاستبدال والاسترجاع", icon: Shield },
+    copy: { title: "نصوص وعناوين المتجر", subtitle: "تعديل اسم المتجر وشعارات الهيرو والفوتر", icon: Type },
+    payments: { title: "بيانات الدفع والتواصل", subtitle: "تعديل رقم فودافون كاش ويوزر انستا باي وأرقام الدعم", icon: CreditCard },
+    social: { title: "روابط التواصل الاجتماعي", subtitle: "تعديل حسابات إنستجرام وتيك توك وفيسبوك", icon: Share2 },
+  };
+
+  const currentTabInfo = TAB_DETAILS[activeTab] || TAB_DETAILS["maintenance"];
+  const CurrentIcon = currentTabInfo.icon;
 
   return (
-    <div className="space-y-8 max-w-5xl pb-16 font-sans" dir="rtl">
-      {/* Page Header */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
-            <Sliders size={14} />
-            مركز التحكم والإعدادات الفرعية (CMS Branch Navigation)
+    <div className="space-y-6 w-full pb-16 font-sans" dir="rtl">
+      {/* Sleek Header Bar for Current Active Section */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-zinc-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-zinc-900 text-amber-400 flex items-center justify-center font-black shadow-md shrink-0">
+            <CurrentIcon size={20} />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900">
-            إعدادات وجداول مقاسات الموقع
-          </h1>
-          <p className="text-zinc-500 text-xs mt-1">
-            اختر الفرع المناسب من التبويبات أدناه لتخصيص محتوى وإعدادات المتجر بسهولة.
-          </p>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-zinc-900 tracking-tight">
+              {currentTabInfo.title}
+            </h1>
+            <p className="text-zinc-500 text-xs mt-0.5 font-medium">
+              {currentTabInfo.subtitle}
+            </p>
+          </div>
         </div>
 
         <button
           type="button"
           onClick={() => handleSave()}
           disabled={saving}
-          className="inline-flex items-center justify-center gap-2 bg-zinc-900 text-white px-6 py-3.5 rounded-2xl font-bold text-xs hover:bg-zinc-800 transition-all shadow-md disabled:opacity-50 self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 bg-zinc-900 text-white px-6 py-3 rounded-2xl font-bold text-xs hover:bg-zinc-800 transition-all shadow-md disabled:opacity-50 self-start sm:self-auto shrink-0 cursor-pointer"
         >
           {saving ? <Spinner size="sm" className="border-white" /> : <Save size={16} />}
-          حفظ التغييرات العامة
+          <span>حفظ التغييرات</span>
         </button>
       </div>
 
-      {/* Sub-Branch Navigation Tabs Bar */}
-      <div className="bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm flex items-center gap-2 overflow-x-auto scrollbar-none">
-        {SETTINGS_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                isActive
-                  ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10 scale-[1.02]"
-                  : "bg-zinc-50/80 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-              }`}
-            >
-              <Icon size={15} className={isActive ? "text-amber-400" : "text-zinc-400"} />
-              <span>{tab.label}</span>
-              {tab.badge !== undefined && tab.badge > 0 && (
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    isActive ? "bg-amber-400 text-zinc-950" : "bg-zinc-200 text-zinc-700"
-                  }`}
-                >
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tab Form Container */}
-      <form onSubmit={handleSave} className="space-y-8">
+      {/* Tab Form Container — Full Width */}
+      <form onSubmit={handleSave} className="space-y-6 w-full">
         {/* 1. MAINTENANCE & RESTOCK MODE TAB */}
         {activeTab === "maintenance" && (
           <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-zinc-800 space-y-6">
