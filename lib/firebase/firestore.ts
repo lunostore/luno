@@ -50,6 +50,15 @@ export function cleanUndefined<T>(obj: T): T {
   return cleaned as T;
 }
 
+export function getTimestampMs(t: any): number {
+  if (!t) return 0;
+  if (typeof t.toMillis === "function") return t.toMillis();
+  if (typeof t.toDate === "function") return t.toDate().getTime();
+  if (t.seconds) return t.seconds * 1000;
+  if (t instanceof Date) return t.getTime();
+  return new Date(t).getTime() || 0;
+}
+
 // ─── Products ──────────────────────────────────────────
 
 export async function getProducts(filters?: {
@@ -1238,11 +1247,7 @@ export function subscribeApprovedReviews(
       })) as CustomerReview[];
 
       // Sort in JS memory to avoid requiring a Firestore composite index!
-      items.sort((a, b) => {
-        const tA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
-        const tB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
-        return tB - tA;
-      });
+      items.sort((a, b) => getTimestampMs(b.createdAt) - getTimestampMs(a.createdAt));
 
       callback(items);
     },
@@ -1267,11 +1272,7 @@ export function subscribeAllReviews(
       })) as CustomerReview[];
 
       // Sort in JS memory
-      items.sort((a, b) => {
-        const tA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
-        const tB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
-        return tB - tA;
-      });
+      items.sort((a, b) => getTimestampMs(b.createdAt) - getTimestampMs(a.createdAt));
 
       callback(items);
     },
