@@ -1236,18 +1236,17 @@ export async function createCustomerReview(data: {
 export function subscribeApprovedReviews(
   callback: (reviews: CustomerReview[]) => void
 ): () => void {
-  const q = query(
-    collection(db, "customer_reviews"),
-    where("status", "==", "approved")
-  );
+  const q = query(collection(db, "customer_reviews"));
 
   return onSnapshot(
     q,
     (snapshot) => {
-      const items: CustomerReview[] = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      })) as CustomerReview[];
+      const items: CustomerReview[] = snapshot.docs
+        .map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }) as CustomerReview[])
+        .filter((r) => r.status === "approved");
 
       // Sort in JS memory to avoid requiring a Firestore composite index!
       items.sort((a, b) => getTimestampMs(b.createdAt) - getTimestampMs(a.createdAt));
