@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -13,8 +13,7 @@ import {
   Banknote,
   Smartphone,
   CreditCard,
-  Upload,
-  X,
+  ShieldCheck,
   CheckCircle2,
   ChevronRight,
 } from "lucide-react";
@@ -22,7 +21,6 @@ import { useCart } from "@/features/cart/CartProvider";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
 import { createOrder, getShippingRates, validateStockAvailability } from "@/lib/firebase/firestore";
 import { formatPrice } from "@/lib/utils";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/validations/checkout.schema";
 import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
@@ -45,12 +43,6 @@ export default function CheckoutPage() {
   // Payment state
   const [paymentCategory, setPaymentCategory] = useState<PaymentCategory>("cash");
   const [onlineMethod, setOnlineMethod] = useState<OnlineMethod>("vodafone_cash");
-
-  // Screenshot upload state
-  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
-  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Shipping & settings
   const [shippingRates, setShippingRates] = useState<GovernorateRate[]>([]);
@@ -93,8 +85,7 @@ export default function CheckoutPage() {
     watchedCity.trim().length >= 2 &&
     !!watchedAddress &&
     watchedAddress.trim().length >= 8 &&
-    (paymentCategory === "cash" ||
-      (isEgyptianPhone(watchedTransferPhone) && !!screenshotFile));
+    (paymentCategory === "cash" || isEgyptianPhone(watchedTransferPhone));
 
   useEffect(() => {
     setMounted(true);
@@ -129,37 +120,6 @@ export default function CheckoutPage() {
   const currentShippingCost = activeRateObj?.price ?? 50;
   const finalOrderTotal = totalPrice + currentShippingCost;
 
-  // Handle screenshot selection
-  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setScreenshotFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setScreenshotPreview(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  const removeScreenshot = () => {
-    setScreenshotFile(null);
-    setScreenshotPreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  // Upload screenshot to Cloudinary
-  const uploadScreenshot = async (): Promise<string | null> => {
-    if (!screenshotFile) return null;
-    setUploadingScreenshot(true);
-    try {
-      const url = await uploadToCloudinary(screenshotFile, "transfer_screenshots");
-      return url ?? null;
-    } catch (err) {
-      console.error("Screenshot upload error:", err);
-      return null;
-    } finally {
-      setUploadingScreenshot(false);
-    }
-  };
-
   if (!mounted || items.length === 0 || isRedirecting) {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
@@ -169,12 +129,6 @@ export default function CheckoutPage() {
   }
 
   const onSubmit = async (data: CheckoutFormData) => {
-    // Extra guard: if online, require screenshot
-    if (paymentCategory === "online" && !screenshotFile) {
-      toast.error("من فضلك ارفع صورة إيصال التحويل");
-      return;
-    }
-
     setSubmitting(true);
     try {
       const orderItems: OrderItem[] = items.map((item) => ({
@@ -202,16 +156,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      let screenshotUrl: string | null = null;
-      if (paymentCategory === "online" && screenshotFile) {
-        screenshotUrl = await uploadScreenshot();
-        if (!screenshotUrl) {
-          toast.error("فشل رفع صورة التحويل — حاول مرة أخرى");
-          setSubmitting(false);
-          return;
-        }
-      }
-
       const orderPayload: CreateOrderInput = {
         customerName: data.customerName.trim(),
         phone: data.phone.trim(),
@@ -230,10 +174,6 @@ export default function CheckoutPage() {
 
       if (data.transferPhone?.trim()) {
         orderPayload.transferPhone = data.transferPhone.trim();
-      }
-
-      if (screenshotUrl) {
-        orderPayload.transferScreenshot = screenshotUrl;
       }
 
       const orderId = await createOrder(orderPayload);
@@ -489,8 +429,7 @@ export default function CheckoutPage() {
                         </p>
                         <ol className="text-xs text-amber-800 dark:text-amber-400 space-y-1 list-decimal list-inside font-medium">
                           <li>حوّل المبلغ ({formatPrice(finalOrderTotal)}) على: <span className="font-black font-mono">{onlineNumberDisplay}</span></li>
-                          <li>اكتب رقم هاتفك اللي حوّلت منه</li>
-                          <li>ارفع صورة إيصال التحويل</li>
+                          <li>اكتب رقم هاتفك الذي حوّلت منه بالأسفل</li>
                         </ol>
                       </div>
 
@@ -503,50 +442,17 @@ export default function CheckoutPage() {
                         {...register("transferPhone")}
                       />
 
-                      {/* Screenshot upload */}
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
-                          صورة إيصال التحويل *
-                        </label>
-                        {!screenshotPreview ? (
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-xl p-6 flex flex-col items-center gap-3 hover:border-gray-400 transition-colors cursor-pointer"
-                          >
-                            <Upload size={24} className="text-gray-400" />
-                            <span className="text-xs font-semibold text-gray-500">
-                              اضغط لرفع صورة الإيصال
-                            </span>
-                            <span className="text-[10px] text-gray-400">PNG, JPG, WEBP</span>
-                          </button>
-                        ) : (
-                          <div className="relative">
-                            <img
-                              src={screenshotPreview}
-                              alt="إيصال التحويل"
-                              className="w-full max-h-52 object-contain rounded-xl border border-gray-200 dark:border-zinc-700"
-                            />
-                            <button
-                              type="button"
-                              onClick={removeScreenshot}
-                              className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:scale-110 transition-transform"
-                            >
-                              <X size={14} />
-                            </button>
-                            <div className="mt-2 flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                              <CheckCircle2 size={14} />
-                              <span className="text-xs font-semibold">تم اختيار الصورة</span>
-                            </div>
-                          </div>
-                        )}
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleScreenshotChange}
-                        />
+                      {/* Admin Review Notice Card */}
+                      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-start gap-3">
+                        <ShieldCheck size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-bold text-blue-900 dark:text-blue-200">
+                            ملاحظة هامة:
+                          </p>
+                          <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mt-0.5">
+                            سيتم مراجعة عملية التحويل والتأكد منها من قِبل الأدمن بعد إرسال الطلب.
+                          </p>
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -618,7 +524,7 @@ export default function CheckoutPage() {
                 {/* Submit Button */}
                 <div className="pt-1">
                   <TruckSubmitButton
-                    isSubmitting={submitting || uploadingScreenshot}
+                    isSubmitting={submitting}
                     isSuccess={orderSuccess}
                     disabled={!isFormValid}
                     totalText={formatPrice(finalOrderTotal)}

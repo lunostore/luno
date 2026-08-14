@@ -1000,13 +1000,14 @@ export function subscribeToVisitorSessions(
 
 export interface ChatEvent {
   id?: string;
-  type: "chat_started" | "product_recommended" | "add_to_cart_click" | "chat_sale";
+  type: "chat_started" | "product_recommended" | "add_to_cart_click" | "user_message" | "chat_sale" | string;
   productId?: string;
   productName?: string;
   selectedColor?: string;
   selectedSize?: string;
   sessionId?: string;
   price?: number;
+  messageText?: string;
   timestamp: any;
 }
 
@@ -1039,6 +1040,7 @@ export async function logChatEvent(
       productName: data?.productName || null,
       selectedColor: data?.selectedColor || null,
       selectedSize: data?.selectedSize || null,
+      messageText: data?.messageText || null,
       price: data?.price || 0,
       timestamp: serverTimestamp(),
     }));

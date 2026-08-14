@@ -253,6 +253,8 @@ export function LUNOChatWidget() {
     if (!textToSend) setInput("");
     setIsLoading(true);
 
+    logChatEvent("user_message", { messageText: query });
+
     try {
       // Build conversation payload
       const historyPayload = messages
