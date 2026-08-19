@@ -12,8 +12,8 @@ FIREBASE_SA_PATH = os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH", "./service-account
 
 # ─── Shipping Provider (Wassalha / Egypt Post) ────────
 SHIPPING_URL      = os.getenv("SHIPPING_SITE_URL", "https://wassalha.egyptpost.org")
-SHIPPING_USERNAME = os.getenv("SHIPPING_USERNAME", "")
-SHIPPING_PASSWORD = os.getenv("SHIPPING_PASSWORD", "")
+SHIPPING_USERNAME = os.getenv("SHIPPING_USERNAME") or os.getenv("VARS_SHIPPING_USERNAME", "")
+SHIPPING_PASSWORD = os.getenv("SHIPPING_PASSWORD") or os.getenv("VARS_SHIPPING_PASSWORD", "")
 
 # ─── Automation Options ───────────────────────────────
 HEADLESS       = os.getenv("HEADLESS", "false").lower() == "true"

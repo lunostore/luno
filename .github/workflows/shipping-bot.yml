@@ -36,15 +36,18 @@ jobs:
 
       - name: 🔐 Generate Firebase Service Account JSON
         env:
-          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON || vars.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          SECRET_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          VAR_SA: ${{ vars.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
-          python -c "import os, json; sa=os.environ.get('SA_JSON','').strip(); open('automation/service-account.json', 'w').write(sa if sa else '{}')"
+          python -c "import os; sa=(os.environ.get('SECRET_SA') or os.environ.get('VAR_SA') or '').strip(); open('automation/service-account.json', 'w', encoding='utf-8').write(sa if sa else '{}')"
 
       - name: 🚀 Run Shipping Automation Bot
         env:
           SHIPPING_SITE_URL: "https://wassalha.egyptpost.org"
-          SHIPPING_USERNAME: ${{ secrets.SHIPPING_USERNAME || vars.SHIPPING_USERNAME }}
-          SHIPPING_PASSWORD: ${{ secrets.SHIPPING_PASSWORD || vars.SHIPPING_PASSWORD }}
+          SHIPPING_USERNAME: ${{ secrets.SHIPPING_USERNAME }}
+          VARS_SHIPPING_USERNAME: ${{ vars.SHIPPING_USERNAME }}
+          SHIPPING_PASSWORD: ${{ secrets.SHIPPING_PASSWORD }}
+          VARS_SHIPPING_PASSWORD: ${{ vars.SHIPPING_PASSWORD }}
           HEADLESS: "true"
           AUTO_DOWNLOAD_LABEL: "false"
           FIREBASE_SERVICE_ACCOUNT_PATH: "./service-account.json"
