@@ -207,7 +207,7 @@ export default function RootLayout({
                   <WishlistProvider>
                     {children}
                     <Toaster
-                      position="bottom-right"
+                      position="top-center"
                       toastOptions={{
                         style: {
                           background: "#000",

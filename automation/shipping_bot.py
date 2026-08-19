@@ -85,19 +85,93 @@ class ShippingBot:
         # - Password: id="password"
         # - Login button: button.btn-primary
         try:
-            # Wait for login form
-            self.page.wait_for_selector('#userName', state='visible', timeout=10000)
+            # Wait for login form — try multiple possible selectors
+            username_selectors = ['#userName', '#username', '#user', 'input[name="userName"]', 'input[name="username"]', 'input[type="text"]']
+            password_selectors = ['#password', '#pass', 'input[name="password"]', 'input[type="password"]']
+            
+            username_el = None
+            for sel in username_selectors:
+                try:
+                    el = self.page.wait_for_selector(sel, state='visible', timeout=5000)
+                    if el:
+                        username_el = sel
+                        log(f"   📝 Found username field: {sel}")
+                        break
+                except Exception:
+                    continue
+            
+            if not username_el:
+                log("   ❌ Could not find username field on login page")
+                log(f"   📄 Current URL: {self.page.url}")
+                # Save debug screenshot
+                os.makedirs("./storage", exist_ok=True)
+                self.page.screenshot(path="./storage/login_debug.png")
+                log("   📸 Debug screenshot saved: ./storage/login_debug.png")
+                # Log visible input fields for debugging
+                inputs = self.page.query_selector_all('input')
+                for inp in inputs:
+                    try:
+                        inp_type = inp.get_attribute('type') or '?'
+                        inp_name = inp.get_attribute('name') or '?'
+                        inp_id = inp.get_attribute('id') or '?'
+                        log(f"   🔍 Found input: type={inp_type}, name={inp_name}, id={inp_id}")
+                    except Exception:
+                        pass
+                return False
+
+            password_el = None
+            for sel in password_selectors:
+                try:
+                    el = self.page.query_selector(sel)
+                    if el and el.is_visible():
+                        password_el = sel
+                        log(f"   📝 Found password field: {sel}")
+                        break
+                except Exception:
+                    continue
+
+            if not password_el:
+                log("   ❌ Could not find password field")
+                return False
 
             # Clear and fill username
-            self.page.fill('#userName', '')
-            self.page.fill('#userName', SHIPPING_USERNAME)
+            self.page.fill(username_el, '')
+            self.page.fill(username_el, SHIPPING_USERNAME)
+            log(f"   ✅ Username filled ({SHIPPING_USERNAME[:3]}***)")
 
             # Clear and fill password
-            self.page.fill('#password', '')
-            self.page.fill('#password', SHIPPING_PASSWORD)
+            self.page.fill(password_el, '')
+            self.page.fill(password_el, SHIPPING_PASSWORD)
+            log(f"   ✅ Password filled (***{len(SHIPPING_PASSWORD)} chars)")
 
-            # Click login button
-            self.page.click('button.btn-primary')
+            # Try multiple login button selectors
+            login_btn_selectors = [
+                'button[type="submit"]',
+                'button.btn-primary',
+                'input[type="submit"]',
+                'button:has-text("تسجيل")',
+                'button:has-text("دخول")',
+                'button:has-text("Login")',
+                'button:has-text("Sign in")',
+                '.btn-primary',
+            ]
+            
+            clicked = False
+            for sel in login_btn_selectors:
+                try:
+                    btn = self.page.query_selector(sel)
+                    if btn and btn.is_visible():
+                        btn.click()
+                        clicked = True
+                        log(f"   ✅ Clicked login button: {sel}")
+                        break
+                except Exception:
+                    continue
+
+            if not clicked:
+                log("   ❌ Could not find login button!")
+                return False
+
             self.page.wait_for_load_state("networkidle")
             time.sleep(3)
 
@@ -105,12 +179,22 @@ class ShippingBot:
             current_url = self.page.url
             if "/login" in current_url:
                 # Check for error messages
-                error_el = self.page.query_selector('.alert-danger, .error-message, .text-danger')
+                error_el = self.page.query_selector('.alert-danger, .error-message, .text-danger, .toast-error, .Toastify__toast--error')
                 if error_el:
                     error_text = error_el.inner_text()
                     log(f"   ❌ Login failed: {error_text}")
                 else:
                     log("   ❌ Login failed: still on login page")
+                
+                # Save debug screenshot
+                os.makedirs("./storage", exist_ok=True)
+                self.page.screenshot(path="./storage/login_failed.png")
+                log("   📸 Login failure screenshot saved")
+                
+                # Log page title for debugging
+                title = self.page.title()
+                log(f"   📄 Page title: {title}")
+                log(f"   📄 Current URL: {current_url}")
                 return False
 
             log("   ✅ Login successful!")
@@ -119,6 +203,12 @@ class ShippingBot:
 
         except Exception as e:
             log(f"   ❌ Login error: {e}")
+            try:
+                os.makedirs("./storage", exist_ok=True)
+                self.page.screenshot(path="./storage/login_error.png")
+                log("   📸 Error screenshot saved")
+            except Exception:
+                pass
             return False
 
     def create_shipment(self, order: dict) -> str | None:
