@@ -300,104 +300,91 @@ class ShippingBot:
             log(f"   🧭 Current page URL: {self.page.url}")
             time.sleep(2)
 
-            # Look for sidebar menu links or buttons for "إضافة شحنة" / "الشحنات"
-            menu_clicked = False
-            menu_selectors = [
-                'a[href*="packages"]',
-                'a:has-text("إضافة شحنة")',
-                'a:has-text("شحنة جديدة")',
-                'a:has-text("الشحنات")',
-                'span:has-text("إضافة شحنة")',
-                'span:has-text("شحنة جديدة")',
-                'span:has-text("الشحنات")',
-                'li:has-text("الشحنات")',
+            # Look for action buttons on the page (e.g. "Add Package", "إضافة شحنة", "+", "Create")
+            add_button_found = False
+            add_selectors = [
                 'button:has-text("إضافة شحنة")',
                 'button:has-text("شحنة جديدة")',
                 'button:has-text("إضافة")',
+                'button:has-text("Add Package")',
+                'button:has-text("Add New")',
+                'button:has-text("New Package")',
+                'button:has-text("Add")',
+                'button:has-text("Create")',
                 'a.btn:has-text("إضافة")',
-                '.btn-primary',
-                '.btn-success',
+                'a.btn:has-text("Add")',
+                'a:has-text("إضافة شحنة")',
+                'a:has-text("شحنة جديدة")',
+                'button.btn-primary',
+                'button.btn-success',
+                'a.btn-primary',
+                'a.btn-success',
+                '[data-target*="modal"]',
+                '[data-toggle*="modal"]',
             ]
 
-            # First log all visible clickable buttons/links for diagnosis
-            try:
-                elements_info = self.page.evaluate("""() => {
-                    const items = [];
-                    document.querySelectorAll('button, a, .btn, [role="button"]').forEach(el => {
-                        const txt = (el.innerText || el.textContent || '').trim();
-                        const href = el.getAttribute('href') || '';
-                        const cls = el.className || '';
-                        if (txt || href) {
-                            items.push(`tag=${el.tagName}, text="${txt.slice(0,30)}", href="${href}", class="${cls.slice(0,30)}"`);
-                        }
-                    });
-                    return items.slice(0, 15);
-                }""")
-                if elements_info:
-                    log("   🔍 Page Interactive Elements:")
-                    for einfo in elements_info:
-                        log(f"      👉 {einfo}")
-            except Exception:
-                pass
-
-            # Try clicking menu / add buttons
-            for selector in menu_selectors:
+            for sel in add_selectors:
                 try:
-                    btns = self.page.query_selector_all(selector)
+                    btns = self.page.query_selector_all(sel)
                     for b in btns:
                         if b.is_visible():
-                            btxt = b.inner_text().strip()
-                            if any(w in btxt for w in ["إضافة", "شحنة", "شحنات", "New", "Add", "Package"]):
+                            btxt = (b.inner_text() or b.get_attribute("title") or "").strip()
+                            # Avoid search/export buttons
+                            if any(neg in btxt for neg in ["بحث", "Search", "Export", "تصدير", "Filter", "فلتر"]):
+                                continue
+                            if any(w in btxt for w in ["إضافة", "شحنة", "Add", "New", "Create", "+"]) or sel in ['button.btn-success', 'a.btn-success']:
                                 b.click()
                                 time.sleep(2)
-                                log(f"   ✅ Clicked package action: {selector} (text: '{btxt}')")
-                                menu_clicked = True
+                                log(f"   ✅ Clicked package create button: {sel} ('{btxt}')")
+                                add_button_found = True
                                 break
-                    if menu_clicked:
+                    if add_button_found:
                         break
                 except Exception:
                     continue
 
-            # If not clicked, try navigating to package creation URLs
-            if not menu_clicked:
-                create_urls = [
-                    f"{SHIPPING_URL}/#/packages/eb/create",
-                    f"{SHIPPING_URL}/#/packages/add",
-                    f"{SHIPPING_URL}/#/packages/create",
-                    f"{SHIPPING_URL}/packages/eb",
+            # If no button found on /packages/eb, try navigating directly to possible create URLs
+            if not add_button_found:
+                direct_create_urls = [
+                    f"{SHIPPING_URL}/packages/create",
+                    f"{SHIPPING_URL}/packages/add",
+                    f"{SHIPPING_URL}/packages/eb/create",
+                    f"{SHIPPING_URL}/packages/new",
+                    f"{SHIPPING_URL}/shipment/create",
                 ]
-                for url in create_urls:
+                for durl in direct_create_urls:
                     try:
-                        self.page.goto(url, wait_until="domcontentloaded")
+                        self.page.goto(durl, wait_until="domcontentloaded")
                         time.sleep(2)
-                        if "/login" not in self.page.url:
+                        if "/login" not in self.page.url and "404" not in self.page.title():
+                            log(f"   🧭 Navigated to create page: {durl}")
                             break
                     except Exception:
                         pass
 
-            # Log inputs on current page
+            # Wait for form or modal inputs to be visible
+            time.sleep(2)
+
+            # Log all discovered inputs on current page/modal
             try:
                 inputs_info = self.page.evaluate("""() => {
                     const inputs = [];
                     document.querySelectorAll('input, select, textarea').forEach(el => {
                         const id = el.id || '';
                         const name = el.name || '';
+                        const fcn = el.getAttribute('formcontrolname') || '';
                         const placeholder = el.placeholder || '';
                         const type = el.type || el.tagName.toLowerCase();
-                        inputs.push(`tag=${el.tagName}, id="${id}", name="${name}", type="${type}", placeholder="${placeholder}"`);
+                        inputs.push(`tag=${el.tagName}, id="${id}", name="${name}", fcn="${fcn}", type="${type}", placeholder="${placeholder}"`);
                     });
                     return inputs;
                 }""")
                 if inputs_info:
-                    log(f"   📝 Detected {len(inputs_info)} form inputs on page:")
-                    for inp in inputs_info[:15]:
+                    log(f"   📝 Detected {len(inputs_info)} form inputs on active view:")
+                    for inp in inputs_info[:20]:
                         log(f"      📥 {inp}")
             except Exception:
                 pass
-
-            # ── Step 3: Fill the shipment form ──
-            # These selectors need to be calibrated on first run.
-            # Common patterns for shipping forms:
 
             # ── Step 3: Fill the shipment form ──
             # Determine payment & COD amount rules:
@@ -428,50 +415,58 @@ class ShippingBot:
                 "notes": special_notes,  # Rule 5: Special Notes = كفر شحن وبوليصة شحن
             }
 
-            # Field selectors tuned specifically for Wassalha form inputs
+            # Field selectors tuned with Angular formcontrolname and standard Wassalha inputs
             field_mappings = [
                 ("items_description", [
+                    '[formcontrolname*="description"]', '[formcontrolname*="content"]', '[formcontrolname*="item"]',
                     'textarea[placeholder*="وصف"]', 'textarea[placeholder*="محتوى"]',
                     'textarea[placeholder*="المحتوى"]', '#contents', '#description',
                     'input[name*="description"]', 'textarea[name*="description"]',
-                    'textarea:has-text("")',
                 ]),
                 ("notes", [
+                    '[formcontrolname*="note"]', '[formcontrolname*="remark"]',
                     'textarea[placeholder*="ملاحظات"]', 'textarea[placeholder*="خاصة"]',
                     '#specialNotes', '#notes', '#remarks',
                     'textarea[name*="notes"]', 'textarea[name*="remarks"]',
                 ]),
                 ("weight", [
+                    '[formcontrolname*="weight"]',
                     'input[placeholder*="الوزن"]', 'input[placeholder*="وزن"]',
                     '#weight', '#packageWeight', 'input[name*="weight"]',
                 ]),
                 ("total", [
+                    '[formcontrolname*="cod"]', '[formcontrolname*="amount"]', '[formcontrolname*="total"]',
                     'input[placeholder*="التحصيل"]', 'input[placeholder*="مبلغ"]',
                     '#codAmount', '#cod', '#amount', '#cashOnDelivery',
                     'input[name*="cod"]', 'input[name*="amount"]',
                 ]),
                 ("customerName", [
+                    '[formcontrolname*="name"]', '[formcontrolname*="recipient"]', '[formcontrolname*="customer"]',
                     '#recipientName', '#recipient_name', '#customerName', '#name',
                     'input[name="recipientName"]', 'input[name="name"]',
-                    'input[placeholder*="اسم"]', 'input[placeholder*="المستلم"]',
+                    'input[placeholder*="اسم"]', 'input[placeholder*="المستلم"]', 'input[placeholder*="العميل"]',
                 ]),
                 ("phone", [
+                    '[formcontrolname*="phone"]', '[formcontrolname*="mobile"]',
                     '#recipientPhone', '#phone', '#mobile', '#recipientMobile',
                     'input[name="phone"]', 'input[name="mobile"]',
                     'input[name="recipientPhone"]',
                     'input[placeholder*="هاتف"]', 'input[placeholder*="موبايل"]',
                 ]),
                 ("secondaryPhone", [
+                    '[formcontrolname*="phone2"]', '[formcontrolname*="secondary"]',
                     '#phone2', '#secondaryPhone', '#alternatePhone',
                     'input[name="phone2"]', 'input[name="alternatePhone"]',
                     'input[placeholder*="بديل"]', 'input[placeholder*="ثاني"]',
                 ]),
                 ("address", [
+                    '[formcontrolname*="address"]', '[formcontrolname*="street"]',
                     '#address', '#recipientAddress', '#streetAddress',
                     'input[name="address"]', 'textarea[name="address"]',
                     'input[placeholder*="عنوان"]', 'textarea[placeholder*="عنوان"]',
                 ]),
                 ("city", [
+                    '[formcontrolname*="city"]', '[formcontrolname*="district"]', '[formcontrolname*="area"]',
                     '#city', '#district', '#area',
                     'input[name="city"]', 'input[name="district"]',
                     'input[placeholder*="مدينة"]', 'input[placeholder*="منطقة"]',
