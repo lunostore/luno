@@ -296,127 +296,29 @@ class ShippingBot:
         log(f"   📦 Creating shipment for #{order_id} ({customer})...")
 
         try:
-            # ── Step 1: Discover and navigate to Create Shipment page / modal ──
-            # Try main package routes: /packages/eb or /packages
-            target_routes = [
-                f"{SHIPPING_URL}/packages/eb",
-                f"{SHIPPING_URL}/packages",
-            ]
-            
-            # Make sure we are on the packages page
-            if not any(r in self.page.url for r in ["/packages/eb", "/packages"]):
-                self.page.goto(f"{SHIPPING_URL}/packages/eb", wait_until="domcontentloaded")
-                time.sleep(3)
-
+            # ── Step 1: Open New Package in Easy Box (/packages/eb) ──
             log(f"   🧭 Current page URL: {self.page.url}")
-
-            # Switch to Arabic if language button is present for consistent Arabic selectors
-            try:
-                ar_btn = self.page.query_selector('a.lng:has-text("عربي"), a.lng-menu:has-text("عربي")')
-                if ar_btn and ar_btn.is_visible():
-                    ar_btn.click()
-                    time.sleep(2)
-                    log("   🌐 Switched UI to Arabic")
-            except Exception:
-                pass
-
-            # Inspect ALL clickable elements on the page
-            try:
-                page_buttons = self.page.evaluate("""() => {
-                    const res = [];
-                    document.querySelectorAll('button, a.btn, [role="button"], .btn, input[type="button"], input[type="submit"]').forEach(el => {
-                        res.push({
-                            tag: el.tagName,
-                            text: (el.innerText || el.textContent || '').trim().replace(/\\s+/g, ' '),
-                            id: el.id || '',
-                            class: el.className || '',
-                            href: el.getAttribute('href') || '',
-                            title: el.getAttribute('title') || '',
-                            disabled: el.disabled || false,
-                        });
-                    });
-                    return res;
-                }""")
-                log(f"   🔍 Found {len(page_buttons)} action buttons on page:")
-                for pb in page_buttons[:20]:
-                    log(f"      🔘 tag={pb['tag']}, text='{pb['text']}', id='{pb['id']}', class='{pb['class']}', href='{pb['href']}', title='{pb['title']}'")
-            except Exception as e:
-                log(f"   ⚠️ Could not inspect buttons: {e}")
-
-            # Try clicking any creation/addition button
-            clicked_add = False
-            add_selectors = [
-                'button:has-text("إضافة")',
-                'button:has-text("شحنة")',
-                'button:has-text("جديد")',
-                'button:has-text("Add")',
-                'button:has-text("New")',
-                'button:has-text("Upload")',
-                'button:has-text("Create")',
-                'a.btn:has-text("إضافة")',
-                'a.btn:has-text("شحنة")',
-                'a.btn:has-text("Add")',
-                'a.btn:has-text("New")',
-                'button.btn-primary',
-                'button.btn-success',
-                'a.btn-primary',
-                'a.btn-success',
-                '.fa-plus',
-                '.my-icon-pickups',
-                '[title*="إضافة"]',
-                '[title*="Add"]',
-            ]
-
-            for sel in add_selectors:
-                try:
-                    candidates = self.page.query_selector_all(sel)
-                    for cand in candidates:
-                        if cand.is_visible():
-                            ctxt = (cand.inner_text() or cand.get_attribute("title") or "").strip()
-                            if any(neg in ctxt.lower() for neg in ["search", "بحث", "export", "تصدير", "filter", "فلتر"]):
-                                continue
-                            cand.click()
-                            time.sleep(2)
-                            log(f"   ✅ Clicked candidate create action: {sel} ('{ctxt}')")
-                            clicked_add = True
-                            break
-                    if clicked_add:
-                        break
-                except Exception:
-                    continue
-
-            # Wait for modal/form rendering
             time.sleep(2)
 
-            # Log all discovered inputs on current page/modal
-            try:
-                inputs_info = self.page.evaluate("""() => {
-                    const inputs = [];
-                    document.querySelectorAll('input, select, textarea').forEach(el => {
-                        const id = el.id || '';
-                        const name = el.name || '';
-                        const fcn = el.getAttribute('formcontrolname') || '';
-                        const placeholder = el.placeholder || '';
-                        const type = el.type || el.tagName.toLowerCase();
-                        inputs.push(`tag=${el.tagName}, id="${id}", name="${name}", fcn="${fcn}", type="${type}", placeholder="${placeholder}"`);
-                    });
-                    return inputs;
-                }""")
-                if inputs_info:
-                    log(f"   📝 Detected {len(inputs_info)} form inputs on active view:")
-                    for inp in inputs_info[:20]:
-                        log(f"      📥 {inp}")
-            except Exception:
-                pass
+            # Click the outline Add button on top of the Easy Box table
+            outline_btns = self.page.query_selector_all('button.btn-outline-secondary, .btn-outline-secondary, button:has-text("Add"), button:has-text("إضافة")')
+            for ob in outline_btns:
+                try:
+                    if ob.is_visible():
+                        ob.click()
+                        time.sleep(2)
+                        log("   ✅ Clicked Easy Box Add Package action (btn-outline-secondary)")
+                        break
+                except Exception:
+                    pass
 
-            # ── Step 3: Fill the shipment form ──
-            # Determine payment & COD amount rules:
+            time.sleep(2)
+
+            # ── Step 2: Fill the shipment form (Modal or Easy Box Table Row) ──
             payment_method = order.get("paymentMethod", "cash_on_delivery")
             is_online_payment = payment_method in ["vodafone_cash", "instapay"]
 
             # Rule 1: COD Amount (مبلغ التحصيل عند التسليم)
-            # - Cash: full order total (items + shipping)
-            # - Online payment: 3 spaces ("   ") so no number is typed
             cod_amount = "   " if is_online_payment else str(order.get("total", 0))
 
             # Rule 2: Special Notes (ملاحظات خاصة)
@@ -438,63 +340,156 @@ class ShippingBot:
                 "notes": special_notes,  # Rule 5: Special Notes = كفر شحن وبوليصة شحن
             }
 
-            # Field selectors tuned with Angular formcontrolname and standard Wassalha inputs
+            filled_fields = []
+
+            # Strategy A: Field selectors (Modal / Form / Angular inputs)
             field_mappings = [
                 ("items_description", [
                     '[formcontrolname*="description"]', '[formcontrolname*="content"]', '[formcontrolname*="item"]',
                     'textarea[placeholder*="وصف"]', 'textarea[placeholder*="محتوى"]',
-                    'textarea[placeholder*="المحتوى"]', '#contents', '#description',
-                    'input[name*="description"]', 'textarea[name*="description"]',
+                    'input[placeholder*="وصف"]', 'input[placeholder*="محتوى"]',
+                    '#contents', '#description', 'input[name*="description"]',
                 ]),
                 ("notes", [
                     '[formcontrolname*="note"]', '[formcontrolname*="remark"]',
-                    'textarea[placeholder*="ملاحظات"]', 'textarea[placeholder*="خاصة"]',
-                    '#specialNotes', '#notes', '#remarks',
-                    'textarea[name*="notes"]', 'textarea[name*="remarks"]',
+                    'textarea[placeholder*="ملاحظات"]', 'input[placeholder*="ملاحظات"]',
+                    '#specialNotes', '#notes',
                 ]),
                 ("weight", [
                     '[formcontrolname*="weight"]',
                     'input[placeholder*="الوزن"]', 'input[placeholder*="وزن"]',
-                    '#weight', '#packageWeight', 'input[name*="weight"]',
+                    '#weight', 'input[name*="weight"]',
                 ]),
                 ("total", [
                     '[formcontrolname*="cod"]', '[formcontrolname*="amount"]', '[formcontrolname*="total"]',
                     'input[placeholder*="التحصيل"]', 'input[placeholder*="مبلغ"]',
-                    '#codAmount', '#cod', '#amount', '#cashOnDelivery',
-                    'input[name*="cod"]', 'input[name*="amount"]',
+                    '#codAmount', '#cod', '#amount',
                 ]),
                 ("customerName", [
                     '[formcontrolname*="name"]', '[formcontrolname*="recipient"]', '[formcontrolname*="customer"]',
-                    '#recipientName', '#recipient_name', '#customerName', '#name',
-                    'input[name="recipientName"]', 'input[name="name"]',
-                    'input[placeholder*="اسم"]', 'input[placeholder*="المستلم"]', 'input[placeholder*="العميل"]',
+                    '#recipientName', '#customerName', '#name',
+                    'input[placeholder*="اسم"]', 'input[placeholder*="المستلم"]', 'input[placeholder*="العميل"]', 'input[placeholder*="Name"]',
                 ]),
                 ("phone", [
                     '[formcontrolname*="phone"]', '[formcontrolname*="mobile"]',
-                    '#recipientPhone', '#phone', '#mobile', '#recipientMobile',
-                    'input[name="phone"]', 'input[name="mobile"]',
-                    'input[name="recipientPhone"]',
-                    'input[placeholder*="هاتف"]', 'input[placeholder*="موبايل"]',
+                    '#recipientPhone', '#phone', '#mobile',
+                    'input[placeholder*="هاتف"]', 'input[placeholder*="موبايل"]', 'input[placeholder*="Phone"]', 'input[placeholder*="Mobile"]',
                 ]),
                 ("secondaryPhone", [
-                    '[formcontrolname*="phone2"]', '[formcontrolname*="secondary"]',
-                    '#phone2', '#secondaryPhone', '#alternatePhone',
-                    'input[name="phone2"]', 'input[name="alternatePhone"]',
+                    '[formcontrolname*="phone2"]',
+                    '#phone2', '#secondaryPhone',
                     'input[placeholder*="بديل"]', 'input[placeholder*="ثاني"]',
                 ]),
                 ("address", [
                     '[formcontrolname*="address"]', '[formcontrolname*="street"]',
-                    '#address', '#recipientAddress', '#streetAddress',
-                    'input[name="address"]', 'textarea[name="address"]',
-                    'input[placeholder*="عنوان"]', 'textarea[placeholder*="عنوان"]',
+                    '#address', '#recipientAddress',
+                    'textarea[placeholder*="عنوان"]', 'input[placeholder*="عنوان"]', 'input[placeholder*="Address"]',
                 ]),
                 ("city", [
-                    '[formcontrolname*="city"]', '[formcontrolname*="district"]', '[formcontrolname*="area"]',
-                    '#city', '#district', '#area',
-                    'input[name="city"]', 'input[name="district"]',
-                    'input[placeholder*="مدينة"]', 'input[placeholder*="منطقة"]',
+                    '[formcontrolname*="city"]', '[formcontrolname*="district"]',
+                    '#city', '#district',
+                    'input[placeholder*="مدينة"]', 'input[placeholder*="منطقة"]', 'input[placeholder*="City"]',
                 ]),
             ]
+
+            for field_key, selectors in field_mappings:
+                value = form_data.get(field_key, "")
+                if not value:
+                    continue
+
+                for selector in selectors:
+                    try:
+                        el = self.page.query_selector(selector)
+                        if el and el.is_visible():
+                            el.fill("")
+                            el.fill(value)
+                            el.dispatch_event('input')
+                            el.dispatch_event('change')
+                            filled_fields.append(field_key)
+                            break
+                    except Exception:
+                        continue
+
+            # Strategy B: If table row inputs exist in Easy Box table
+            if len(filled_fields) < 3:
+                try:
+                    row_inputs = self.page.query_selector_all('tbody tr:last-child input, tbody tr:first-child input, .table input')
+                    visible_row_inputs = [inp for inp in row_inputs if inp.is_visible() and (inp.get_attribute("type") or "text") not in ["checkbox", "hidden"]]
+                    if visible_row_inputs:
+                        log(f"   📝 Found {len(visible_row_inputs)} inline table inputs")
+                        # Fill sequential table columns
+                        vals = [form_data["customerName"], form_data["phone"], form_data["city"], form_data["address"], form_data["total"], form_data["weight"], form_data["notes"]]
+                        for i, inp in enumerate(visible_row_inputs):
+                            if i < len(vals) and vals[i]:
+                                inp.fill("")
+                                inp.fill(vals[i])
+                                inp.dispatch_event('input')
+                                inp.dispatch_event('change')
+                                filled_fields.append(f"col_{i+1}")
+                except Exception as e:
+                    log(f"   ⚠️ Inline row fill error: {e}")
+
+            # ── Governorate dropdown ──
+            gov_value = form_data["governorate"]
+            if gov_value:
+                gov_selectors = [
+                    '#governorate', '#city_gov', '#receiverGovernorate',
+                    'select[name="governorate"]', 'select[name="city"]', 'select',
+                ]
+                for selector in gov_selectors:
+                    try:
+                        el = self.page.query_selector(selector)
+                        if el and el.is_visible():
+                            try:
+                                self.page.select_option(selector, label=gov_value)
+                                filled_fields.append("governorate")
+                                break
+                            except Exception:
+                                self.page.select_option(selector, value=gov_value)
+                                filled_fields.append("governorate")
+                                break
+                    except Exception:
+                        continue
+
+            log(f"   📝 Filled {len(filled_fields)} fields: {', '.join(filled_fields)}")
+
+            # ── Step 3: Take screenshot before submission ──
+            os.makedirs(LABELS_DIR, exist_ok=True)
+            screenshot_path = os.path.join(LABELS_DIR, f"pre_submit_{order_id}.png")
+            self.page.screenshot(path=screenshot_path)
+            log(f"   📸 Pre-submit screenshot saved: {screenshot_path}")
+
+            # ── Step 4: Submit the form (Save and Close) ──
+            submit_selectors = [
+                'a.btn-Send',
+                '.btn-Send',
+                'a:has-text("Save and Close")',
+                'button:has-text("Save and Close")',
+                'a:has-text("حفظ وإغلاق")',
+                'button:has-text("حفظ وإغلاق")',
+                'button[type="submit"]',
+                'button:has-text("حفظ")',
+                'button:has-text("Save")',
+                'input[type="submit"]',
+            ]
+
+            submitted = False
+            for selector in submit_selectors:
+                try:
+                    btn = self.page.query_selector(selector)
+                    if btn and btn.is_visible():
+                        btn.click()
+                        self.page.wait_for_load_state("networkidle")
+                        time.sleep(3)
+                        submitted = True
+                        log(f"   ✅ Form submitted via: {selector}")
+                        break
+                except Exception:
+                    continue
+
+            if not submitted:
+                log("   ❌ Could not find submit button!")
+                return None
 
             filled_fields = []
             for field_key, selectors in field_mappings:
