@@ -117,10 +117,14 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   const watchedSizeChartUrl = watch("sizeChartUrl");
   const watchedDetailImages = watch("detailImages") || [];
 
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setValue("name", val, { shouldValidate: true });
-    setValue("slug", generateSlug(val), { shouldValidate: true });
+    if (!slugManuallyEdited && !productId) {
+      setValue("slug", generateSlug(val), { shouldValidate: true });
+    }
   };
 
   // Upload main cover image to Cloudinary
@@ -375,15 +379,36 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-              Slug (رابط المنتج)
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                Slug (رابط المنتج في المتصفح)
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  const currentName = watch("name");
+                  if (currentName) {
+                    setValue("slug", generateSlug(currentName), { shouldValidate: true });
+                    setSlugManuallyEdited(false);
+                    toast.success("تم توليد الرابط تلقائياً من اسم المنتج");
+                  }
+                }}
+                className="text-[9px] font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200 transition-all flex items-center gap-1 cursor-pointer"
+                title="توليد رابط تلقائي من اسم المنتج"
+              >
+                ⚡ توليد من الاسم
+              </button>
+            </div>
             <input
-              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-zinc-50 focus:outline-none focus:border-zinc-300 focus:ring-1 focus:ring-zinc-200/50 transition-all font-mono font-semibold text-zinc-600"
-              placeholder="minimalist-hoodie"
-              readOnly
+              className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all font-mono font-semibold text-zinc-900 placeholder:text-zinc-400"
+              placeholder="مثال: minimalist-oversized-hoodie"
               {...register("slug")}
+              onChange={(e) => {
+                setSlugManuallyEdited(true);
+                setValue("slug", e.target.value, { shouldValidate: true });
+              }}
             />
+            <p className="text-[9px] text-zinc-400 mt-1">يمكنك كتابة أي رابط مخصص يعجبك براحتك مستقل عن اسم المنتج</p>
           </div>
 
           <div>
@@ -630,32 +655,51 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       </div>
 
       {/* 3. Pricing */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
-        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-6">أسعار المنتج</h2>
-        
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)] space-y-4">
+        <div>
+          <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest">أسعار المنتج والخصومات</h2>
+          <p className="text-[10px] text-zinc-400 font-medium mt-1">
+            حدد سعر البيع وسعر الخصم. إذا كان هناك خصم، سيظهر السعر الأصلي مشطوباً وبجانبه شارة الخصم ٪.
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-              السعر الأساسي (ج.م)
+          <div className="p-4 bg-zinc-50 border border-zinc-200/80 rounded-xl space-y-2">
+            <label className="block text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between">
+              <span>السعر الأصلي (قبل الخصم) (ج.م) *</span>
+              <span className="text-[9px] text-zinc-400 font-mono">السعر الأساسي</span>
             </label>
             <input
               type="number"
-              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800 placeholder:text-zinc-400"
+              min="0"
+              step="any"
+              className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-900 transition-all font-bold text-zinc-900 placeholder:text-zinc-400"
               placeholder="مثال: 1200"
               {...register("price", { valueAsNumber: true })}
             />
+            <p className="text-[9px] text-zinc-400 font-medium">
+              السعر الأصلي للمنتج (سيظهر مشطوباً <s>1200 ج.م</s> في حالة وجود سعر مخفض).
+            </p>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
-              سعر الخصم (ج.م) (اختياري)
+          <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-2">
+            <label className="block text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center justify-between">
+              <span>سعر البيع النهائي بعد الخصم (ج.م) (اختياري)</span>
+              <span className="text-[9px] text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-bold">
+                سعر العميل الحالي
+              </span>
             </label>
             <input
               type="number"
-              className="w-full px-4 py-3 border border-zinc-100 rounded-xl text-xs bg-white focus:outline-none focus:border-zinc-300 transition-all font-semibold text-zinc-800 placeholder:text-zinc-400"
+              min="0"
+              step="any"
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl text-xs bg-white focus:outline-none focus:border-amber-500 transition-all font-black text-amber-900 placeholder:text-zinc-400"
               placeholder="مثال: 950"
               {...register("salePrice", { valueAsNumber: true })}
             />
+            <p className="text-[9px] text-amber-700 font-medium">
+              السعر المخفّض الذي يدفعه العميل فعلياً عند الشراء (مثال: 950 ج.م). اتركه فارغاً إذا لم يكن هناك خصم.
+            </p>
           </div>
         </div>
       </div>
