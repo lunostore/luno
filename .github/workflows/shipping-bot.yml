@@ -36,20 +36,20 @@ jobs:
 
       - name: 🔐 Generate Firebase Service Account JSON
         env:
-          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON || vars.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
           python -c "import os, json; sa=os.environ.get('SA_JSON','').strip(); open('automation/service-account.json', 'w').write(sa if sa else '{}')"
 
       - name: 🚀 Run Shipping Automation Bot
         env:
           SHIPPING_SITE_URL: "https://wassalha.egyptpost.org"
-          SHIPPING_USERNAME: ${{ secrets.SHIPPING_USERNAME }}
-          SHIPPING_PASSWORD: ${{ secrets.SHIPPING_PASSWORD }}
+          SHIPPING_USERNAME: ${{ secrets.SHIPPING_USERNAME || vars.SHIPPING_USERNAME }}
+          SHIPPING_PASSWORD: ${{ secrets.SHIPPING_PASSWORD || vars.SHIPPING_PASSWORD }}
           HEADLESS: "true"
           AUTO_DOWNLOAD_LABEL: "false"
           FIREBASE_SERVICE_ACCOUNT_PATH: "./service-account.json"
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
         run: |
           cd automation
           ORDER_ID="${{ github.event.inputs.order_id || github.event.client_payload.orderId }}"
