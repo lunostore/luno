@@ -207,9 +207,11 @@ ${itemsList}
         setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
       }
 
-      // Show stock operation results
+      // Show stock operation results & automatically trigger shipping bot
       if (newStatus === "confirmed" && previousStatus === "pending") {
         toast.success("✅ تم تأكيد الطلب وخصم المخزون تلقائياً");
+        // 🚀 Auto-trigger shipping bot immediately!
+        handleAutoShip(orderId);
       } else if (newStatus === "cancelled" && (previousStatus === "confirmed" || previousStatus === "shipping")) {
         toast.success("🔄 تم إلغاء الطلب واستعادة المخزون تلقائياً");
       } else {
