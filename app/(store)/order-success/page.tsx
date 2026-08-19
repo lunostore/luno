@@ -55,7 +55,7 @@ function OrderSuccessContent() {
           >
             <p className="text-xs text-gray-400 mb-1">Order ID</p>
             <p className="font-mono text-sm font-semibold text-gray-700">
-              #{orderId.slice(0, 12).toUpperCase()}
+              #{orderId.slice(0, 8).toUpperCase()}
             </p>
           </motion.div>
         )}
