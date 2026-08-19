@@ -19,28 +19,30 @@ Prerequisites:
 import sys
 import time
 import argparse
-from config import validate_config
 from logger import log
 
-valid, config_errors = validate_config()
-if not valid:
-    log("=" * 60)
-    log("⚠️ تنبيه: ينقصك إضافة إعدادات البوت بشكل صحيح:")
-    for err in config_errors:
-        log(f"   ❌ {err}")
-    log("💡 يرجى الذهاب لـ GitHub Repository Settings -> Secrets and variables -> Actions وإضافة الأسرار التالية:")
-    log("   1. SHIPPING_USERNAME (اسم المستخدم لحساب وصّلها)")
-    log("   2. SHIPPING_PASSWORD (كلمة المرور لحساب وصّلها)")
-    log("   3. FIREBASE_SERVICE_ACCOUNT_JSON (محتوى ملف service-account.json كاملاً)")
-    log("=" * 60)
-    sys.exit(1)
 
-from firebase_client import get_ready_orders, get_order_by_id, update_order_tracking, set_order_error, send_telegram_notification
-from shipping_bot import ShippingBot
+def preflight_check():
+    """Validate all required config before importing heavy modules."""
+    from config import validate_config
+    valid, config_errors = validate_config()
+    if not valid:
+        log("=" * 60)
+        log("⚠️ تنبيه: ينقصك إضافة إعدادات البوت بشكل صحيح:")
+        for err in config_errors:
+            log(f"   ❌ {err}")
+        log("💡 يرجى الذهاب لـ GitHub Repository Settings -> Secrets and variables -> Actions وإضافة الأسرار التالية:")
+        log("   1. SHIPPING_USERNAME (اسم المستخدم لحساب وصّلها)")
+        log("   2. SHIPPING_PASSWORD (كلمة المرور لحساب وصّلها)")
+        log("   3. FIREBASE_SERVICE_ACCOUNT_JSON (محتوى ملف service-account.json كاملاً)")
+        log("=" * 60)
+        sys.exit(1)
 
 
 def process_orders(order_ids: list[str] | None = None):
     """Process all ready orders or specific order IDs."""
+    from firebase_client import get_ready_orders, get_order_by_id, update_order_tracking, set_order_error, send_telegram_notification
+    from shipping_bot import ShippingBot
 
     # ── Fetch orders ──
     if order_ids:
@@ -197,6 +199,9 @@ Examples:
     )
 
     args = parser.parse_args()
+
+    # Preflight validation
+    preflight_check()
 
     # Header
     log("🚀 Luno Store — Shipping Automation Bot")

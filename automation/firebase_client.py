@@ -4,26 +4,31 @@ Connects to Firestore to read orders and update tracking info.
 """
 import firebase_admin
 from firebase_admin import credentials, firestore
-from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from config import FIREBASE_SA_PATH
 from logger import log
 
+# Lazy-initialized Firestore client
+_db = None
 
-def init_firebase():
-    """Initialize Firebase Admin SDK (safe to call multiple times)."""
+
+def _get_db():
+    """Get or initialize the Firestore client (lazy singleton)."""
+    global _db
+    if _db is not None:
+        return _db
+
     if not firebase_admin._apps:
         try:
             cred = credentials.Certificate(FIREBASE_SA_PATH)
             firebase_admin.initialize_app(cred)
         except Exception as e:
             log("❌ خطأ في تحميل ملف Firebase service-account.json!")
-            log("💡 تأكد من إضافة سر FIREBASE_SERVICE_ACCOUNT_JSON في GitHub Repository Secrets بشكل صحيح.")
+            log("💡 تأكد من إضافة سر FIREBASE_SERVICE_ACCOUNT_JSON في GitHub Repository Settings بشكل صحيح.")
             log(f"   التفاصيل: {e}")
             raise e
-    return firestore.client()
 
-
-db = init_firebase()
+    _db = firestore.client()
+    return _db
 
 
 def get_ready_orders() -> list[dict]:
@@ -31,6 +36,7 @@ def get_ready_orders() -> list[dict]:
     جلب الطلبات المؤكدة التي ليس لها رقم تتبع بعد.
     Status: "confirmed" AND no trackingNumber.
     """
+    db = _get_db()
     orders_ref = db.collection("orders")
     query = orders_ref.where("status", "==", "confirmed").order_by("createdAt")
     docs = query.stream()
@@ -47,6 +53,7 @@ def get_ready_orders() -> list[dict]:
 
 def get_order_by_id(order_id: str) -> dict | None:
     """جلب طلب واحد بالـ ID."""
+    db = _get_db()
     doc = db.collection("orders").document(order_id).get()
     if not doc.exists:
         return None
@@ -60,6 +67,8 @@ def update_order_tracking(order_id: str, tracking_number: str, provider: str = "
     تحديث الطلب برقم الشحنة بعد نجاح التسجيل.
     يغيّر الحالة تلقائياً إلى "shipping".
     """
+    from google.cloud.firestore_v1 import SERVER_TIMESTAMP
+    db = _get_db()
     db.collection("orders").document(order_id).update({
         "trackingNumber": tracking_number,
         "shippingProvider": provider,
@@ -72,6 +81,7 @@ def update_order_tracking(order_id: str, tracking_number: str, provider: str = "
 
 def set_order_error(order_id: str, error_msg: str):
     """تسجيل خطأ شحن على الطلب (يظهر في لوحة التحكم)."""
+    db = _get_db()
     db.collection("orders").document(order_id).update({
         "shippingError": error_msg,
     })
@@ -89,7 +99,6 @@ def send_telegram_notification(tracking_number: str, order: dict):
 
     import urllib.request
     import urllib.parse
-    import json
 
     items_text = "\n".join([
         f"  • {item.get('productName', '?')} x{item.get('quantity', 1)}"
