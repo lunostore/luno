@@ -220,14 +220,26 @@ class ShippingBot:
             # Wait for response / navigation
             time.sleep(5)
 
-            # Check if URL changed or redirected away from /login
+            # Check if auth/permission API returned success
+            api_login_success = any(
+                ("200" in nlog and any(k in nlog for k in ["GetUserModulesPermission", "GetUserPermittedActions", "GetMemberNotificationCount", "GetNumberOfUserNotifications"]))
+                for nlog in network_logs
+            )
+
             current_url = self.page.url
-            if "/login" not in current_url:
-                log(f"   ✅ Login successful! Redirected to: {current_url}")
+            if "/login" not in current_url or api_login_success:
+                log(f"   ✅ Login successful! (API authenticated: {api_login_success})")
                 self._save_session()
+                # If still on /login URL, navigate to home/packages
+                if "/login" in self.page.url:
+                    try:
+                        self.page.goto(f"{SHIPPING_URL}/packages/eb", wait_until="domcontentloaded")
+                        time.sleep(3)
+                    except Exception:
+                        pass
                 return True
 
-            # If still on login page, check error elements
+            # If still on login page and no auth API succeeded, check error elements
             error_selectors = [
                 '.alert-danger', '.error-message', '.text-danger',
                 '.toast-error', '.Toastify__toast--error', '.invalid-feedback',
@@ -254,12 +266,6 @@ class ShippingBot:
             log(f"   📄 Page title: {self.page.title()}")
             log(f"   📄 Current URL: {current_url}")
             return False
-
-        except Exception as e:
-            log(f"   ❌ Login error: {e}")
-            return False
-            self._save_session()
-            return True
 
         except Exception as e:
             log(f"   ❌ Login error: {e}")
