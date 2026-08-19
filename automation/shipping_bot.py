@@ -193,6 +193,22 @@ class ShippingBot:
             # These selectors need to be calibrated on first run.
             # Common patterns for shipping forms:
 
+            # ── Step 3: Fill the shipment form ──
+            # Determine payment & COD amount rules:
+            payment_method = order.get("paymentMethod", "cash_on_delivery")
+            is_online_payment = payment_method in ["vodafone_cash", "instapay"]
+
+            # Rule 1: COD Amount (مبلغ التحصيل عند التسليم)
+            # - Cash: full order total (items + shipping)
+            # - Online payment: 3 spaces ("   ") so no number is typed
+            cod_amount = "   " if is_online_payment else str(order.get("total", 0))
+
+            # Rule 2: Special Notes (ملاحظات خاصة)
+            customer_notes = (order.get("notes") or "").strip()
+            special_notes = "كفر شحن وبوليصة شحن"
+            if customer_notes:
+                special_notes = f"{special_notes} - {customer_notes}"
+
             form_data = {
                 "customerName": order.get("customerName", ""),
                 "phone": order.get("phone", ""),
@@ -200,29 +216,44 @@ class ShippingBot:
                 "governorate": get_shipping_value(order.get("governorate", "")),
                 "city": order.get("city", ""),
                 "address": order.get("address", ""),
-                "total": str(order.get("total", 0)),
-                "notes": order.get("notes", ""),
-                "items_description": ", ".join([
-                    f'{item.get("productName", "?")} x{item.get("quantity", 1)}'
-                    for item in order.get("items", [])
-                ]),
+                "total": cod_amount,
+                "weight": "500",  # Rule 3: Weight = 500 grams
+                "items_description": "ملابس",  # Rule 4: Content description = ملابس
+                "notes": special_notes,  # Rule 5: Special Notes = كفر شحن وبوليصة شحن
             }
 
-            # Try to fill each field using common selectors
+            # Field selectors tuned specifically for Wassalha form inputs
             field_mappings = [
-                # (field_key, possible_selectors)
+                ("items_description", [
+                    'textarea[placeholder*="وصف"]', 'textarea[placeholder*="محتوى"]',
+                    'textarea[placeholder*="المحتوى"]', '#contents', '#description',
+                    'input[name*="description"]', 'textarea[name*="description"]',
+                    'textarea:has-text("")',
+                ]),
+                ("notes", [
+                    'textarea[placeholder*="ملاحظات"]', 'textarea[placeholder*="خاصة"]',
+                    '#specialNotes', '#notes', '#remarks',
+                    'textarea[name*="notes"]', 'textarea[name*="remarks"]',
+                ]),
+                ("weight", [
+                    'input[placeholder*="الوزن"]', 'input[placeholder*="وزن"]',
+                    '#weight', '#packageWeight', 'input[name*="weight"]',
+                ]),
+                ("total", [
+                    'input[placeholder*="التحصيل"]', 'input[placeholder*="مبلغ"]',
+                    '#codAmount', '#cod', '#amount', '#cashOnDelivery',
+                    'input[name*="cod"]', 'input[name*="amount"]',
+                ]),
                 ("customerName", [
                     '#recipientName', '#recipient_name', '#customerName', '#name',
                     'input[name="recipientName"]', 'input[name="name"]',
-                    'input[placeholder*="اسم"]', 'input[placeholder*="Name"]',
-                    'input[placeholder*="المستلم"]',
+                    'input[placeholder*="اسم"]', 'input[placeholder*="المستلم"]',
                 ]),
                 ("phone", [
                     '#recipientPhone', '#phone', '#mobile', '#recipientMobile',
                     'input[name="phone"]', 'input[name="mobile"]',
                     'input[name="recipientPhone"]',
-                    'input[placeholder*="هاتف"]', 'input[placeholder*="Phone"]',
-                    'input[placeholder*="موبايل"]',
+                    'input[placeholder*="هاتف"]', 'input[placeholder*="موبايل"]',
                 ]),
                 ("secondaryPhone", [
                     '#phone2', '#secondaryPhone', '#alternatePhone',
@@ -232,33 +263,12 @@ class ShippingBot:
                 ("address", [
                     '#address', '#recipientAddress', '#streetAddress',
                     'input[name="address"]', 'textarea[name="address"]',
-                    'input[placeholder*="عنوان"]', 'input[placeholder*="Address"]',
-                    'textarea[placeholder*="عنوان"]',
+                    'input[placeholder*="عنوان"]', 'textarea[placeholder*="عنوان"]',
                 ]),
                 ("city", [
                     '#city', '#district', '#area',
                     'input[name="city"]', 'input[name="district"]',
                     'input[placeholder*="مدينة"]', 'input[placeholder*="منطقة"]',
-                    'input[placeholder*="City"]',
-                ]),
-                ("total", [
-                    '#codAmount', '#cod', '#amount', '#cashOnDelivery',
-                    'input[name="cod"]', 'input[name="amount"]',
-                    'input[name="codAmount"]', 'input[name="cashOnDelivery"]',
-                    'input[placeholder*="مبلغ"]', 'input[placeholder*="تحصيل"]',
-                    'input[placeholder*="Amount"]',
-                ]),
-                ("items_description", [
-                    '#contents', '#description', '#packageContents',
-                    'input[name="contents"]', 'textarea[name="contents"]',
-                    'input[name="description"]', 'textarea[name="description"]',
-                    'input[placeholder*="محتوي"]', 'input[placeholder*="Content"]',
-                    'textarea[placeholder*="محتوي"]',
-                ]),
-                ("notes", [
-                    '#notes', '#remarks', '#comment',
-                    'input[name="notes"]', 'textarea[name="notes"]',
-                    'input[placeholder*="ملاحظ"]', 'textarea[placeholder*="ملاحظ"]',
                 ]),
             ]
 
