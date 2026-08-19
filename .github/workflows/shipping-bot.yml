@@ -1,0 +1,60 @@
+name: 🚚 Luno Store - Shipping Automation Bot
+
+on:
+  schedule:
+    # Runs automatically every 15 minutes (24/7 in the cloud)
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      order_id:
+        description: 'Firestore Order ID (Optional - leave blank for all confirmed orders)'
+        required: false
+        default: ''
+  repository_dispatch:
+    types: [auto-ship]
+
+jobs:
+  run-shipping-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'automation/requirements.txt'
+
+      - name: ⚙️ Install Dependencies & Playwright Chromium
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r automation/requirements.txt
+          playwright install --with-deps chromium
+
+      - name: 🔐 Generate Firebase Service Account JSON
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > automation/service-account.json
+
+      - name: 🚀 Run Shipping Automation Bot
+        env:
+          SHIPPING_SITE_URL: "https://wassalha.egyptpost.org"
+          SHIPPING_USERNAME: ${{ secrets.SHIPPING_USERNAME }}
+          SHIPPING_PASSWORD: ${{ secrets.SHIPPING_PASSWORD }}
+          HEADLESS: "true"
+          AUTO_DOWNLOAD_LABEL: "false"
+          FIREBASE_SERVICE_ACCOUNT_PATH: "./service-account.json"
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          cd automation
+          ORDER_ID="${{ github.event.inputs.order_id || github.event.client_payload.orderId }}"
+          if [ -n "$ORDER_ID" ]; then
+            echo "Processing single order: $ORDER_ID"
+            python main.py --order "$ORDER_ID"
+          else
+            echo "Processing all ready confirmed orders"
+            python main.py
+          fi

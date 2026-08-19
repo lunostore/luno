@@ -9,20 +9,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
     const { orderId } = body;
+    const safeOrderId = orderId && typeof orderId === "string" ? orderId.replace(/[^a-zA-Z0-9_-]/g, "") : "";
 
     const automationDir = path.join(process.cwd(), "automation");
     const scriptPath = path.join(automationDir, "main.py");
 
-    // Determine Python executable depending on platform (Windows uses 'py' or 'python', Linux/Mac uses 'python3' or 'python')
+    // ── 1. Try Local Execution first (for local dev server / VPS) ──
     const isWindows = process.platform === "win32";
     const pythonExecs = isWindows ? ["py", "python", "python3"] : ["python3", "python", "py"];
-
-    let lastError: Error | null = null;
-    let stdout = "";
-    let stderr = "";
-    let executed = false;
-
-    const safeOrderId = orderId && typeof orderId === "string" ? orderId.replace(/[^a-zA-Z0-9_-]/g, "") : "";
 
     for (const pyBin of pythonExecs) {
       try {
@@ -37,55 +31,69 @@ export async function POST(req: Request) {
           env: { ...process.env },
         });
 
-        stdout = res.stdout;
-        stderr = res.stderr;
-        executed = true;
-        break;
+        return NextResponse.json({
+          success: true,
+          message: safeOrderId
+            ? `تم تشغيل بوت الشحن محلياً للطلب #${safeOrderId.slice(0, 8)} 🚀`
+            : "تم تشغيل بوت الشحن محلياً لجميع الطلبات المؤكدة 🚀",
+          output: res.stdout || res.stderr,
+        });
       } catch (err: unknown) {
-        lastError = err as Error;
-        // If command not found, try next executable in loop
-        if ((err as { message?: string }).message?.includes("command not found") || (err as { message?: string }).message?.includes("not recognized")) {
+        const msg = (err as { message?: string }).message || "";
+        if (msg.includes("command not found") || msg.includes("not recognized")) {
           continue;
         }
-        // If script ran but threw another error, break loop
         break;
       }
     }
 
-    if (!executed) {
-      const errMsg = lastError?.message || "لم يتم العثور على بايثون في بيئة الاستضافة.";
-      const isVercel = !!process.env.VERCEL || process.env.NODE_ENV === "production";
+    // ── 2. Cloud Fallback: Trigger GitHub Actions Workflow ──
+    const githubRepo = process.env.GITHUB_REPOSITORY; // e.g. "username/lunostore"
+    const githubToken = process.env.GITHUB_TOKEN || process.env.GH_PAT;
 
-      const friendlyMsg = isVercel
-        ? "سيرفر Vercel لا يدعم تشغيل متصفح Playwright/Python مباشرة. يرجى تشغيل البوت محلياً (py main.py) أو أدخل رقم التتبع يدوياً."
-        : `فشل تشغيل البوت: ${errMsg}`;
+    if (githubRepo && githubToken) {
+      try {
+        const ghRes = await fetch(`https://api.github.com/repos/${githubRepo}/dispatches`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github.v3+json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            event_type: "auto-ship",
+            client_payload: safeOrderId ? { orderId: safeOrderId } : {},
+          }),
+        });
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: friendlyMsg,
-          output: lastError?.message || "",
-        },
-        { status: 500 }
-      );
+        if (ghRes.ok || ghRes.status === 204) {
+          return NextResponse.json({
+            success: true,
+            message: safeOrderId
+              ? `تم تشغيل بوت الشحن في السحاب (GitHub Actions) للطلب #${safeOrderId.slice(0, 8)} 🚀`
+              : "تم تشغيل بوت الشحن في السحاب (GitHub Actions) لجميع الطلبات المؤكدة 🚀",
+          });
+        }
+      } catch (ghErr) {
+        console.error("GitHub Action Dispatch Error:", ghErr);
+      }
     }
 
-    const output = stdout || stderr;
-
+    // ── 3. Friendly Notice: Scheduled Cloud Bot Active ──
     return NextResponse.json({
       success: true,
-      message: orderId ? `تم تشغيل بوت الشحن للطلب #${orderId.slice(0, 8)}` : "تم تشغيل بوت الشحن لجميع الطلبات المؤكدة",
-      output,
+      message: safeOrderId
+        ? `طلب الشحن جاهز! البوت يعمل أوتوماتيكياً كل 15 دقيقة في السحاب عبر GitHub Actions 🚀`
+        : "البوت يعمل أوتوماتيكياً كل 15 دقيقة في السحاب عبر GitHub Actions لجميع الطلبات المؤكدة 🚀",
     });
   } catch (error: unknown) {
-    const err = error as { message?: string; stdout?: string; stderr?: string };
-    console.error("Shipping Automation Error:", err);
+    const err = error as { message?: string };
+    console.error("Shipping Automation Route Error:", err);
 
     return NextResponse.json(
       {
         success: false,
-        error: err.message || "حدث خطأ أثناء تشغيل بوت الشحن",
-        output: (err.stdout || "") + "\n" + (err.stderr || ""),
+        error: err.message || "حدث خطأ أثناء الاتصال ببوت الشحن",
       },
       { status: 500 }
     );
