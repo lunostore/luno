@@ -88,20 +88,20 @@ class ShippingBot:
         Uses saved session first, falls back to username/password.
         Returns True if login successful.
         """
-        log("🔐 Checking login status...")
+        log("🔐 [v3.2] Checking login status...")
         
         # Track API responses to see exact server response
         network_logs = []
         def handle_response(response):
             try:
                 url_low = response.url.lower()
-                if any(x in url_low for x in ["login", "auth", "token", "api", "account", "user"]):
+                if any(x in url_low for x in ["login", "auth", "token", "api", "account", "user", "notification"]):
                     status = response.status
                     try:
                         text = response.text()[:250].strip()
                     except Exception:
                         text = ""
-                    network_logs.append(f"📡 [{status}] {response.url} -> {text}")
+                    network_logs.append((status, response.url, text))
             except Exception:
                 pass
 
@@ -165,7 +165,7 @@ class ShippingBot:
             # Type username using realistic keystrokes and dispatch Angular/JS events
             self.page.click(username_el)
             self.page.fill(username_el, '')
-            self.page.type(username_el, SHIPPING_USERNAME, delay=40)
+            self.page.type(username_el, SHIPPING_USERNAME, delay=30)
             self.page.evaluate(f"""() => {{
                 const el = document.querySelector('{username_el}');
                 if (el) {{
@@ -178,7 +178,7 @@ class ShippingBot:
             # Type password using realistic keystrokes and dispatch Angular/JS events
             self.page.click(password_el)
             self.page.fill(password_el, '')
-            self.page.type(password_el, SHIPPING_PASSWORD, delay=40)
+            self.page.type(password_el, SHIPPING_PASSWORD, delay=30)
             self.page.evaluate(f"""() => {{
                 const el = document.querySelector('{password_el}');
                 if (el) {{
@@ -218,25 +218,30 @@ class ShippingBot:
                 self.page.press(password_el, 'Enter')
 
             # Wait for response / navigation
-            time.sleep(5)
+            time.sleep(4)
 
-            # Check if auth/permission API returned success
+            # Check if auth/permission API returned 200 OK
             api_login_success = any(
-                ("200" in nlog and any(k in nlog for k in ["GetUserModulesPermission", "GetUserPermittedActions", "GetMemberNotificationCount", "GetNumberOfUserNotifications"]))
-                for nlog in network_logs
+                status == 200 and any(k.lower() in url.lower() for k in ["getusermodulespermission", "getuserpermittedactions", "getmembernotificationcount", "getnumberofusernotifications", "login", "auth"])
+                for status, url, text in network_logs
             )
 
+            # Check if token exists in localStorage
+            token_in_storage = self.page.evaluate("""() => {
+                return !!(localStorage.getItem('token') || localStorage.getItem('user') || sessionStorage.getItem('token') || localStorage.length > 2);
+            }""")
+
             current_url = self.page.url
-            if "/login" not in current_url or api_login_success:
-                log(f"   ✅ Login successful! (API authenticated: {api_login_success})")
+            if "/login" not in current_url or api_login_success or token_in_storage:
+                log(f"   🎉 Login successful! (API 200: {api_login_success}, Storage token: {token_in_storage})")
                 self._save_session()
-                # If still on /login URL, navigate to home/packages
-                if "/login" in self.page.url:
-                    try:
-                        self.page.goto(f"{SHIPPING_URL}/packages/eb", wait_until="domcontentloaded")
-                        time.sleep(3)
-                    except Exception:
-                        pass
+                # Navigate to packages creation page directly
+                log("   🚚 Navigating to packages dashboard...")
+                try:
+                    self.page.goto(f"{SHIPPING_URL}/packages/eb", wait_until="domcontentloaded")
+                    time.sleep(3)
+                except Exception:
+                    pass
                 return True
 
             # If still on login page and no auth API succeeded, check error elements
@@ -256,8 +261,8 @@ class ShippingBot:
             # Log captured network messages to see server status
             if network_logs:
                 log("   🔍 Network Responses:")
-                for nlog in network_logs[-5:]:
-                    log(f"      {nlog}")
+                for status, url, text in network_logs[-5:]:
+                    log(f"      📡 [{status}] {url} -> {text}")
 
             # Save screenshot for debugging
             os.makedirs("./storage", exist_ok=True)
