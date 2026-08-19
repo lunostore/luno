@@ -42,19 +42,19 @@ export default function AdminAnalyticsPage() {
   }, [user, authLoading]);
 
   const formatRelativeTime = (timestamp: unknown): { label: string; isLive: boolean } => {
-    if (!timestamp) return { label: "غير معروف", isLive: false };
     let ms = 0;
     const ts = timestamp as Record<string, unknown> & { toMillis?: () => number; seconds?: number };
     if (typeof ts?.toMillis === "function") ms = ts.toMillis();
     else if (ts?.seconds) ms = ts.seconds * 1000;
     else if (timestamp instanceof Date) ms = timestamp.getTime();
+    else if (typeof timestamp === "number" && timestamp > 0) ms = timestamp;
 
-    if (!ms) return { label: "غير معروف", isLive: false };
+    if (!ms) ms = Date.now();
 
     const diffSec = Math.floor((Date.now() - ms) / 1000);
     const isLive = diffSec <= 300; // 5 minutes
 
-    if (diffSec < 15) return { label: "الآن", isLive: true };
+    if (diffSec <= 15) return { label: "الآن", isLive: true };
     if (diffSec < 60) return { label: `منذ ${diffSec} ثانية`, isLive };
     const diffMin = Math.floor(diffSec / 60);
     if (diffMin < 60) return { label: `منذ ${diffMin} دقيقة`, isLive };

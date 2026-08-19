@@ -531,6 +531,72 @@ export async function deleteOrder(id: string): Promise<void> {
   await deleteDoc(doc(db, "orders", id));
 }
 
+// ─── Shipping Automation Helpers ────────────────────────
+
+/**
+ * جلب الطلبات المؤكدة الجاهزة للشحن (بدون رقم تتبع)
+ */
+export async function getOrdersReadyForShipping(): Promise<Order[]> {
+  const q = query(
+    collection(db, "orders"),
+    where("status", "==", "confirmed"),
+    orderBy("createdAt", "asc")
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }) as Order)
+    .filter((order) => !order.trackingNumber);
+}
+
+/**
+ * تحديث بيانات الشحن بعد نجاح الأتمتة
+ */
+export async function updateOrderShippingInfo(
+  orderId: string,
+  data: {
+    trackingNumber: string;
+    shippingProvider?: string;
+    shippingLabelUrl?: string;
+  }
+): Promise<void> {
+  await updateDoc(doc(db, "orders", orderId), cleanUndefined({
+    trackingNumber: data.trackingNumber,
+    shippingProvider: data.shippingProvider || "egypt_post",
+    shippedAt: Timestamp.now(),
+    shippingLabelUrl: data.shippingLabelUrl,
+    shippingError: null, // مسح أي خطأ سابق
+    status: "shipping" as OrderStatus,
+  }));
+}
+
+/**
+ * تسجيل خطأ شحن على الطلب (يظهر في لوحة التحكم)
+ */
+export async function setOrderShippingError(
+  orderId: string,
+  errorMessage: string
+): Promise<void> {
+  await updateDoc(doc(db, "orders", orderId), {
+    shippingError: errorMessage,
+  });
+}
+
+/**
+ * إدخال رقم تتبع يدوياً (فولباك)
+ */
+export async function setManualTrackingNumber(
+  orderId: string,
+  trackingNumber: string
+): Promise<void> {
+  await updateDoc(doc(db, "orders", orderId), cleanUndefined({
+    trackingNumber,
+    shippingProvider: "manual",
+    shippedAt: Timestamp.now(),
+    shippingError: null,
+    status: "shipping" as OrderStatus,
+  }));
+}
+
 // ─── Categories ──────────────────────────────────────────
 
 export async function getCategories(): Promise<Category[]> {
@@ -835,11 +901,13 @@ export async function trackVisitorSession(data: {
     const sessionRef = doc(db, "visitor_sessions", data.sessionId);
     const now = new Date();
     const dateKey = now.toISOString().slice(0, 10);
+    const timestampMs = Date.now();
 
     const sessionPayload: Record<string, any> = {
       sessionId: data.sessionId,
       visitorId: data.visitorId,
       lastActive: serverTimestamp(),
+      updatedAtMs: timestampMs,
       dateKey,
       currentPage: data.currentPage || "/",
       device: data.device || "Desktop",
@@ -871,12 +939,16 @@ export function subscribeToVisitorSessions(
       const liveWindowMs = 5 * 60 * 1000; // 5 minutes active window
       const todayStr = new Date().toISOString().slice(0, 10);
 
-      const getMs = (t: any): number => {
-        if (!t) return 0;
+      const getMs = (t: any, fallbackMs?: number): number => {
+        if (typeof fallbackMs === "number" && fallbackMs > 0 && (!t || (typeof t === "object" && !t.seconds && !t.toMillis))) {
+          return fallbackMs;
+        }
+        if (!t) return Date.now();
         if (t?.toMillis) return t.toMillis();
         if (t?.seconds) return t.seconds * 1000;
         if (t instanceof Date) return t.getTime();
-        return 0;
+        if (typeof t === "number" && t > 0) return t;
+        return Date.now();
       };
 
       const sessions: VisitorSession[] = snapshot.docs.map((docSnap) => {
@@ -896,7 +968,11 @@ export function subscribeToVisitorSessions(
       });
 
       // Sort in JS memory by lastActive descending
-      sessions.sort((a, b) => getMs(b.lastActive) - getMs(a.lastActive));
+      sessions.sort((a, b) => {
+        const docA = snapshot.docs.find((d) => d.id === a.id)?.data();
+        const docB = snapshot.docs.find((d) => d.id === b.id)?.data();
+        return getMs(b.lastActive, docB?.updatedAtMs) - getMs(a.lastActive, docA?.updatedAtMs);
+      });
 
       let liveCount = 0;
       let todayCount = 0;
@@ -915,7 +991,8 @@ export function subscribeToVisitorSessions(
       }
 
       sessions.forEach((s) => {
-        const lastActiveMs = getMs(s.lastActive);
+        const docData = snapshot.docs.find((d) => d.id === s.id)?.data();
+        const lastActiveMs = getMs(s.lastActive, docData?.updatedAtMs);
 
         // Live status check (within last 5 mins)
         if (nowMs - lastActiveMs <= liveWindowMs && lastActiveMs > 0) {

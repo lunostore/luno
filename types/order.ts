@@ -43,6 +43,13 @@ export interface Order {
   total: number;
   status: OrderStatus;
   createdAt: Timestamp | Date;
+
+  // ─── Shipping Automation Fields ─────────
+  trackingNumber?: string;        // رقم البوليصة من شركة الشحن (Wassalha)
+  shippingProvider?: string;      // اسم شركة الشحن (مثلاً "egypt_post")
+  shippedAt?: Timestamp | Date;   // وقت تسجيل الشحنة
+  shippingError?: string;         // رسالة خطأ لو فشل التسجيل التلقائي
+  shippingLabelUrl?: string;      // رابط ملف PDF البوليصة (اختياري)
 }
 
 export interface CreateOrderInput {
