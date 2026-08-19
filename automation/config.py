@@ -18,8 +18,25 @@ SHIPPING_PASSWORD = os.getenv("SHIPPING_PASSWORD", "")
 # ─── Automation Options ───────────────────────────────
 HEADLESS       = os.getenv("HEADLESS", "false").lower() == "true"
 AUTO_DOWNLOAD  = os.getenv("AUTO_DOWNLOAD_LABEL", "true").lower() == "true"
-LABELS_DIR     = os.getenv("LABELS_DIR", "./storage/labels")
-
-# ─── Telegram Notification (Optional) ─────────────────
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID", "")
+# ─── Validation Helper ─────────────────────────────────
+def validate_config() -> tuple[bool, list[str]]:
+    """Verify all required environment variables and service-account file exist."""
+    errors = []
+    if not SHIPPING_USERNAME:
+        errors.append("اسم المستخدم SHIPPING_USERNAME غير مضاف")
+    if not SHIPPING_PASSWORD:
+        errors.append("كلمة المرور SHIPPING_PASSWORD غير مضافة")
+    
+    if not os.path.exists(FIREBASE_SA_PATH):
+        errors.append("ملف Firebase service-account.json غير موجود")
+    else:
+        try:
+            import json
+            with open(FIREBASE_SA_PATH, "r", encoding="utf-8") as f:
+                content = json.load(f)
+                if not content or "project_id" not in content:
+                    errors.append("ملف FIREBASE_SERVICE_ACCOUNT_JSON فارغ أو غير صالح (ينقص project_id)")
+        except Exception as e:
+            errors.append(f"محتوى ملف FIREBASE_SERVICE_ACCOUNT_JSON غير صالح JSON ({e})")
+            
+    return len(errors) == 0, errors
