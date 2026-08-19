@@ -491,100 +491,10 @@ class ShippingBot:
                 log("   ❌ Could not find submit button!")
                 return None
 
-            filled_fields = []
-            for field_key, selectors in field_mappings:
-                value = form_data.get(field_key, "")
-                if not value:
-                    continue
-
-                filled = False
-                for selector in selectors:
-                    try:
-                        el = self.page.query_selector(selector)
-                        if el and el.is_visible():
-                            tag = el.evaluate("el => el.tagName.toLowerCase()")
-                            if tag == "textarea":
-                                el.fill(value)
-                            else:
-                                el.fill("")
-                                el.fill(value)
-                            filled = True
-                            filled_fields.append(field_key)
-                            break
-                    except Exception:
-                        continue
-
-                if not filled:
-                    log(f"   ⚠️ Could not find field: {field_key}")
-
-            # ── Step 4: Handle governorate dropdown ──
-            gov_value = form_data["governorate"]
-            if gov_value:
-                gov_selectors = [
-                    '#governorate', '#city_gov', '#receiverGovernorate',
-                    'select[name="governorate"]', 'select[name="city"]',
-                ]
-                for selector in gov_selectors:
-                    try:
-                        el = self.page.query_selector(selector)
-                        if el and el.is_visible():
-                            # Try selecting by text content first (more reliable with Arabic)
-                            self.page.select_option(selector, label=gov_value)
-                            filled_fields.append("governorate")
-                            break
-                    except Exception:
-                        try:
-                            # Fallback: try by value
-                            self.page.select_option(selector, value=gov_value)
-                            filled_fields.append("governorate")
-                            break
-                        except Exception:
-                            continue
-
-            log(f"   📝 Filled {len(filled_fields)} fields: {', '.join(filled_fields)}")
-
-            # ── Step 5: Take screenshot before submission ──
-            os.makedirs(LABELS_DIR, exist_ok=True)
-            screenshot_path = os.path.join(LABELS_DIR, f"pre_submit_{order_id}.png")
-            self.page.screenshot(path=screenshot_path)
-            log(f"   📸 Pre-submit screenshot saved: {screenshot_path}")
-
-            # ── Step 6: Submit the form ──
-            submit_selectors = [
-                'button[type="submit"]',
-                'button:has-text("حفظ")',
-                'button:has-text("إنشاء")',
-                'button:has-text("تأكيد")',
-                'button:has-text("Save")',
-                'button:has-text("Create")',
-                'button:has-text("Submit")',
-                '.btn-primary[type="submit"]',
-                'input[type="submit"]',
-            ]
-
-            submitted = False
-            for selector in submit_selectors:
-                try:
-                    btn = self.page.query_selector(selector)
-                    if btn and btn.is_visible():
-                        btn.click()
-                        self.page.wait_for_load_state("networkidle")
-                        time.sleep(3)
-                        submitted = True
-                        log(f"   ✅ Form submitted via: {selector}")
-                        break
-                except Exception:
-                    continue
-
-            if not submitted:
-                log("   ❌ Could not find submit button!")
-                log("   💡 Run with HEADLESS=false and manually inspect the form")
-                return None
-
-            # ── Step 7: Extract tracking number ──
+            # ── Step 5: Extract tracking number ──
             tracking = self._extract_tracking_number()
 
-            # ── Step 8: Download label PDF (optional) ──
+            # ── Step 6: Download label PDF (optional) ──
             if tracking and AUTO_DOWNLOAD:
                 self._download_label(tracking, order_id)
 
