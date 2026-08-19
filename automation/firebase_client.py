@@ -12,8 +12,14 @@ from logger import log
 def init_firebase():
     """Initialize Firebase Admin SDK (safe to call multiple times)."""
     if not firebase_admin._apps:
-        cred = credentials.Certificate(FIREBASE_SA_PATH)
-        firebase_admin.initialize_app(cred)
+        try:
+            cred = credentials.Certificate(FIREBASE_SA_PATH)
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+            log("❌ خطأ في تحميل ملف Firebase service-account.json!")
+            log("💡 تأكد من إضافة سر FIREBASE_SERVICE_ACCOUNT_JSON في GitHub Repository Secrets بشكل صحيح.")
+            log(f"   التفاصيل: {e}")
+            raise e
     return firestore.client()
 
 
