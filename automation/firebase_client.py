@@ -38,8 +38,14 @@ def get_ready_orders() -> list[dict]:
     """
     db = _get_db()
     orders_ref = db.collection("orders")
-    query = orders_ref.where("status", "==", "confirmed").order_by("createdAt")
-    docs = query.stream()
+    # Use simple where without order_by to avoid needing a composite index
+    query = orders_ref.where("status", "==", "confirmed")
+
+    try:
+        docs = query.stream()
+    except Exception as e:
+        log(f"❌ خطأ في جلب الطلبات من Firestore: {e}")
+        return []
 
     ready = []
     for doc in docs:
@@ -48,6 +54,9 @@ def get_ready_orders() -> list[dict]:
         # Only include orders without tracking numbers
         if not data.get("trackingNumber"):
             ready.append(data)
+
+    # Sort by createdAt in Python (avoids composite index requirement)
+    ready.sort(key=lambda x: x.get("createdAt", 0) or 0)
     return ready
 
 
