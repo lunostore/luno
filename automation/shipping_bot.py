@@ -296,59 +296,104 @@ class ShippingBot:
         log(f"   📦 Creating shipment for #{order_id} ({customer})...")
 
         try:
-            # ── Step 1: Navigate to Create Shipment page ──
-            # Try common Wassalha URLs for shipment creation
-            create_urls = [
-                f"{SHIPPING_URL}/packages/eb",          # Known packages page
-                f"{SHIPPING_URL}/shipment/create",
-                f"{SHIPPING_URL}/packages/create",
-                f"{SHIPPING_URL}/order/create",
-            ]
+            # ── Step 1: Discover and navigate to Create Shipment page / modal ──
+            log(f"   🧭 Current page URL: {self.page.url}")
+            time.sleep(2)
 
-            navigated = False
-            for url in create_urls:
-                self.page.goto(url, wait_until="networkidle")
-                time.sleep(2)
-                # Check if page loaded (not 404 or redirected to login)
-                if "/login" in self.page.url:
-                    log("   ⚠️ Session expired, re-logging in...")
-                    if not self.login():
-                        return None
-                    self.page.goto(url, wait_until="networkidle")
-                    time.sleep(2)
-
-                if self.page.url == url or "/login" not in self.page.url:
-                    navigated = True
-                    break
-
-            if not navigated:
-                log("   ❌ Could not navigate to shipment creation page")
-                return None
-
-            # ── Step 2: Look for "New Shipment" or "Add" button ──
-            # Click the create/add button if present
-            add_btn_selectors = [
-                'button:has-text("إضافة")',
-                'button:has-text("شحنة جديدة")',
-                'button:has-text("New")',
-                'a:has-text("إضافة")',
+            # Look for sidebar menu links or buttons for "إضافة شحنة" / "الشحنات"
+            menu_clicked = False
+            menu_selectors = [
+                'a[href*="packages"]',
+                'a:has-text("إضافة شحنة")',
                 'a:has-text("شحنة جديدة")',
-                '.btn-primary:has-text("إضافة")',
-                'button:has-text("Add")',
-                'button:has-text("Create")',
+                'a:has-text("الشحنات")',
+                'span:has-text("إضافة شحنة")',
+                'span:has-text("شحنة جديدة")',
+                'span:has-text("الشحنات")',
+                'li:has-text("الشحنات")',
+                'button:has-text("إضافة شحنة")',
+                'button:has-text("شحنة جديدة")',
+                'button:has-text("إضافة")',
+                'a.btn:has-text("إضافة")',
+                '.btn-primary',
+                '.btn-success',
             ]
 
-            for selector in add_btn_selectors:
+            # First log all visible clickable buttons/links for diagnosis
+            try:
+                elements_info = self.page.evaluate("""() => {
+                    const items = [];
+                    document.querySelectorAll('button, a, .btn, [role="button"]').forEach(el => {
+                        const txt = (el.innerText || el.textContent || '').trim();
+                        const href = el.getAttribute('href') || '';
+                        const cls = el.className || '';
+                        if (txt || href) {
+                            items.push(`tag=${el.tagName}, text="${txt.slice(0,30)}", href="${href}", class="${cls.slice(0,30)}"`);
+                        }
+                    });
+                    return items.slice(0, 15);
+                }""")
+                if elements_info:
+                    log("   🔍 Page Interactive Elements:")
+                    for einfo in elements_info:
+                        log(f"      👉 {einfo}")
+            except Exception:
+                pass
+
+            # Try clicking menu / add buttons
+            for selector in menu_selectors:
                 try:
-                    btn = self.page.query_selector(selector)
-                    if btn and btn.is_visible():
-                        btn.click()
-                        self.page.wait_for_load_state("networkidle")
-                        time.sleep(2)
-                        log(f"   ✅ Clicked create button: {selector}")
+                    btns = self.page.query_selector_all(selector)
+                    for b in btns:
+                        if b.is_visible():
+                            btxt = b.inner_text().strip()
+                            if any(w in btxt for w in ["إضافة", "شحنة", "شحنات", "New", "Add", "Package"]):
+                                b.click()
+                                time.sleep(2)
+                                log(f"   ✅ Clicked package action: {selector} (text: '{btxt}')")
+                                menu_clicked = True
+                                break
+                    if menu_clicked:
                         break
                 except Exception:
                     continue
+
+            # If not clicked, try navigating to package creation URLs
+            if not menu_clicked:
+                create_urls = [
+                    f"{SHIPPING_URL}/#/packages/eb/create",
+                    f"{SHIPPING_URL}/#/packages/add",
+                    f"{SHIPPING_URL}/#/packages/create",
+                    f"{SHIPPING_URL}/packages/eb",
+                ]
+                for url in create_urls:
+                    try:
+                        self.page.goto(url, wait_until="domcontentloaded")
+                        time.sleep(2)
+                        if "/login" not in self.page.url:
+                            break
+                    except Exception:
+                        pass
+
+            # Log inputs on current page
+            try:
+                inputs_info = self.page.evaluate("""() => {
+                    const inputs = [];
+                    document.querySelectorAll('input, select, textarea').forEach(el => {
+                        const id = el.id || '';
+                        const name = el.name || '';
+                        const placeholder = el.placeholder || '';
+                        const type = el.type || el.tagName.toLowerCase();
+                        inputs.push(`tag=${el.tagName}, id="${id}", name="${name}", type="${type}", placeholder="${placeholder}"`);
+                    });
+                    return inputs;
+                }""")
+                if inputs_info:
+                    log(f"   📝 Detected {len(inputs_info)} form inputs on page:")
+                    for inp in inputs_info[:15]:
+                        log(f"      📥 {inp}")
+            except Exception:
+                pass
 
             # ── Step 3: Fill the shipment form ──
             # These selectors need to be calibrated on first run.
