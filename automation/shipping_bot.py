@@ -296,162 +296,144 @@ class ShippingBot:
         log(f"   📦 Creating shipment for #{order_id} ({customer})...")
 
         try:
-            # ── Step 1: Open New Package in Easy Box (/packages/eb) ──
+            # ── Step 1: Open Add New Package Modal in Easy Box (/packages/eb) ──
             log(f"   🧭 Current page URL: {self.page.url}")
-            time.sleep(2)
+            if "/packages/eb" not in self.page.url:
+                self.page.goto(f"{SHIPPING_URL}/packages/eb", wait_until="domcontentloaded")
+                time.sleep(3)
 
-            # Click the outline Add button on top of the Easy Box table
-            outline_btns = self.page.query_selector_all('button.btn-outline-secondary, .btn-outline-secondary, button:has-text("Add"), button:has-text("إضافة")')
-            for ob in outline_btns:
+            # Click the 'Add New' button at top right
+            add_btn_clicked = False
+            add_selectors = [
+                'button:has-text("Add New")',
+                'a:has-text("Add New")',
+                'button:has-text("إضافة شحنة")',
+                'button:has-text("إضافة")',
+                'button.btn-outline-secondary',
+                '.btn-outline-secondary',
+            ]
+            for sel in add_selectors:
                 try:
-                    if ob.is_visible():
-                        ob.click()
+                    btn = self.page.query_selector(sel)
+                    if btn and btn.is_visible():
+                        btn.click()
                         time.sleep(2)
-                        log("   ✅ Clicked Easy Box Add Package action (btn-outline-secondary)")
+                        log(f"   ✅ Opened 'Add new package' modal via: {sel}")
+                        add_btn_clicked = True
                         break
                 except Exception:
-                    pass
+                    continue
 
+            # Wait for modal to render
             time.sleep(2)
 
-            # ── Step 2: Fill the shipment form (Modal or Easy Box Table Row) ──
+            # ── Step 2: Prepare Shipment Data ──
             payment_method = order.get("paymentMethod", "cash_on_delivery")
             is_online_payment = payment_method in ["vodafone_cash", "instapay"]
 
-            # Rule 1: COD Amount (مبلغ التحصيل عند التسليم)
+            # Rule 1: COD Amount
             cod_amount = "   " if is_online_payment else str(order.get("total", 0))
 
-            # Rule 2: Special Notes (ملاحظات خاصة)
+            # Rule 2: Special Notes
             customer_notes = (order.get("notes") or "").strip()
             special_notes = "كفر شحن وبوليصة شحن"
             if customer_notes:
                 special_notes = f"{special_notes} - {customer_notes}"
 
-            form_data = {
-                "customerName": order.get("customerName", ""),
-                "phone": order.get("phone", ""),
-                "secondaryPhone": order.get("secondaryPhone", ""),
-                "governorate": get_shipping_value(order.get("governorate", "")),
-                "city": order.get("city", ""),
-                "address": order.get("address", ""),
-                "total": cod_amount,
-                "weight": "500",  # Rule 3: Weight = 500 grams
-                "items_description": "ملابس",  # Rule 4: Content description = ملابس
-                "notes": special_notes,  # Rule 5: Special Notes = كفر شحن وبوليصة شحن
-            }
-
             filled_fields = []
 
-            # Strategy A: Field selectors (Modal / Form / Angular inputs)
-            field_mappings = [
-                ("items_description", [
-                    '[formcontrolname*="description"]', '[formcontrolname*="content"]', '[formcontrolname*="item"]',
-                    'textarea[placeholder*="وصف"]', 'textarea[placeholder*="محتوى"]',
-                    'input[placeholder*="وصف"]', 'input[placeholder*="محتوى"]',
-                    '#contents', '#description', 'input[name*="description"]',
-                ]),
-                ("notes", [
-                    '[formcontrolname*="note"]', '[formcontrolname*="remark"]',
-                    'textarea[placeholder*="ملاحظات"]', 'input[placeholder*="ملاحظات"]',
-                    '#specialNotes', '#notes',
-                ]),
-                ("weight", [
-                    '[formcontrolname*="weight"]',
-                    'input[placeholder*="الوزن"]', 'input[placeholder*="وزن"]',
-                    '#weight', 'input[name*="weight"]',
-                ]),
-                ("total", [
-                    '[formcontrolname*="cod"]', '[formcontrolname*="amount"]', '[formcontrolname*="total"]',
-                    'input[placeholder*="التحصيل"]', 'input[placeholder*="مبلغ"]',
-                    '#codAmount', '#cod', '#amount',
-                ]),
-                ("customerName", [
-                    '[formcontrolname*="name"]', '[formcontrolname*="recipient"]', '[formcontrolname*="customer"]',
-                    '#recipientName', '#customerName', '#name',
-                    'input[placeholder*="اسم"]', 'input[placeholder*="المستلم"]', 'input[placeholder*="العميل"]', 'input[placeholder*="Name"]',
-                ]),
-                ("phone", [
-                    '[formcontrolname*="phone"]', '[formcontrolname*="mobile"]',
-                    '#recipientPhone', '#phone', '#mobile',
-                    'input[placeholder*="هاتف"]', 'input[placeholder*="موبايل"]', 'input[placeholder*="Phone"]', 'input[placeholder*="Mobile"]',
-                ]),
-                ("secondaryPhone", [
-                    '[formcontrolname*="phone2"]',
-                    '#phone2', '#secondaryPhone',
-                    'input[placeholder*="بديل"]', 'input[placeholder*="ثاني"]',
-                ]),
-                ("address", [
-                    '[formcontrolname*="address"]', '[formcontrolname*="street"]',
-                    '#address', '#recipientAddress',
-                    'textarea[placeholder*="عنوان"]', 'input[placeholder*="عنوان"]', 'input[placeholder*="Address"]',
-                ]),
-                ("city", [
-                    '[formcontrolname*="city"]', '[formcontrolname*="district"]',
-                    '#city', '#district',
-                    'input[placeholder*="مدينة"]', 'input[placeholder*="منطقة"]', 'input[placeholder*="City"]',
-                ]),
-            ]
+            # ── Step 3: Tab 1 - Shipment Details ──
+            try:
+                shipment_tab = self.page.query_selector('a:has-text("Shipment Details"), button:has-text("Shipment Details"), a:has-text("بيانات الشحنة"), [href*="shipment"]')
+                if shipment_tab and shipment_tab.is_visible():
+                    shipment_tab.click()
+                    time.sleep(1)
+                    log("   📂 Switched to 'Shipment Details' tab")
+            except Exception:
+                pass
 
-            for field_key, selectors in field_mappings:
-                value = form_data.get(field_key, "")
-                if not value:
-                    continue
+            # Fill Shipment Details fields (Exact verified IDs: pkgDescription, pkgWeight, COD)
+            try:
+                # Description of content
+                desc_el = self.page.query_selector('#pkgDescription, textarea[name*="description"], [formcontrolname*="description"]')
+                if desc_el and desc_el.is_visible():
+                    desc_el.fill("ملابس")
+                    desc_el.dispatch_event('input')
+                    filled_fields.append("pkgDescription")
 
-                for selector in selectors:
+                # Weight = 500
+                weight_el = self.page.query_selector('#pkgWeight, input[name*="weight"], [formcontrolname*="weight"]')
+                if weight_el and weight_el.is_visible():
+                    weight_el.fill("500")
+                    weight_el.dispatch_event('input')
+                    filled_fields.append("pkgWeight")
+
+                # COD Amount
+                cod_el = self.page.query_selector('#COD, input[name*="COD"], input[name*="cod"], [formcontrolname*="cod"]')
+                if cod_el and cod_el.is_visible():
+                    cod_el.fill(cod_amount)
+                    cod_el.dispatch_event('input')
+                    filled_fields.append("COD")
+
+                # Special Notes
+                notes_el = self.page.query_selector('#pkgNotes, textarea[name*="notes"], #specialNotes, textarea')
+                if notes_el and notes_el.is_visible():
+                    notes_el.fill(special_notes)
+                    notes_el.dispatch_event('input')
+                    filled_fields.append("pkgNotes")
+            except Exception as e:
+                log(f"   ⚠️ Shipment details tab fill warning: {e}")
+
+            # ── Step 4: Tab 2 - Consignee Details (Customer info) ──
+            try:
+                consignee_tab = self.page.query_selector('a:has-text("Consignee Details"), button:has-text("Consignee Details"), a:has-text("بيانات المستلم"), [href*="consignee"], [href*="customer"]')
+                if consignee_tab and consignee_tab.is_visible():
+                    consignee_tab.click()
+                    time.sleep(1)
+                    log("   📂 Switched to 'Consignee Details' tab")
+            except Exception:
+                pass
+
+            # Fill Consignee Details fields (Exact verified IDs: customerName, customerMobile, customerStreet, City)
+            try:
+                # Customer Name
+                name_el = self.page.query_selector('#customerName, #CustomerName, input[name*="customerName"], [formcontrolname*="name"]')
+                if name_el and name_el.is_visible():
+                    name_el.fill(order.get("customerName", ""))
+                    name_el.dispatch_event('input')
+                    filled_fields.append("customerName")
+
+                # Mobile Number
+                phone_el = self.page.query_selector('#customerMobile, #CustomerMobile, #mobile, input[name*="mobile"], [formcontrolname*="phone"]')
+                if phone_el and phone_el.is_visible():
+                    phone_el.fill(order.get("phone", ""))
+                    phone_el.dispatch_event('input')
+                    filled_fields.append("customerMobile")
+
+                # Full Address / Street
+                street_el = self.page.query_selector('#customerStreet, #CustomerStreet, #address, textarea[name*="street"], input[name*="street"]')
+                if street_el and street_el.is_visible():
+                    street_el.fill(order.get("address", ""))
+                    street_el.dispatch_event('input')
+                    filled_fields.append("customerStreet")
+
+                # City / Governorate Dropdown
+                gov_val = get_shipping_value(order.get("governorate", ""))
+                city_sel = self.page.query_selector('#City, select[name="city"], select[name="governorate"], select')
+                if city_sel and city_sel.is_visible() and gov_val:
                     try:
-                        el = self.page.query_selector(selector)
-                        if el and el.is_visible():
-                            el.fill("")
-                            el.fill(value)
-                            el.dispatch_event('input')
-                            el.dispatch_event('change')
-                            filled_fields.append(field_key)
-                            break
+                        city_sel.select_option(label=gov_val)
+                        filled_fields.append("City")
                     except Exception:
-                        continue
+                        try:
+                            city_sel.select_option(value=gov_val)
+                            filled_fields.append("City")
+                        except Exception:
+                            pass
+            except Exception as e:
+                log(f"   ⚠️ Consignee details tab fill warning: {e}")
 
-            # Strategy B: If table row inputs exist in Easy Box table
-            if len(filled_fields) < 3:
-                try:
-                    row_inputs = self.page.query_selector_all('tbody tr:last-child input, tbody tr:first-child input, .table input')
-                    visible_row_inputs = [inp for inp in row_inputs if inp.is_visible() and (inp.get_attribute("type") or "text") not in ["checkbox", "hidden"]]
-                    if visible_row_inputs:
-                        log(f"   📝 Found {len(visible_row_inputs)} inline table inputs")
-                        # Fill sequential table columns
-                        vals = [form_data["customerName"], form_data["phone"], form_data["city"], form_data["address"], form_data["total"], form_data["weight"], form_data["notes"]]
-                        for i, inp in enumerate(visible_row_inputs):
-                            if i < len(vals) and vals[i]:
-                                inp.fill("")
-                                inp.fill(vals[i])
-                                inp.dispatch_event('input')
-                                inp.dispatch_event('change')
-                                filled_fields.append(f"col_{i+1}")
-                except Exception as e:
-                    log(f"   ⚠️ Inline row fill error: {e}")
-
-            # ── Governorate dropdown ──
-            gov_value = form_data["governorate"]
-            if gov_value:
-                gov_selectors = [
-                    '#governorate', '#city_gov', '#receiverGovernorate',
-                    'select[name="governorate"]', 'select[name="city"]', 'select',
-                ]
-                for selector in gov_selectors:
-                    try:
-                        el = self.page.query_selector(selector)
-                        if el and el.is_visible():
-                            try:
-                                self.page.select_option(selector, label=gov_value)
-                                filled_fields.append("governorate")
-                                break
-                            except Exception:
-                                self.page.select_option(selector, value=gov_value)
-                                filled_fields.append("governorate")
-                                break
-                    except Exception:
-                        continue
-
-            log(f"   📝 Filled {len(filled_fields)} fields: {', '.join(filled_fields)}")
+            log(f"   📝 Filled {len(filled_fields)} verified fields: {', '.join(filled_fields)}")
 
             # ── Step 3: Take screenshot before submission ──
             os.makedirs(LABELS_DIR, exist_ok=True)
@@ -459,7 +441,7 @@ class ShippingBot:
             self.page.screenshot(path=screenshot_path)
             log(f"   📸 Pre-submit screenshot saved: {screenshot_path}")
 
-            # ── Step 4: Submit the form (Save and Close) ──
+            # ── Step 4: Submit the form (Save and Close) & Intercept Tracking Response ──
             submit_selectors = [
                 'a.btn-Send',
                 '.btn-Send',
@@ -473,14 +455,30 @@ class ShippingBot:
                 'input[type="submit"]',
             ]
 
+            # Intercept submit API network responses
+            captured_tracking = []
+            def on_submit_response(res):
+                try:
+                    rurl = res.url.lower()
+                    if any(w in rurl for w in ["package", "shipment", "save", "create", "eb", "order"]):
+                        rtext = res.text()
+                        import re
+                        # Look for tracking code / barcode in JSON response
+                        matches = re.findall(r'(?:EG|EP|EB)\d{8,14}(?:EG)?|\b\d{10,14}\b', rtext)
+                        for m in matches:
+                            captured_tracking.append(m)
+                except Exception:
+                    pass
+
+            self.page.on("response", on_submit_response)
+
             submitted = False
             for selector in submit_selectors:
                 try:
                     btn = self.page.query_selector(selector)
                     if btn and btn.is_visible():
                         btn.click()
-                        self.page.wait_for_load_state("networkidle")
-                        time.sleep(3)
+                        time.sleep(4)
                         submitted = True
                         log(f"   ✅ Form submitted via: {selector}")
                         break
@@ -492,7 +490,12 @@ class ShippingBot:
                 return None
 
             # ── Step 5: Extract tracking number ──
-            tracking = self._extract_tracking_number()
+            tracking = None
+            if captured_tracking:
+                tracking = captured_tracking[0]
+                log(f"   🎯 Intercepted tracking number from API: {tracking}")
+            else:
+                tracking = self._extract_tracking_number()
 
             # ── Step 6: Download label PDF (optional) ──
             if tracking and AUTO_DOWNLOAD:
