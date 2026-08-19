@@ -1,6 +1,6 @@
 """
 Luno Store — Shipping Automation Config
-Reads environment variables from .env file.
+Reads environment variables from .env file or GitHub Secrets / Vars.
 """
 import os
 from dotenv import load_dotenv
@@ -18,6 +18,12 @@ SHIPPING_PASSWORD = os.getenv("SHIPPING_PASSWORD") or os.getenv("VARS_SHIPPING_P
 # ─── Automation Options ───────────────────────────────
 HEADLESS       = os.getenv("HEADLESS", "false").lower() == "true"
 AUTO_DOWNLOAD  = os.getenv("AUTO_DOWNLOAD_LABEL", "true").lower() == "true"
+LABELS_DIR     = os.getenv("LABELS_DIR", "./storage/labels")
+
+# ─── Telegram Notification (Optional) ─────────────────
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("VARS_TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("VARS_TELEGRAM_CHAT_ID", "")
+
 # ─── Validation Helper ─────────────────────────────────
 def validate_config() -> tuple[bool, list[str]]:
     """Verify all required environment variables and service-account file exist."""
