@@ -297,72 +297,95 @@ class ShippingBot:
 
         try:
             # ── Step 1: Discover and navigate to Create Shipment page / modal ──
-            log(f"   🧭 Current page URL: {self.page.url}")
-            time.sleep(2)
+            # Try main package routes: /packages/eb or /packages
+            target_routes = [
+                f"{SHIPPING_URL}/packages/eb",
+                f"{SHIPPING_URL}/packages",
+            ]
+            
+            # Make sure we are on the packages page
+            if not any(r in self.page.url for r in ["/packages/eb", "/packages"]):
+                self.page.goto(f"{SHIPPING_URL}/packages/eb", wait_until="domcontentloaded")
+                time.sleep(3)
 
-            # Look for action buttons on the page (e.g. "Add Package", "إضافة شحنة", "+", "Create")
-            add_button_found = False
+            log(f"   🧭 Current page URL: {self.page.url}")
+
+            # Switch to Arabic if language button is present for consistent Arabic selectors
+            try:
+                ar_btn = self.page.query_selector('a.lng:has-text("عربي"), a.lng-menu:has-text("عربي")')
+                if ar_btn and ar_btn.is_visible():
+                    ar_btn.click()
+                    time.sleep(2)
+                    log("   🌐 Switched UI to Arabic")
+            except Exception:
+                pass
+
+            # Inspect ALL clickable elements on the page
+            try:
+                page_buttons = self.page.evaluate("""() => {
+                    const res = [];
+                    document.querySelectorAll('button, a.btn, [role="button"], .btn, input[type="button"], input[type="submit"]').forEach(el => {
+                        res.push({
+                            tag: el.tagName,
+                            text: (el.innerText || el.textContent || '').trim().replace(/\\s+/g, ' '),
+                            id: el.id || '',
+                            class: el.className || '',
+                            href: el.getAttribute('href') || '',
+                            title: el.getAttribute('title') || '',
+                            disabled: el.disabled || false,
+                        });
+                    });
+                    return res;
+                }""")
+                log(f"   🔍 Found {len(page_buttons)} action buttons on page:")
+                for pb in page_buttons[:20]:
+                    log(f"      🔘 tag={pb['tag']}, text='{pb['text']}', id='{pb['id']}', class='{pb['class']}', href='{pb['href']}', title='{pb['title']}'")
+            except Exception as e:
+                log(f"   ⚠️ Could not inspect buttons: {e}")
+
+            # Try clicking any creation/addition button
+            clicked_add = False
             add_selectors = [
-                'button:has-text("إضافة شحنة")',
-                'button:has-text("شحنة جديدة")',
                 'button:has-text("إضافة")',
-                'button:has-text("Add Package")',
-                'button:has-text("Add New")',
-                'button:has-text("New Package")',
+                'button:has-text("شحنة")',
+                'button:has-text("جديد")',
                 'button:has-text("Add")',
+                'button:has-text("New")',
+                'button:has-text("Upload")',
                 'button:has-text("Create")',
                 'a.btn:has-text("إضافة")',
+                'a.btn:has-text("شحنة")',
                 'a.btn:has-text("Add")',
-                'a:has-text("إضافة شحنة")',
-                'a:has-text("شحنة جديدة")',
+                'a.btn:has-text("New")',
                 'button.btn-primary',
                 'button.btn-success',
                 'a.btn-primary',
                 'a.btn-success',
-                '[data-target*="modal"]',
-                '[data-toggle*="modal"]',
+                '.fa-plus',
+                '.my-icon-pickups',
+                '[title*="إضافة"]',
+                '[title*="Add"]',
             ]
 
             for sel in add_selectors:
                 try:
-                    btns = self.page.query_selector_all(sel)
-                    for b in btns:
-                        if b.is_visible():
-                            btxt = (b.inner_text() or b.get_attribute("title") or "").strip()
-                            # Avoid search/export buttons
-                            if any(neg in btxt for neg in ["بحث", "Search", "Export", "تصدير", "Filter", "فلتر"]):
+                    candidates = self.page.query_selector_all(sel)
+                    for cand in candidates:
+                        if cand.is_visible():
+                            ctxt = (cand.inner_text() or cand.get_attribute("title") or "").strip()
+                            if any(neg in ctxt.lower() for neg in ["search", "بحث", "export", "تصدير", "filter", "فلتر"]):
                                 continue
-                            if any(w in btxt for w in ["إضافة", "شحنة", "Add", "New", "Create", "+"]) or sel in ['button.btn-success', 'a.btn-success']:
-                                b.click()
-                                time.sleep(2)
-                                log(f"   ✅ Clicked package create button: {sel} ('{btxt}')")
-                                add_button_found = True
-                                break
-                    if add_button_found:
+                            cand.click()
+                            time.sleep(2)
+                            log(f"   ✅ Clicked candidate create action: {sel} ('{ctxt}')")
+                            clicked_add = True
+                            break
+                    if clicked_add:
                         break
                 except Exception:
                     continue
 
-            # If no button found on /packages/eb, try navigating directly to possible create URLs
-            if not add_button_found:
-                direct_create_urls = [
-                    f"{SHIPPING_URL}/packages/create",
-                    f"{SHIPPING_URL}/packages/add",
-                    f"{SHIPPING_URL}/packages/eb/create",
-                    f"{SHIPPING_URL}/packages/new",
-                    f"{SHIPPING_URL}/shipment/create",
-                ]
-                for durl in direct_create_urls:
-                    try:
-                        self.page.goto(durl, wait_until="domcontentloaded")
-                        time.sleep(2)
-                        if "/login" not in self.page.url and "404" not in self.page.title():
-                            log(f"   🧭 Navigated to create page: {durl}")
-                            break
-                    except Exception:
-                        pass
-
-            # Wait for form or modal inputs to be visible
+            # Wait for modal/form rendering
             time.sleep(2)
 
             # Log all discovered inputs on current page/modal
