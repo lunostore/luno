@@ -33,29 +33,54 @@ class ShippingBot:
         self.page: Page | None = None
 
     def start(self):
-        """Launch browser with optional session restoration."""
-        log("🌐 Starting browser...")
+        """Launch browser with anti-bot stealth headers and optional session restoration."""
+        log("🌐 Starting browser with stealth options...")
         self.playwright = sync_playwright().start()
 
         self.browser = self.playwright.chromium.launch(
             headless=HEADLESS,
-            slow_mo=200,  # Small delay between actions for stability
+            slow_mo=100,  # Small delay between actions for stability
+            args=[
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled",
+                "--ignore-certificate-errors",
+            ],
         )
+
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        context_opts = {
+            "user_agent": user_agent,
+            "viewport": {"width": 1366, "height": 768},
+            "locale": "ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7",
+            "timezone_id": "Africa/Cairo",
+        }
 
         # Restore saved session (cookies) to skip login
         os.makedirs("./storage", exist_ok=True)
         if os.path.exists(SESSION_FILE):
             try:
-                self.context = self.browser.new_context(storage_state=SESSION_FILE)
+                self.context = self.browser.new_context(storage_state=SESSION_FILE, **context_opts)
                 log("   📂 Restored saved session")
             except Exception:
-                self.context = self.browser.new_context()
+                self.context = self.browser.new_context(**context_opts)
                 log("   ⚠️ Could not restore session, starting fresh")
         else:
-            self.context = self.browser.new_context()
+            self.context = self.browser.new_context(**context_opts)
 
         self.page = self.context.new_page()
         self.page.set_default_timeout(30000)  # 30 seconds
+
+        # Bypass webdriver detection
+        self.page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+            window.chrome = {
+                runtime: {}
+            };
+        """)
 
     def login(self) -> bool:
         """
@@ -64,8 +89,29 @@ class ShippingBot:
         Returns True if login successful.
         """
         log("🔐 Checking login status...")
-        self.page.goto(f"{SHIPPING_URL}/login", wait_until="networkidle")
-        time.sleep(2)
+        
+        # Track API responses to see exact server response
+        network_logs = []
+        def handle_response(response):
+            try:
+                url_low = response.url.lower()
+                if any(x in url_low for x in ["login", "auth", "token", "api", "account", "user"]):
+                    status = response.status
+                    try:
+                        text = response.text()[:250].strip()
+                    except Exception:
+                        text = ""
+                    network_logs.append(f"📡 [{status}] {response.url} -> {text}")
+            except Exception:
+                pass
+
+        self.page.on("response", handle_response)
+
+        try:
+            self.page.goto(f"{SHIPPING_URL}/login", wait_until="domcontentloaded")
+            time.sleep(2)
+        except Exception as e:
+            log(f"   ⚠️ Navigation warning: {e}")
 
         # Check if we're already logged in (redirected to dashboard)
         current_url = self.page.url
@@ -75,24 +121,20 @@ class ShippingBot:
             return True
 
         if not SHIPPING_USERNAME or not SHIPPING_PASSWORD:
-            log("   ❌ No credentials in .env file!")
+            log("   ❌ No credentials provided!")
             return False
 
         log("   📝 Entering credentials...")
 
-        # Wassalha login form fields (from portal analysis):
-        # - Username: id="userName"
-        # - Password: id="password"
-        # - Login button: button.btn-primary
         try:
-            # Wait for login form — try multiple possible selectors
-            username_selectors = ['#userName', '#username', '#user', 'input[name="userName"]', 'input[name="username"]', 'input[type="text"]']
+            # Wait for login form
+            username_selectors = ['#userName', '#username', 'input[name="userName"]', 'input[name="username"]', 'input[type="text"]']
             password_selectors = ['#password', '#pass', 'input[name="password"]', 'input[type="password"]']
             
             username_el = None
             for sel in username_selectors:
                 try:
-                    el = self.page.wait_for_selector(sel, state='visible', timeout=5000)
+                    el = self.page.wait_for_selector(sel, state='visible', timeout=6000)
                     if el:
                         username_el = sel
                         log(f"   📝 Found username field: {sel}")
@@ -103,20 +145,6 @@ class ShippingBot:
             if not username_el:
                 log("   ❌ Could not find username field on login page")
                 log(f"   📄 Current URL: {self.page.url}")
-                # Save debug screenshot
-                os.makedirs("./storage", exist_ok=True)
-                self.page.screenshot(path="./storage/login_debug.png")
-                log("   📸 Debug screenshot saved: ./storage/login_debug.png")
-                # Log visible input fields for debugging
-                inputs = self.page.query_selector_all('input')
-                for inp in inputs:
-                    try:
-                        inp_type = inp.get_attribute('type') or '?'
-                        inp_name = inp.get_attribute('name') or '?'
-                        inp_id = inp.get_attribute('id') or '?'
-                        log(f"   🔍 Found input: type={inp_type}, name={inp_name}, id={inp_id}")
-                    except Exception:
-                        pass
                 return False
 
             password_el = None
@@ -134,25 +162,42 @@ class ShippingBot:
                 log("   ❌ Could not find password field")
                 return False
 
-            # Clear and fill username
+            # Type username using realistic keystrokes and dispatch Angular/JS events
+            self.page.click(username_el)
             self.page.fill(username_el, '')
-            self.page.fill(username_el, SHIPPING_USERNAME)
+            self.page.type(username_el, SHIPPING_USERNAME, delay=40)
+            self.page.evaluate(f"""() => {{
+                const el = document.querySelector('{username_el}');
+                if (el) {{
+                    el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                    el.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                }}
+            }}""")
             log(f"   ✅ Username filled ({SHIPPING_USERNAME[:3]}***)")
 
-            # Clear and fill password
+            # Type password using realistic keystrokes and dispatch Angular/JS events
+            self.page.click(password_el)
             self.page.fill(password_el, '')
-            self.page.fill(password_el, SHIPPING_PASSWORD)
+            self.page.type(password_el, SHIPPING_PASSWORD, delay=40)
+            self.page.evaluate(f"""() => {{
+                const el = document.querySelector('{password_el}');
+                if (el) {{
+                    el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                    el.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                }}
+            }}""")
             log(f"   ✅ Password filled (***{len(SHIPPING_PASSWORD)} chars)")
 
-            # Try multiple login button selectors
+            time.sleep(1)
+
+            # Try clicking login button or pressing Enter
             login_btn_selectors = [
-                'button[type="submit"]',
                 'button.btn-primary',
+                'button[type="submit"]',
                 'input[type="submit"]',
                 'button:has-text("تسجيل")',
                 'button:has-text("دخول")',
                 'button:has-text("Login")',
-                'button:has-text("Sign in")',
                 '.btn-primary',
             ]
             
@@ -169,35 +214,50 @@ class ShippingBot:
                     continue
 
             if not clicked:
-                log("   ❌ Could not find login button!")
-                return False
+                log("   ⌨️ Pressing Enter on password input...")
+                self.page.press(password_el, 'Enter')
 
-            self.page.wait_for_load_state("networkidle")
-            time.sleep(3)
+            # Wait for response / navigation
+            time.sleep(5)
 
-            # Verify login success
+            # Check if URL changed or redirected away from /login
             current_url = self.page.url
-            if "/login" in current_url:
-                # Check for error messages
-                error_el = self.page.query_selector('.alert-danger, .error-message, .text-danger, .toast-error, .Toastify__toast--error')
-                if error_el:
-                    error_text = error_el.inner_text()
-                    log(f"   ❌ Login failed: {error_text}")
-                else:
-                    log("   ❌ Login failed: still on login page")
-                
-                # Save debug screenshot
-                os.makedirs("./storage", exist_ok=True)
-                self.page.screenshot(path="./storage/login_failed.png")
-                log("   📸 Login failure screenshot saved")
-                
-                # Log page title for debugging
-                title = self.page.title()
-                log(f"   📄 Page title: {title}")
-                log(f"   📄 Current URL: {current_url}")
-                return False
+            if "/login" not in current_url:
+                log(f"   ✅ Login successful! Redirected to: {current_url}")
+                self._save_session()
+                return True
 
-            log("   ✅ Login successful!")
+            # If still on login page, check error elements
+            error_selectors = [
+                '.alert-danger', '.error-message', '.text-danger',
+                '.toast-error', '.Toastify__toast--error', '.invalid-feedback',
+                'div[role="alert"]', '.swal2-html-container',
+            ]
+            for es in error_selectors:
+                try:
+                    eel = self.page.query_selector(es)
+                    if eel and eel.is_visible():
+                        log(f"   ❌ Login Error on page: {eel.inner_text().strip()}")
+                except Exception:
+                    pass
+
+            # Log captured network messages to see server status
+            if network_logs:
+                log("   🔍 Network Responses:")
+                for nlog in network_logs[-5:]:
+                    log(f"      {nlog}")
+
+            # Save screenshot for debugging
+            os.makedirs("./storage", exist_ok=True)
+            self.page.screenshot(path="./storage/login_failed.png")
+            log("   📸 Login failure screenshot saved")
+            log(f"   📄 Page title: {self.page.title()}")
+            log(f"   📄 Current URL: {current_url}")
+            return False
+
+        except Exception as e:
+            log(f"   ❌ Login error: {e}")
+            return False
             self._save_session()
             return True
 
