@@ -83,8 +83,8 @@ export function HeroSection() {
             </AnimatePresence>
           ) : null}
 
-          {/* Full-bleed gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/80 dark:from-black/40 dark:via-transparent dark:to-black/70 pointer-events-none" />
+          {/* Clean Overlay without white haze */}
+          <div className="absolute inset-0 bg-transparent dark:bg-gradient-to-b dark:from-black/40 dark:via-transparent dark:to-black/70 pointer-events-none" />
         </div>
       )}
 
@@ -123,7 +123,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="mt-6 text-sm sm:text-base md:text-lg font-medium tracking-[0.3em] uppercase text-zinc-600 dark:text-zinc-400 max-w-2xl"
+          className="mt-6 text-sm sm:text-base md:text-lg font-bold tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-400 max-w-2xl drop-shadow-sm"
         >
           {settings?.heroTagline || "LUNO IS YOURS • MODERN STREETWEAR & LUXURY FASHION"}
         </motion.p>
