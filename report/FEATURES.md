@@ -1,43 +1,246 @@
-# Luno Store — Core Features
+# 🌟 LUNO STORE — الدليل الشامل والكامل لمميزات وإمكانيات المنصة ولوحة التحكم
 
-This document provides a detailed breakdown of all the premium features and interactive capabilities implemented inside the **Luno Store** fashion store.
-
----
-
-## 🌓 Dynamic Light & Dark Mode
-Luno Store features a comprehensive, system-aware dark mode that allows users to seamlessly switch themes without any page refresh:
-
-* **Zero-Flash Reload**: Injected a blocking script inside the HTML `<head>` which reads the theme from `localStorage` or OS settings and applies the `.dark` class to `document.documentElement` before the browser starts rendering, preventing the ugly white flash during page reloads in dark mode.
-* **Smart Contrast Header**: When the header is scrolled, it changes styles dynamically:
-  * **Light Mode**: White translucent background (`bg-white/95`) with charcoal gray text.
-  * **Dark Mode**: Black translucent background (`bg-black/95`) with white text.
-* **Fluid Theme Icons**: Transition button switches smoothly between a Sun and Moon icon using custom Framer Motion animations.
-* **Mobile Drawer Support**: The mobile navigation slide-in menu adapts its background and link divider colors dynamically to prevent contrast failures on dark backgrounds.
+> **LUNO Store** ليس مجرد متجر إلكتروني لبيع الملابس، بل هو **منظومة تجارة إلكترونية ذكية متكاملة ومؤتمتة بالكامل (Luxury Fashion E-Commerce & Enterprise Admin Platform)** تم بناؤها بأحدث معايير الويب الفاخر مع لوحة تحكم إدارية شاملة تدير كل شاردة وواردة في المتجر.
 
 ---
 
-## 🌀 Cinematic Loading Intro & 3D Logo
-To give the website a highly premium editorial feel:
-* **3D Logo Extrusion**: We created a custom React component (`components/ui/Logo3D.tsx`) that stacks **15 layers of the brand logo image** along the Z-axis using CSS `transformStyle: "preserve-3d"`. It includes a dynamic lighting simulation filter (progressively darkening deeper layers) and a slow rotating tilted spin.
-* **Cinematic Entrance**: On page refresh, a full-screen black overlay blocks the page and loads the rotating 3D logo surrounded by three animated orbit rings. It expands into the brand tagline "DEFINE YOUR STYLE" before fading out to reveal the main website.
+## 📑 فهرس الأقسام
+1. [👑 لوحة التحكم المركزية والإدارة الشاملة (Admin Dashboard & Control Center)](#1--لوحة-التحكم-المركزية-والإدارة-الشاملة-admin-dashboard--control-center)
+2. [📦 إدارة المنتجات والمخزون المتقدمة (Advanced Product & Inventory System)](#2--إدارة-المنتجات-والمخزون-المتقدمة-advanced-product--inventory-system)
+3. [🛒 إدارة خط إنتاج الطلبات وتصدير البيانات (Order Pipeline & Export Engine)](#3--إدارة-خط-إنتاج-الطلبات-وتصدير-البيانات-order-pipeline--export-engine)
+4. [👥 نظام إدارة العملاء وقاعدة البيانات (Customer CRM & LTV Engine)](#4--نظام-إدارة-العملاء-وقاعدة-البيانات-customer-crm--ltv-engine)
+5. [🚚 أتمتة الشحن والربط مع البريد المصري (Automated Shipping Bot)](#5--أتمتة-الشحن-والربط-مع-البريد-المصري-automated-shipping-bot)
+6. [📊 التحليلات ورادار الزوار والشات بوت (Analytics & Bot Intelligence)](#6--التحليلات-ورادار-الزوار-والشات-بوت-analytics--bot-intelligence)
+7. [⚙️ الإعدادات المتقدمة للمتجر (8 أنظمة تحكم كاملة) (Store Configuration Hub)](#7-️-الإعدادات-المتقدمة-للمتجر-8-أنظمة-تحكم-كاملة-store-configuration-hub)
+8. [⭐ آراء العملاء والرسائل والشكاوى (Reviews & Messages Inbox)](#8-️-آراء-العملاء-والرسائل-والشكاوى-reviews--messages-inbox)
+9. [🔔 مركز الإشعارات الفوري بالصوت (Live Audio Notification Center)](#9--مركز-الإشعارات-الفوري-بالصوت-live-audio-notification-center)
+10. [🎨 واجهة المستخدم وتجربة التسوق الفاخرة (Storefront & UX)](#10--واجهة-المستخدم-وتجربة-التسوق-الفاخرة-storefront--ux)
+11. [🤖 المساعد الذكي والمبيعات الآلية (AI Chatbot Sales Agent)](#11--المساعد-الذكي-والمبيعات-الآلية-ai-chatbot-sales-agent)
+12. [💳 بوابات الدفع وإتمام الطلب السلس (Checkout & Payments)](#12--بوابات-الدفع-وإتمام-الطلب-السلس-checkout--payments)
+13. [🛡️ الأداء التقني، السيو والحماية (Performance, SEO & Security)](#13-️-الأداء-التقني-السيو-والحماية-performance-seo--security)
 
 ---
 
-## 📐 Unified Single-Page Catalog
-The shopping flow is simplified to keep user friction as close to zero as possible:
-* **Instant Shop Scroll**: The Hero section displays a sleek minimal subtitle `next is yours` at the top and a prominent centered "Shop Now" white button in the middle. Clicking this scrolls the window down smoothly (`scrollIntoView: smooth`) to the products container.
-* **Unified Collection**: Removed the multi-step `/shop` filter page and displayed all active products directly on the home page inside `Our Collection`.
-* **Zero-Bailout Redirect**: If users try to access the old `/shop` URL directly, they are seamlessly redirected back to the main catalog section `/#products` on the homepage.
+## 1. 👑 لوحة التحكم المركزية والإدارة الشاملة (Admin Dashboard & Control Center)
+
+- **شاشة القيادة والمؤشرات الحيوية (KPIs Overview Dashboard)**:
+  - **إجمالي المبيعات والأرباح (Total Revenue)**: حساب المبيعات الإجمالية بدقة مع استبعاد الطلبات الملغاة.
+  - **مؤشر متوسط قيمة الطلب (Average Order Value - AOV)**.
+  - **معدل تحويل الزوار إلى مشترين (Sales Conversion Rate)**.
+  - **إجمالي عدد الطلبات المصنفة لحظياً** (الطلبات الجديدة، المؤكدة، قيد الشحن، والمسلّمة).
+  - **مؤشر المخزون الحرج (Low Stock Alert)**: تنبيه فوري بالأصناف والقطع التي أوشكت على النفاد.
+  - **رسم بياني تفاعلي للمبيعات والأرباح**: عرض نمو المبيعات يومياً، أسبوعياً، وشهرياً.
+  - **قائمة أحدث الطلبات والنشاط الحي (Live Recent Activity Feed)**.
 
 ---
 
-## 🛒 Interactive Shopping Cart & Checkout
-* **Glassmorphic Slide-out Cart**: A responsive side drawer (`CartSidebar.tsx`) slides out from the right on screen. It features dynamic dark mode styling, quantity controls, product images, and auto-computed prices.
-* **Dynamic Checkout**: Checks if the cart contains items before loading. If empty, it redirects back to the main store. Once billing details are completed, the order is registered directly in Firestore and a dynamic order success page is displayed.
+## 2. 📦 إدارة المنتجات والمخزون المتقدمة (Advanced Product & Inventory System)
+
+- **منشئ المنتجات المتقدم (Product Builder Engine)**:
+  - إضافة وتعديل وتكرار وحذف المنتجات بسهولة وسرعة فائقة.
+  - رفع صور فائقة الجودة غير محدودة مدعومة برفع سحابي عبر `Cloudinary / Firebase` مع خاصية السحب والإفلات وتغيير ترتيب الصور وعرض صورة مخصصة لكل لون.
+  - **دعم تضمين مقاطع الفيديو**: إمكانية إضافة روابط فيديو استعراضي للمنتج أو فيديو ترويجي يظهر في صفحة المنتج.
+- **مصفوفة المتغيرات والمخزون متعدد الأبعاد (Variants & Multi-Stock Matrix)**:
+  - تخصيص ألوان غير محدودة لكل منتج مع تحديد كود اللون السداسي (`Hex Color`) واسم اللون بالعربية والإنجليزية وصورة كل لون.
+  - تحديد المقاسات المتوفرة (`XS, S, M, L, XL, XXL, 3XL, Oversized`) مع حقل مخزون مستقل لكل مقاس لكل لون.
+  - **نظام استقطاع وإرجاع المخزون الذكي (Auto Stock Sync)**:
+    - خصم القطع تلقائياً عند تأكيد الطلب.
+    - استرجاع كميات المخزون أوتوماتيكياً إلى المتجر في حال تم إلغاء الطلب من الإدارة.
+- **الأسعار والعروض الترويجية**:
+  - تحديد سعر البيع الأساسي (`Regular Price`) وسعر الخصم (`Sale Price`).
+  - حساب وتوليد شارة الخصم المئوية تلقائياً (مثلاً: `خصم 30%`).
+- **بيانات الخامة والقصة وتفاصيل المنتج**:
+  - حقول مخصصة لنوع القماش والخامة (مثلاً: `100% قطن مصري فاخر 240 جرام`).
+  - نوع القصة (`Oversized Fit`, `Regular Fit`, `Slim Fit`, `Boxy`).
+  - ربط المنتج بجدول مقاسات مخصص (`Size Chart`).
+  - تعيين شارات مميزة (`New Drop`, `Best Seller`, `Limited Edition`, `Trending`).
 
 ---
 
-## 🖼️ Adaptive Theme Banners
-* **Banner Light Mode**: Features the editorial white apparel image (`banner_light.png`).
-* **Banner Dark Mode**: Features the black industrial background branding image (`banner.png`).
-* The system automatically detects active theme changes and swaps the banner background image instantly to fit the design aesthetic!
+## 3. 🛒 إدارة خط إنتاج الطلبات وتصدير البيانات (Order Pipeline & Export Engine)
+
+- **خط مراحل الطلبات الاحترافي (Order Status Pipeline)**:
+  - تصنيف مرن للطلبات عبر 5 مراحل واضحة:
+    1. **قيد الانتظار (`Pending`)**: الطلبات الجديدة الواردة من المتجر.
+    2. **تم التأكيد (`Confirmed`)**: الطلبات التي تمت مراجعتها وجاهزة للتجهيز والشحن.
+    3. **قيد الشحن (`Shipping`)**: الطلبات التي تم تسليمها لشركة الشحن واستخراج بوليصة لها.
+    4. **تم التوصيل (`Delivered`)**: الطلبات المكتملة بنجاح.
+    5. **ملغي (`Cancelled`)**: الطلبات الملغاة مع الاسترجاع التلقائي للمخزون.
+- **فاحص إيصالات الدفع الإلكتروني (Payment Receipt Inspector Modal)**:
+  - نافذة منبثقة متطورة لفحص سكرين شوت إيصالات تحويل **فودافون كاش** و **انستا باي** المرفوعة من العميل، مع إمكانية تكبير الإيصال والتأكد من رقم المعاملة قبل تغيير حالة الطلب.
+- **التواصل الفوري مع العميل عبر WhatsApp بنقرة واحدة**:
+  - زر مخصص بجانب كل طلب يفتح محادثة واتساب مباشرة مع العميل مع رسالة جاهزة تتضمن رقم الطلب والمنتجات والمبلغ لتأكيد البيانات في ثانية واحدة.
+- **محرك تصدير وطباعة البيانات (Export & Print Engine)**:
+  - **تصدير إلى Excel / CSV**: تصدير جميع الطلبات أو الطلبات المحددة مع تفاصيل العميل، الهاتف، العنوان، المحافظة، المنتجات، المقاسات، الأسعار، وطريقة الدفع.
+  - **طباعة بوالص ومنافست الشحن المجمع (Print Shipping Manifest & PDF)**: تصميم PDF جاهز للطباعة بحجم قياسي مع باركود الطلب وتفاصيل المستلم والمنتجات لتسليمها لمندوب الشحن فوراً.
+- **تعديل الطلبات الحي**:
+  - إمكانية تعديل بيانات العنوان، رقم هاتف العميل، إضافة ملاحظات إدارية، أو تغيير المنتجات والمقاسات قبل خروج الشحنة.
+
+---
+
+## 4. 👥 نظام إدارة العملاء وقاعدة البيانات (Customer CRM & LTV Engine)
+
+- **سجل العملاء المتكامل (Customer Profiles & Directory)**:
+  - قاعدة بيانات مركزية تسجل كل عميل قام بالطلب مع اسمه، أرقام هواتفه الأساسية والبديلة، عناوينه المسجلة، ومحافظته.
+- **حساب القيمة الإجمالية للعميل (Customer Lifetime Value - LTV)**:
+  - حساب إجمالي ما أنفقه العميل عبر تاريخه في المتجر، وعدد الطلبات الناجحة.
+- **تصنيف وشرائح العملاء (VIP Segmentation)**:
+  - تمييز العملاء الدائمين والـ VIP تلقائياً بناءً على تكرار الشراء ومبالغ الطلبات لتقديم عروض خاصة لهم.
+- **سجل مشتريات العميل التاريخي**:
+  - عرض كل الطلبات السابقة الخاصة بكل عميل وتواريخها وتفاصيلها بنقرة واحدة.
+- **البحث والفلترة السريعة**:
+  - البحث الفوري عن أي عميل بالاسم، رقم الموبايل، المحافظة، أو كود الطلب.
+
+---
+
+## 5. 🚚 أتمتة الشحن والربط مع البريد المصري (Automated Shipping Bot)
+
+- **بوت أتمتة البريد المصري الذكي (Wassalha Headless RPA Bot)**:
+  - روبوت متطور مبني بتقنية `Playwright` مع محاكاة كاملة للتصفح البشري وتخطي أنظمة الحماية (*Anti-Bot Stealth*).
+  - يعمل في السحاب 24/7 عبر **GitHub Actions** أو يمكن تشغيله بضغطة زر من لوحة التحكم أو محلياً.
+  - يسحب الطلبات الجاهزة المؤكدة من Firebase، ويسجل الدخول لحساب وصّلها، ويفتح تبويب `Shipment Details` و `Consignee Details`.
+  - يملأ بدقة: الاسم، الهاتف، العنوان، المحافظة، المدينة، كود التحصيل (COD)، الوزن (500 جم)، والوصف ("ملابس") والملاحظات الخاصة ("كفر شحن وبوليصة شحن").
+  - يضغط `Save and Close`، ويستمع للـ API ويلتقط **رقم البوليصة والتتبع الرسمي (Tracking Barcode)** فوراً.
+  - يحدث حالة الطلب في المتجر أوتوماتيكياً إلى `Shipping`، ويحفظ رقم التتبع في قاعدة البيانات ليتتبعه العميل.
+- **إدارة أسعار الشحن والتوصيل للمحافظات (Governorates Rates Manager)**:
+  - لوحة تحكم لتسعير الشحن لكل محافظة من محافظات مصر الـ 27 بصورة مستقلة.
+  - إمكانية تفعيل أو إيقاف التوصيل لأي محافظة أو تعديل السعر ليظهر فوراً في صفحة الدفع والشات بوت.
+
+---
+
+## 6. 📊 التحليلات ورادار الزوار والشات بوت (Analytics & Bot Intelligence)
+
+- **رادار حركة الزوار والتجارة (Store Traffic & Conversion Analytics)**:
+  - تتبع عدد الزيارات، والصفحات الأكثر مشاهدة، ومعدلات الارتداد.
+  - تحليل أجهزة الزوار (موبايل، ديسكتوب، تابلت) والمتصفحات.
+  - قمع المبيعات (Sales Funnel): قياس نسبة الزوار الذين أضافوا للسلة ➔ وصلوا لصفحة الدفع ➔ أكملوا الشراء بنجاح.
+  - المنتجات الأكثر مبيعاً والأعلى تحقيقاً للأرباح.
+- **لوحة تحليلات الشات بوت الذكي (AI Chatbot Analytics)**:
+  - رصد عدد المحادثات التفاعلية التي أجراها روبوت المبيعات مع العملاء.
+  - تتبع عدد مرات ترشيح المنتجات ونسبة نقر العملاء على كروت المنتجات داخل الشات (`Product Card Clicks`).
+  - حساب عدد عمليات الإضافة إلى السلة التي تمت مباشرة من نافذة الشات بوت (`Add to Cart via Bot`).
+
+---
+
+## 7. ⚙️ الإعدادات المتقدمة للمتجر (8 أنظمة تحكم كاملة) (Store Configuration Hub)
+
+تحتوي لوحة الإعدادات على 8 تبويبات متخصصة للتحكم بكل جزء في المتجر بدون الحاجة لكتابة كود برمجي:
+
+1. **🛡️ الصيانة والتايمر (`Maintenance & Launch Timer`)**:
+   - تفعيل/تعطيل "وضع الصيانة" أو "قريباً Coming Soon" بنقرة زر.
+   - تحديد تاريخ ووقت الإطلاق مع عداد تنازلي فاخر يظهر للزوار.
+   - تعيين كلمة سر سرية تتيح للإدارة والمطورين الدخول وتصفح المتجر حتى أثناء تفعيل وضع الصيانة.
+2. **✨ وسائط الهيرو والإنترو (`Hero & Intro Media`)**:
+   - تغيير فيديو أو صورة البانر الرئيسي في الصفحة الأولى (Hero Section).
+   - كتابة العنوان الرئيسي والفرعي وزر الدعوة للشراء (CTA Button).
+3. **📏 جداول المقاسات المخصصة (`Size Charts Manager`)**:
+   - إنشاء جداول مقاسات احترافية متعددة الأبعاد (الصدر، الطول، الكتف، الكم) لكل نوع ملابس (تيشيرت، هودي، بنطلون..).
+   - ربط كل منتج بجدول المقاسات المناسب له ليظهر للعميل بدقة.
+4. **ℹ️ صفحة من نحن وقصة البراند (`About Us Page`)**:
+   - تعديل نصوص قصة براند LUNO، الرؤية، الأهداف، ومعلومات المؤسسين وصورهم.
+5. **📜 الشروط والسياسات (`Store Policies`)**:
+   - محرر نصوص لتعديل سياسة الاستبدال والاسترجاع، سياسة الشحن والتوصيل، والشروط والأحكام.
+6. **✍️ نصوص وعناوين المتجر (`Copy & Announcement Bar`)**:
+   - التحكم بنص شريط الإعلانات العلوي المتحرك في قمة الموقع (Announcement Bar).
+   - تعديل رسائل الترحيب، ونصوص الفوتر، وحقوق الملكية.
+7. **💳 بيانات الدفع والتواصل (`Payments & Contact Info`)**:
+   - تفعيل/تعطيل بوابات الدفع (الدفع عند الاستلام، فودافون كاش، انستا باي).
+   - تعديل رقم محفظة فودافون كاش واسم/عنوان حساب انستا باي فورياً.
+   - تعديل رقم الواتساب الرسمي للدعم والبريد الإلكتروني.
+8. **🔗 روابط التواصل الاجتماعي (`Social Media Links`)**:
+   - تعديل روابط حسابات البراند (Instagram, TikTok, Facebook, YouTube) وتحديثها فورياً في الهيدر والفوتر.
+
+---
+
+## 8. ⭐ آراء العملاء والرسائل والشكاوى (Reviews & Messages Inbox)
+
+- **نظام إدارة واعتماد تقييمات العملاء (Reviews Moderation System)**:
+  - استعراض آراء وتقييمات العملاء الواردة على المنتجات (النجوم من 1 إلى 5 مع التعليق).
+  - إمكانية قبول واعتماد المراجعة لتظهر في صفحة المنتج، أو رفضها وحذفها.
+  - إظهار شارة "مشتري موثوق Verified Buyer" للتقييمات الحقيقية.
+- **صندوق رسائل وشكاوى العملاء (Customer Inquiries Inbox)**:
+  - استقبال جميع الرسائل والاستفسارات والشكاوى المرسلة من صفحة "اتصل بنا".
+  - تصنيف حالة الشكوى (`جديدة`, `قيد المتابعة`, `تم الحل`).
+  - التواصل المباشر مع صاحب الرسالة عبر البريد أو واتساب بضغطة زر.
+
+---
+
+## 9. 🔔 مركز الإشعارات الفوري بالصوت (Live Audio Notification Center)
+
+- **جرس وتنبيهات الإدارة اللحظية (Admin Live Audio Alerts)**:
+  - تنبيه صوتي فوري في لوحة التحكم يصدر صوتاً مميزاً لحظة قيام أي عميل بإنشاء طلب جديد.
+  - شارة حمراء بالعدد الفعلي للطلبات والرسائل غير المقروءة.
+  - نافذة إشعارات منبثقة سريعة تتيح فتح الطلب الجديد فور وصوله.
+- **تكامل الإشعارات الفوري مع Telegram**:
+  - إرسال إشعار فوري إلى جروب/بوت تيليجرام الإدارة فور تسجيل أي طلب جديد بكامل التفاصيل (اسم العميل، الهاتف، المحافظة، المنتجات، والمبلغ الإجمالي).
+
+---
+
+## 10. 🎨 واجهة المستخدم وتجربة التسوق الفاخرة (Storefront & UX)
+
+- **الهوية البصرية الملكية (Luxury Dark Aesthetics)**:
+  - ثيم داكن فاخر مع تطعيمات باللون الذهبي النحاسي (`#D4B886`) وتأثيرات زجاجية راقية (*Glassmorphism*).
+  - رسوم متحركة وانتقالات انسيابية جذابة لكل العناصر باستخدام `Framer Motion`.
+  - إشعارات تفاعلية أنيقة في أعلى المنتصف (`Sonner Top-Center Toaster`).
+- **تصفح وتخصيص المنتجات الذكي**:
+  - **فلاتر متقدمة وفورية**: تصفية حسب الأقسام، والألوان، والمقاسات، والنطاق السعري بدون إعادة تحميل الصفحة.
+  - **معاينة سريعة للمنتج (Quick View Modal)**: استعراض الصور والمقاسات وإضافة المنتج للسلة فوراً.
+  - **سلايدر صور تفاعلي متعدد الزوايا**: تغيير صور المنتج الرئيسية أوتوماتيكياً باختيار اللون المفضل مع خاصية التكبير.
+  - **دليل المقاسات التفاعلي (Dynamic Size Guide)**: مساعدة العميل على اختيار المقاس الأمثل بناءً على الطول والوزن.
+- **سلة مشتريات تفاعلية ديناميكية (Smart Cart Drawer)**:
+  - درج سلة جانبي يفتح بسلاسة مع إمكانية تعديل المقاس واللون والكمية في ثوانٍ.
+  - **شريط الشحن المجاني التفاعلي (Free Shipping Progress Bar)**: يحسب المبلغ المتبقي للشحن المجاني.
+  - حفظ محتويات السلة في المتصفح تلقائياً حتى لا تضيع مشتريات العميل عند خروجه وعودته.
+
+---
+
+## 11. 🤖 المساعد الذكي والمبيعات الآلية (AI Chatbot Sales Agent)
+
+- **بائع افتراضي ذكي يعمل 24/7 (AI Sales Assistant)**:
+  - مدعوم بأحدث محركات الذكاء الاصطناعي (`Google Gemini 3.6 Flash / 2.5 Flash` و `Groq Llama 3`).
+  - يتحدث باللغة العربية الفصحى الودودة واللبقة والمقنعة تسويقياً.
+  - **ذاكرة سياقية مترابطة (Contextual Memory)**: يفهم تسلسل الحديث ويربط الأسئلة ببعضها بشكل طبيعي وذكي.
+  - متصل بقاعدة بيانات المتجر الحية لحظياً؛ يعرف أسعار المنتجات الحالية، الخصومات، خامات الأقمشة، الألوان، والمقاسات المتوفرة بالمخزن.
+- **كروت المنتجات التفاعلية في قلب الشات (In-Chat Product Cards)**:
+  - عند ترشيح أي منتج للعميل، يظهر كارت تفاعلي كامل بالصورة الحية، السعر، المقاس، وخيارات الألوان مع زر **"إضافة إلى السلة"** فوري يفتح السلة مباشرة من داخل المحادثة!
+- **معرفة أسعار الشحن وطرق الدفع لحظياً**:
+  - يجيب العميل فوراً عن تكلفة الشحن لأي محافظة (القاهرة، الجيزة، الإسكندرية، الصعيد، القناة...).
+  - يشرح طرق الدفع المتاحة ورقم فودافون كاش أو حساب انستا باي المعتمد لحظة بلحظة.
+- **كاش سريع وفائق الأداء (Ultra-Fast Response Cache)**:
+  - نظام كاش ذاكرة ذكي يضمن رد البوت في أقل من ثانية واحدة بدون تأخير.
+
+---
+
+## 12. 💳 بوابات الدفع وإتمام الطلب السلس (Checkout & Payments)
+
+- **شاشة إتمام الطلب في خطوة واحدة (One-Page Frictionless Checkout)**:
+  - تقليل نسبة التخلي عن السلة (*Cart Abandonment*) بفضل بساطة وسرعة النموذج.
+  - التحقق التلقائي من صحة رقم الهاتف المصري المكون من 11 رقماً ومن صحة العنوان.
+  - حساب تكلفة الشحن والمجموع النهائي فور اختيار المحافظة.
+- **دعم كوبونات الخصم وقسائم الشراء (Promo Codes)**:
+  - دعم كوبونات الخصم الثابتة (مثلاً 50 ج.م) أو النسبية (مثلاً 10%) مع تحديد حد أدنى للطلب.
+- **خيارات دفع متعددة وآمنة**:
+  - **الدفع عند الاستلام (Cash on Delivery - COD)**.
+  - **محفظة فودافون كاش (Vodafone Cash)**: إظهار رقم التحويل مع حقل لرفع سكرين شوت الإيصال مباشرة.
+  - **انستا باي (InstaPay)**: إظهار الحساب البنكي / العنوان وتأكيد المعاملة.
+- **شاشة نجاح الطلب التفاعلية (Order Success Page)**:
+  - عرض رقم الطلب المميز وتفاصيل الفاتورة بالكامل، وتأكيد وقت التوصيل المتوقع، مع زر للتواصل السريع عبر واتساب.
+
+---
+
+## 13. 🛡️ الأداء التقني، السيو والحماية (Performance, SEO & Security)
+
+- **أحدث بنية تقنية (Next.js 15 App Router & React 19 & TypeScript)**:
+  - سرعة تحميل خارقة للصفحات (أقل من ثانية).
+  - استهلاك منخفض للبيانات وتجربة فائقة السرعة على باقات الموبايل.
+- **توافق 100% مع جميع الأجهزة (Ultra-Responsive Mobile First)**:
+  - تجربة متكاملة على هواتف أندرويد وآيفون والتابلت والكمبيوتر.
+- **تهيئة قوية لمحركات البحث ومواقع التواصل (SEO & Social OpenGraph)**:
+  - عناوين ووصف ديناميكي لكل منتج في محركات البحث (`Google SEO`).
+  - بطاقات مشاركة احترافية مع الصور والأسعار عند مشاركة رابط أي منتج على فيسبوك، واتساب، أو إنستجرام (`OpenGraph / Twitter Cards`).
+- **قاعدة بيانات سحابية لحظية (Google Firebase Firestore)**:
+  - أمان وسرية تامة لبيانات العملاء، وحماية كاملة للوحة التحكم وصلاحيات المديرين.
+
+---
+
+👑 **LUNO STORE — الفخامة، الذكاء، والأتمتة في منصة تجارة إلكترونية واحدة.**

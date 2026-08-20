@@ -49,48 +49,6 @@ export default function AdminOrdersPage() {
   const [copiedWaMsg, setCopiedWaMsg] = useState(false);
   const [manualTracking, setManualTracking] = useState("");
   const [savingTracking, setSavingTracking] = useState(false);
-  const [autoShippingId, setAutoShippingId] = useState<string | null>(null);
-  const [autoShippingAll, setAutoShippingAll] = useState(false);
-
-  const handleAutoShip = async (orderId?: string) => {
-    if (orderId) {
-      setAutoShippingId(orderId);
-    } else {
-      setAutoShippingAll(true);
-    }
-
-    const toastId = toast.loading(
-      orderId ? "جارٍ تشغيل بوت الشحن للطلب..." : "جارٍ تشغيل بوت الشحن لجميع الطلبات المؤكدة..."
-    );
-
-    try {
-      const res = await fetch("/api/admin/shipping/auto-ship", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderId ? { orderId } : {}),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        toast.success(data.message || "تم تنفيذ أتمتة الشحن بنجاح 🚀", { id: toastId });
-        const freshOrders = await getOrders();
-        setOrders(freshOrders);
-        if (selectedOrder) {
-          const updated = freshOrders.find((o) => o.id === selectedOrder.id);
-          if (updated) setSelectedOrder(updated);
-        }
-      } else {
-        toast.error(data.error || "فشل تشغيل بوت الشحن التلقائي", { id: toastId, duration: 6000 });
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("حدث خطأ أثناء الاتصال ببوت الشحن", { id: toastId });
-    } finally {
-      setAutoShippingId(null);
-      setAutoShippingAll(false);
-    }
-  };
 
   const handleSendWhatsAppConfirmation = (order: Order) => {
     const waNumber = (order.whatsappPhone || order.phone).replace(/^0/, "20");
@@ -207,11 +165,9 @@ ${itemsList}
         setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
       }
 
-      // Show stock operation results & automatically trigger shipping bot
+      // Show stock operation results
       if (newStatus === "confirmed" && previousStatus === "pending") {
         toast.success("✅ تم تأكيد الطلب وخصم المخزون تلقائياً");
-        // 🚀 Auto-trigger shipping bot immediately!
-        handleAutoShip(orderId);
       } else if (newStatus === "cancelled" && (previousStatus === "confirmed" || previousStatus === "shipping")) {
         toast.success("🔄 تم إلغاء الطلب واستعادة المخزون تلقائياً");
       } else {
@@ -318,17 +274,6 @@ ${itemsList}
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => handleAutoShip()}
-            disabled={autoShippingAll}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
-            title="تشغيل بوت الشحن أوتوماتيكياً على موقع وصّلها لجميع الطلبات المؤكدة"
-          >
-            <Truck size={16} className={autoShippingAll ? "animate-bounce" : ""} />
-            <span>{autoShippingAll ? "جارٍ الشحن..." : "شحن المؤكدة عبر البوت 🚀"}</span>
-          </button>
-
           <button
             type="button"
             onClick={handleExportExcel}
@@ -823,35 +768,12 @@ ${itemsList}
                       </div>
                     </div>
                   ) : (
-                    /* Manual Tracking Input & Auto-Ship Option */
+                    /* Manual Tracking Input */
                     <div className="bg-white/90 border border-indigo-100 rounded-xl p-4 space-y-3">
-                      {/* Auto-Ship Option */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl">
-                        <div>
-                          <p className="text-xs font-black text-indigo-950 flex items-center gap-1">
-                            <Truck size={13} className="text-indigo-600" />
-                            الشحن التلقائي (بوت وصّلها)
-                          </p>
-                          <p className="text-[10px] text-indigo-600 font-medium mt-0.5">
-                            فتح متصفح وصّلها وتعبئة البيانات واستخراج رقم البوليصة تلقائياً
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleAutoShip(selectedOrder.id)}
-                          disabled={autoShippingId === selectedOrder.id}
-                          className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
-                        >
-                          <Truck size={13} className={autoShippingId === selectedOrder.id ? "animate-spin" : ""} />
-                          {autoShippingId === selectedOrder.id ? "جارٍ الشحن..." : "شحن تلقائي 🚀"}
-                        </button>
-                      </div>
-
-                      {/* Manual Input Alternative */}
                       <div>
                         <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider mb-2">
                           <Package size={11} className="inline ml-1" />
-                          أو إدخال رقم التتبع يدوياً
+                          إدخال رقم البوليصة / التتبع يدوياً
                         </p>
                         <div className="flex gap-2">
                           <input
@@ -866,14 +788,14 @@ ${itemsList}
                             type="button"
                             onClick={() => handleSaveManualTracking(selectedOrder.id)}
                             disabled={!manualTracking.trim() || savingTracking}
-                            className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+                            className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                           >
                             <Check size={13} />
-                            {savingTracking ? "جارٍ الحفظ..." : "حفظ"}
+                            {savingTracking ? "جارٍ الحفظ..." : "حفظ رقم الشحنة"}
                           </button>
                         </div>
                         <p className="text-[10px] text-indigo-400 mt-2">
-                          💡 سيتم تحويل حالة الطلب تلقائياً إلى &quot;جارٍ الشحن&quot; بعد الشحن أو الحفظ
+                          💡 سيتم تحويل حالة الطلب تلقائياً إلى &quot;جارٍ الشحن&quot; بعد حفظ رقم البوليصة
                         </p>
                       </div>
                     </div>

@@ -45,9 +45,10 @@ export function ImageUploader({
         } else {
           onChange([urls[0]]);
         }
-        toast.success(`${urls.length} image(s) uploaded successfully`);
-      } catch {
-        toast.error("Upload failed. Please check your Cloudinary configuration.");
+        toast.success(urls.length === 1 ? "تم رفع الصورة بنجاح! ✨" : `تم رفع ${urls.length} صور بنجاح! ✨`);
+      } catch (err) {
+        console.error("Image upload failed:", err);
+        toast.error("فشل رفع الصورة، يرجى المحاولة مرة أخرى.");
       } finally {
         setUploading(false);
       }
