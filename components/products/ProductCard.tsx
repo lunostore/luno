@@ -115,7 +115,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         delay: (index % 4) * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="relative h-full select-none pt-12" // Padding top to allow shirt to pop out completely
+      className="relative h-full select-none pt-10"
       style={{ perspective: 1200 }}
     >
       <motion.div
@@ -129,15 +129,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-shadow duration-500 overflow-visible"
+        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-all duration-500 overflow-visible"
       >
-        {/* ── 3D FLOATING PRODUCT VISUAL AREA (POPS OUT OF CARD) ── */}
+        {/* ── 3D FLOATING PRODUCT VISUAL AREA ── */}
         <div
           ref={imageContainerRef}
           className="relative w-full aspect-[4/4.2] flex items-center justify-center p-3 overflow-visible z-30"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* 3D Soft Floor Shadow Under the Shirt */}
+          {/* 3D Soft Floor Shadow */}
           <motion.div
             animate={{
               scale: isHovered ? 1.2 : 0.95,
@@ -145,14 +145,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               y: isHovered ? 15 : 0,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[72%] h-7 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.6)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[72%] h-7 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.6)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
           />
 
-          {/* Garment Image: Lifts up and pops OUT of the top of the card */}
+          {/* Garment Image: Pops up and flies out of top of card */}
           <motion.div
             animate={{
-              y: isHovered ? -46 : 0, // Massive upward lift breaking outside the card top
-              scale: isHovered ? 1.16 : 1, // Noticeable pop-out scale
+              y: isHovered ? -46 : 0,
+              scale: isHovered ? 1.15 : 1,
             }}
             transition={{
               type: "spring",
@@ -197,28 +197,32 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION WITH PROMINENT SEMI-CIRCLE DOME (نصف دائرة واضحة من فوق) ── */}
-        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-hidden">
-          {/* Black Section with Large Semi-Circle Dome on Hover */}
+        {/* ── BOTTOM INFO SECTION WITH DOME (نصف دائرة بارزة بدون أي قص) ── */}
+        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-visible">
+          {/* Black Dome Arc Layer (Positioned on top of the black container) */}
           <div
-            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-8 flex flex-col justify-between ${
-              isHovered
-                ? "bg-black text-white"
-                : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"
+            className={`absolute -top-12 left-0 right-0 h-14 pointer-events-none transition-all duration-500 ease-out z-10 ${
+              isHovered ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"
             }`}
+            style={{ transformOrigin: "bottom center" }}
           >
-            {/* Prominent Semi-Circle Dome SVG at the top of the black section */}
             <svg
-              className={`absolute -top-10 left-0 w-full h-11 text-black fill-current pointer-events-none transition-all duration-500 ${
-                isHovered ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"
-              }`}
+              className="w-full h-full text-black fill-current"
               viewBox="0 0 100 40"
               preserveAspectRatio="none"
             >
-              {/* Distinct High Semi-Circle Dome Path */}
-              <path d="M 0,40 Q 50,-5 100,40 L 100,40 L 0,40 Z" />
+              <path d="M 0,40 Q 50,-5 100,40 Z" />
             </svg>
+          </div>
 
+          {/* Black Content Container */}
+          <div
+            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-7 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between z-20 ${
+              isHovered
+                ? "bg-black text-white shadow-2xl"
+                : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"
+            }`}
+          >
             {/* Product Title & Price */}
             <div className="relative z-10 space-y-1.5 mb-4">
               <div className="flex items-center justify-between gap-2">
