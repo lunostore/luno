@@ -134,25 +134,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* ── 3D FLOATING PRODUCT VISUAL AREA (POPS OUT OVER TOP) ── */}
         <div
           ref={imageContainerRef}
-          className="relative w-full aspect-[4/4.2] flex items-center justify-center p-3 overflow-visible z-30"
+          className="relative w-full aspect-[1/1.05] sm:aspect-[1/1.08] flex items-center justify-center p-1 sm:p-2 overflow-visible z-30"
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* 3D Soft Floor Shadow Under the Shirt */}
           <motion.div
             animate={{
-              scale: isHovered ? 1.25 : 0.95,
-              opacity: isHovered ? 0.5 : 0.22,
-              y: isHovered ? 18 : 0,
+              scale: isHovered ? 1.35 : 1.05,
+              opacity: isHovered ? 0.55 : 0.25,
+              y: isHovered ? 20 : 0,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[74%] h-8 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.4)_0%,_rgba(255,255,255,0.08)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
+            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[85%] h-9 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.4)_0%,_rgba(255,255,255,0.08)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
           />
 
-          {/* Garment Image: Pops up and flies out of top of card */}
+          {/* Garment Image: Enlarged and pops up on hover */}
           <motion.div
             animate={{
               y: isHovered ? -55 : 0,
-              scale: isHovered ? 1.18 : 1,
+              scale: isHovered ? 1.25 : 1.12,
             }}
             transition={{
               type: "spring",
@@ -164,7 +164,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               transformStyle: "preserve-3d",
               transform: isHovered ? "translateZ(60px)" : "translateZ(15px)",
             }}
-            className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none"
+            className="relative w-[92%] h-[92%] flex items-center justify-center z-10 pointer-events-none"
           >
             <Image
               key={currentImage}
@@ -174,7 +174,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               priority={index < 4}
               quality={95}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center drop-shadow-[0_16px_25px_rgba(0,0,0,0.2)] pointer-events-none transition-all duration-500"
+              className="object-contain object-center drop-shadow-[0_18px_28px_rgba(0,0,0,0.22)] pointer-events-none transition-all duration-500"
             />
           </motion.div>
 
