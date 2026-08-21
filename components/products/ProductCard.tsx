@@ -34,19 +34,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const mouseY = useMotionValue(0);
 
   // Smooth springs for fluid 3D physics
-  const smoothX = useSpring(mouseX, { stiffness: 240, damping: 22 });
-  const smoothY = useSpring(mouseY, { stiffness: 240, damping: 22 });
+  const smoothX = useSpring(mouseX, { stiffness: 220, damping: 20 });
+  const smoothY = useSpring(mouseY, { stiffness: 220, damping: 20 });
 
-  // Floating cursor follower coordinates
+  // Floating cursor follower coordinates ("Ver" / "عرض")
   const cursorX = useMotionValue(100);
   const cursorY = useMotionValue(100);
-  const smoothCursorX = useSpring(cursorX, { stiffness: 320, damping: 28 });
-  const smoothCursorY = useSpring(cursorY, { stiffness: 320, damping: 28 });
+  const smoothCursorX = useSpring(cursorX, { stiffness: 300, damping: 26 });
+  const smoothCursorY = useSpring(cursorY, { stiffness: 300, damping: 26 });
 
   // 3D transformations
-  const rotateX = useTransform(smoothY, [-0.5, 0.5], [10, -10]);
-  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-10, 10]);
-  const garmentFloatY = useTransform(smoothY, [-0.5, 0.5], [-14, -4]);
+  const rotateX = useTransform(smoothY, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-8, 8]);
+  const garmentFloatY = useTransform(smoothY, [-0.5, 0.5], [-26, -16]);
 
   const primaryImage = product.mainImage || "/placeholder.jpg";
   const hoverImage = product.hoverImage || product.images?.[0] || primaryImage;
@@ -83,7 +83,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     const targetVariant = product.variants?.[0];
     const availableSizes = targetVariant?.sizes || [];
 
-    // If product has multiple choices, open modal for seamless selection
     if (availableSizes.length > 1 || (product.variants?.length ?? 0) > 1) {
       openProduct(product.id);
       return;
@@ -131,35 +130,35 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[26px] sm:rounded-[30px] border border-zinc-200/90 dark:border-zinc-800 overflow-hidden cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transition-shadow duration-500"
+        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 overflow-hidden cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.14)] transition-shadow duration-500"
       >
         {/* ── 3D FLOATING PRODUCT VISUAL AREA ── */}
         <div
           ref={imageContainerRef}
-          className="relative w-full aspect-[4/4.5] flex items-center justify-center p-6 pb-2 overflow-visible"
+          className="relative w-full aspect-[4/4.6] flex items-center justify-center p-5 pt-8 overflow-visible z-10"
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* 3D Realistic Soft Floor Shadow */}
           <motion.div
             animate={{
-              scale: isHovered ? 1.12 : 0.95,
-              opacity: isHovered ? 0.4 : 0.25,
-              y: isHovered ? 6 : 0,
+              scale: isHovered ? 1.15 : 0.95,
+              opacity: isHovered ? 0.45 : 0.25,
+              y: isHovered ? 10 : 0,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[68%] h-7 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.5)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[70%] h-8 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.55)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm"
           />
 
-          {/* Floating Transparent PNG Garment */}
+          {/* Floating Transparent PNG Garment (Elevates & Scales Up on Hover) */}
           <motion.div
             style={{
               y: isHovered ? garmentFloatY : 0,
               transformStyle: "preserve-3d",
               transform: isHovered
-                ? "translateZ(40px) scale(1.05)"
+                ? "translateZ(45px) scale(1.08)"
                 : "translateZ(15px) scale(1)",
             }}
-            transition={{ type: "spring", stiffness: 240, damping: 20 }}
+            transition={{ type: "spring", stiffness: 220, damping: 18 }}
             className="relative w-full h-full flex items-center justify-center"
           >
             <Image
@@ -170,11 +169,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               priority={index < 4}
               quality={95}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center drop-shadow-[0_10px_15px_rgba(0,0,0,0.08)] pointer-events-none transition-transform duration-500"
+              className="object-contain object-center drop-shadow-[0_12px_20px_rgba(0,0,0,0.12)] pointer-events-none transition-transform duration-500"
             />
           </motion.div>
 
-          {/* Magnetic Circular Cursor Follower ("عرض" / "View") */}
+          {/* Magnetic Circular Cursor Follower ("عرض" / "Ver") */}
           <motion.div
             style={{
               left: smoothCursorX,
@@ -187,30 +186,30 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               scale: isHovered ? 1 : 0.3,
             }}
             transition={{ duration: 0.2 }}
-            className="absolute z-40 hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white/95 text-zinc-900 text-xs font-black shadow-2xl border border-zinc-200/80 pointer-events-none"
+            className="absolute z-40 hidden md:flex items-center justify-center w-14 h-14 rounded-full bg-white/95 text-zinc-900 text-xs font-black shadow-2xl border border-zinc-200/80 pointer-events-none tracking-tight"
           >
             عرض
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION WITH CONCAVE DOME HOVER ARCH ── */}
-        <div className="relative z-20 mt-auto">
-          {/* Concave Cradle Shape when Hovered */}
+        {/* ── BOTTOM INFO SECTION WITH DOME CURVE (قوس القبة الصاعد) ── */}
+        <div className="relative z-20 mt-auto overflow-hidden">
+          {/* Black Dome Background Layer */}
           <div
-            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] p-5 pt-6 flex flex-col justify-between ${
+            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-7 flex flex-col justify-between ${
               isHovered
                 ? "bg-black text-white"
                 : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"
             }`}
           >
-            {/* Curved Concave Arch Header on Hover */}
+            {/* Convex Dome Arch (القوس المنحني لأعلى كما بالصورة تماماً) */}
             {isHovered && (
               <svg
-                className="absolute -top-5 left-0 w-full h-6 text-black fill-current pointer-events-none"
-                viewBox="0 0 100 24"
+                className="absolute -top-7 left-0 w-full h-8 text-black fill-current pointer-events-none"
+                viewBox="0 0 100 30"
                 preserveAspectRatio="none"
               >
-                <path d="M0,0 Q50,22 100,0 L100,24 L0,24 Z" />
+                <path d="M 0,30 Q 50,0 100,30 L 100,30 L 0,30 Z" />
               </svg>
             )}
 
@@ -244,8 +243,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
 
             {/* Bottom Actions Row: Wishlist + Add to Cart */}
-            <div className="relative z-10 flex items-center gap-2 pt-1">
-              {/* Wishlist Square Button */}
+            <div className="relative z-10 flex items-center gap-2">
+              {/* Wishlist Button */}
               <button
                 type="button"
                 onClick={(e) => {
