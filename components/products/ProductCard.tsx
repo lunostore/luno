@@ -145,13 +145,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               y: isHovered ? 18 : 0,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[74%] h-8 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[74%] h-8 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.4)_0%,_rgba(255,255,255,0.08)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
           />
 
           {/* Garment Image: Pops up and flies out of top of card */}
           <motion.div
             animate={{
-              y: isHovered ? -52 : 0,
+              y: isHovered ? -55 : 0,
               scale: isHovered ? 1.18 : 1,
             }}
             transition={{
@@ -191,7 +191,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               scale: isHovered ? 1 : 0.2,
             }}
             transition={{ duration: 0.2 }}
-            className="absolute z-40 hidden md:flex items-center justify-center w-14 h-14 rounded-full bg-white/95 text-zinc-950 text-xs font-black shadow-2xl border border-zinc-200 pointer-events-none"
+            className="absolute z-40 hidden md:flex items-center justify-center w-14 h-14 rounded-full bg-white/95 dark:bg-zinc-900/95 text-zinc-950 dark:text-white text-xs font-black shadow-2xl border border-zinc-200 dark:border-zinc-700 pointer-events-none"
           >
             عرض
           </motion.div>
@@ -199,30 +199,30 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
         {/* ── BOTTOM INFO SECTION WITH HUGE DOME ABOVE RECTANGLE ── */}
         <div className="relative z-20 mt-auto overflow-visible">
-          {/* Big Black Semi-Circle Dome Rising High ABOVE the Rectangle */}
+          {/* Extra Large Semi-Circle Dome (Black in Light mode, White in Dark mode) */}
           <div
-            className={`absolute -top-16 sm:-top-20 left-0 right-0 h-16 sm:h-20 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${
+            className={`absolute -top-20 sm:-top-24 md:-top-28 left-0 right-0 h-20 sm:h-24 md:h-28 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${
               isHovered
                 ? "opacity-100 translate-y-0 scale-y-100"
-                : "opacity-0 translate-y-6 scale-y-50"
+                : "opacity-0 translate-y-8 scale-y-50"
             }`}
             style={{ transformOrigin: "bottom center" }}
           >
             <svg
-              className="w-full h-full text-black fill-current"
-              viewBox="0 0 100 45"
+              className="w-full h-full text-black dark:text-white fill-current transition-colors duration-500"
+              viewBox="0 0 100 55"
               preserveAspectRatio="none"
             >
-              {/* Massive smooth continuous circular dome arc */}
-              <path d="M 0,45 Q 50,0 100,45 Z" />
+              {/* Extra large, sweeping continuous circular dome arch */}
+              <path d="M 0,55 Q 50,0 100,55 Z" />
             </svg>
           </div>
 
-          {/* Base Rectangle Content Container */}
+          {/* Base Rectangle Content Container (Black in Light mode, White in Dark mode) */}
           <div
             className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-4 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between z-20 ${
               isHovered
-                ? "bg-black text-white shadow-2xl"
+                ? "bg-black text-white dark:bg-white dark:text-black shadow-2xl"
                 : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"
             }`}
           >
@@ -231,14 +231,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               <div className="flex items-center justify-between gap-2">
                 <h3
                   className={`font-black text-sm sm:text-base tracking-tight line-clamp-1 transition-colors duration-300 ${
-                    isHovered ? "text-white" : "text-zinc-900 dark:text-white"
+                    isHovered ? "text-white dark:text-black" : "text-zinc-900 dark:text-white"
                   }`}
                 >
                   {product.name}
                 </h3>
                 <span
                   className={`font-black text-sm sm:text-base whitespace-nowrap transition-colors duration-300 ${
-                    isHovered ? "text-white" : "text-zinc-900 dark:text-white"
+                    isHovered ? "text-white dark:text-black" : "text-zinc-900 dark:text-white"
                   }`}
                 >
                   {formatPrice(displayPrice)}
@@ -248,7 +248,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               {/* Description */}
               <p
                 className={`text-[11px] sm:text-xs line-clamp-2 leading-relaxed transition-colors duration-300 ${
-                  isHovered ? "text-zinc-400" : "text-zinc-500 dark:text-zinc-400"
+                  isHovered ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500 dark:text-zinc-400"
                 }`}
               >
                 {product.description || product.subtitle || "Our premium collection in high-density cotton"}
@@ -266,7 +266,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 }}
                 className={`w-10 h-10 rounded-xl transition-all duration-300 flex items-center justify-center flex-shrink-0 ${
                   isHovered
-                    ? "bg-transparent text-white border border-zinc-700 hover:border-zinc-500"
+                    ? "bg-transparent text-white border-zinc-700 hover:border-zinc-500 dark:text-black dark:border-zinc-300 dark:hover:border-zinc-500"
                     : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300"
                 }`}
                 title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
@@ -287,7 +287,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   isHovered
                     ? isAddedBriefly
                       ? "bg-emerald-500 text-white"
-                      : "bg-white text-black hover:bg-zinc-100 shadow-md font-extrabold"
+                      : "bg-white text-black hover:bg-zinc-100 dark:bg-black dark:text-white dark:hover:bg-zinc-800 shadow-md font-extrabold"
                     : isAddedBriefly
                     ? "bg-emerald-600 text-white"
                     : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
