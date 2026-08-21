@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import ProductDetailClient from "@/components/store/ProductDetailClient";
 
 interface ProductModalContextValue {
@@ -26,7 +26,6 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
@@ -37,11 +36,13 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
     // Lock body scroll
     document.body.style.overflow = "hidden";
     // Update URL without full page reload
-    window.history.pushState(
-      { productModal: productId },
-      "",
-      `/products?id=${encodeURIComponent(productId)}`
-    );
+    if (typeof window !== "undefined") {
+      window.history.pushState(
+        { productModal: productId },
+        "",
+        `/products?id=${encodeURIComponent(productId)}`
+      );
+    }
   }, []);
 
   const closeProduct = useCallback(() => {
@@ -57,9 +58,9 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // Auto-close modal whenever user navigates to checkout or other pages
+  // Auto-close modal whenever user navigates to other pages (e.g. /checkout)
   useEffect(() => {
-    if (pathname === "/checkout" || pathname === "/cart" || pathname === "/order-success") {
+    if (pathname && pathname !== "/" && !pathname.startsWith("/products")) {
       if (activeProductId) {
         setActiveProductId(null);
         document.body.style.overflow = "";

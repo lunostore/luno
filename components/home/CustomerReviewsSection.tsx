@@ -14,7 +14,6 @@ import {
   Quote,
   CheckCircle2,
   Lock,
-  Heart,
   MessageSquareQuote,
 } from "lucide-react";
 import { toast } from "sonner";
