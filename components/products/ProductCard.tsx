@@ -223,14 +223,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             }}
             className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible shadow-2xl"
           >
-            {/* The High Semi-Circle Dome Header on Top of the Rising Layer (Never Clipped) */}
-            <div className="absolute -top-20 sm:-top-24 md:-top-28 left-0 right-0 h-20 sm:h-24 md:h-28 overflow-visible pointer-events-none">
+            {/* The High Semi-Circle Dome Header on Top of the Rising Layer (Extra Large Panoramic Radius) */}
+            <div className="absolute -top-28 sm:-top-32 md:-top-36 left-0 right-0 h-28 sm:h-32 md:h-36 overflow-visible pointer-events-none">
               <svg
                 className="w-full h-full text-black dark:text-white fill-current"
-                viewBox="0 0 100 55"
+                viewBox="0 0 100 60"
                 preserveAspectRatio="none"
               >
-                <path d="M 0,55 Q 50,0 100,55 Z" />
+                {/* Extra large, sweeping panoramic dome arc */}
+                <path d="M 0,60 C 12,-4 88,-4 100,60 Z" />
               </svg>
             </div>
           </motion.div>
