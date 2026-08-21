@@ -14,6 +14,7 @@ import { Logo3D } from "@/components/ui/Logo3D";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/#products", label: "Shop" },
+  { href: "/reviews", label: "Reviews" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];

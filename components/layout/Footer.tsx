@@ -119,6 +119,7 @@ export function Footer() {
             </h4>
             <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
               {[
+                { href: "/reviews", label: "آراء العملاء (Reviews)" },
                 { href: "/about", label: "About Us" },
                 { href: "/contact", label: "Contact Us" },
                 { href: "/shipping-policy", label: "Shipping & Returns" },
