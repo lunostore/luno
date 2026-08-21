@@ -115,7 +115,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         delay: (index % 4) * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="relative h-full select-none pt-10"
+      className="relative h-full select-none pt-12"
       style={{ perspective: 1200 }}
     >
       <motion.div
@@ -137,22 +137,22 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           className="relative w-full aspect-[4/4.2] flex items-center justify-center p-3 overflow-visible z-30"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* 3D Soft Floor Shadow */}
+          {/* 3D Soft Floor Shadow Under the Shirt */}
           <motion.div
             animate={{
-              scale: isHovered ? 1.2 : 0.95,
-              opacity: isHovered ? 0.45 : 0.22,
-              y: isHovered ? 15 : 0,
+              scale: isHovered ? 1.25 : 0.95,
+              opacity: isHovered ? 0.5 : 0.22,
+              y: isHovered ? 18 : 0,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[72%] h-7 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.6)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[74%] h-8 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
           />
 
           {/* Garment Image: Pops up and flies out of top of card */}
           <motion.div
             animate={{
-              y: isHovered ? -46 : 0,
-              scale: isHovered ? 1.15 : 1,
+              y: isHovered ? -52 : 0,
+              scale: isHovered ? 1.18 : 1,
             }}
             transition={{
               type: "spring",
@@ -162,7 +162,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             }}
             style={{
               transformStyle: "preserve-3d",
-              transform: isHovered ? "translateZ(55px)" : "translateZ(15px)",
+              transform: isHovered ? "translateZ(60px)" : "translateZ(15px)",
             }}
             className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none"
           >
@@ -174,7 +174,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               priority={index < 4}
               quality={95}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center drop-shadow-[0_16px_25px_rgba(0,0,0,0.18)] pointer-events-none transition-all duration-500"
+              className="object-contain object-center drop-shadow-[0_16px_25px_rgba(0,0,0,0.2)] pointer-events-none transition-all duration-500"
             />
           </motion.div>
 
@@ -183,7 +183,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             style={{
               left: smoothCursorX,
               top: smoothCursorY,
-              transform: "translate(-50%, -50%) translateZ(70px)",
+              transform: "translate(-50%, -50%) translateZ(75px)",
               pointerEvents: "none",
             }}
             animate={{
@@ -197,14 +197,30 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION WITH SEAMLESS FULL-WIDTH DOME (نصف دائرة كاملة ومثالية) ── */}
-        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-hidden">
+        {/* ── BOTTOM INFO SECTION WITH HUGE DOME ABOVE RECTANGLE ── */}
+        <div className="relative z-20 mt-auto overflow-visible">
+          {/* Big Black Semi-Circle Dome Rising High ABOVE the Rectangle */}
           <div
-            style={{
-              borderTopLeftRadius: isHovered ? "50% 45px" : "0px",
-              borderTopRightRadius: isHovered ? "50% 45px" : "0px",
-            }}
-            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-8 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between ${
+            className={`absolute -top-16 sm:-top-20 left-0 right-0 h-16 sm:h-20 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${
+              isHovered
+                ? "opacity-100 translate-y-0 scale-y-100"
+                : "opacity-0 translate-y-6 scale-y-50"
+            }`}
+            style={{ transformOrigin: "bottom center" }}
+          >
+            <svg
+              className="w-full h-full text-black fill-current"
+              viewBox="0 0 100 45"
+              preserveAspectRatio="none"
+            >
+              {/* Massive smooth continuous circular dome arc */}
+              <path d="M 0,45 Q 50,0 100,45 Z" />
+            </svg>
+          </div>
+
+          {/* Base Rectangle Content Container */}
+          <div
+            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-4 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between z-20 ${
               isHovered
                 ? "bg-black text-white shadow-2xl"
                 : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"

@@ -11,16 +11,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products";
 
-    // ── 1. Try Cloudinary if API keys exist ──
+    // ── 1. Try Cloudinary Unsigned Upload (Preset based) ──
+    try {
+      const cldFormData = new FormData();
+      cldFormData.append("file", file);
+      cldFormData.append("upload_preset", uploadPreset);
+      cldFormData.append("folder", folder);
+
+      const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: cldFormData,
+      });
+
+      if (cldRes.ok) {
+        const cldData = await cldRes.json();
+        if (cldData.secure_url) {
+          return NextResponse.json({
+            secure_url: cldData.secure_url,
+            url: cldData.secure_url,
+            public_id: cldData.public_id,
+            success: true,
+          });
+        }
+      }
+    } catch (cldErr) {
+      console.warn("Cloudinary preset upload failed, checking signed config:", cldErr);
+    }
+
+    // ── 2. Try Cloudinary Signed SDK if API keys exist ──
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-    if (apiKey && apiSecret && cloudName) {
+    if (apiKey && apiSecret) {
       try {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
         cloudinary.config({
           cloud_name: cloudName,
           api_key: apiKey,
@@ -29,10 +58,7 @@ export async function POST(req: Request) {
 
         const cldResult = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: folder,
-              resource_type: "auto",
-            },
+            { folder: folder, resource_type: "auto" },
             (error, result) => {
               if (error) reject(error);
               else if (result) resolve({ secure_url: result.secure_url, public_id: result.public_id });
@@ -43,56 +69,19 @@ export async function POST(req: Request) {
         });
 
         if (cldResult?.secure_url) {
-          return NextResponse.json({ secure_url: cldResult.secure_url, public_id: cldResult.public_id, success: true });
+          return NextResponse.json({
+            secure_url: cldResult.secure_url,
+            url: cldResult.secure_url,
+            public_id: cldResult.public_id,
+            success: true,
+          });
         }
-      } catch (cldErr) {
-        console.warn("Cloudinary server-side upload attempt failed, falling back to Firebase Storage:", cldErr);
+      } catch (signedErr) {
+        console.warn("Cloudinary signed upload failed:", signedErr);
       }
     }
 
-    // ── 2. Primary / Guaranteed Fallback: Server-side Firebase Storage (Zero CORS) ──
-    const rawExt = file.name.split(".").pop() || "jpg";
-    const cleanExt = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "jpg";
-    const randomId = Math.random().toString(36).substring(2, 9);
-    const safeFileName = `${Date.now()}_${randomId}.${cleanExt}`;
-    const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "luno-629e0.firebasestorage.app";
-    const filePath = `${folder}/${safeFileName}`;
-
-    const fbUploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?name=${encodeURIComponent(filePath)}&uploadType=media`;
-
-    const fbRes = await fetch(fbUploadUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": file.type || "image/jpeg",
-      },
-      body: buffer,
-    });
-
-    if (fbRes.ok) {
-      const fbData = await fbRes.json();
-      const token = fbData.downloadTokens;
-      const downloadUrl = token
-        ? `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`
-        : `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(filePath)}?alt=media`;
-
-      return NextResponse.json({
-        secure_url: downloadUrl,
-        url: downloadUrl,
-        public_id: filePath,
-        success: true,
-      });
-    }
-
-    // ── 3. Fallback: Base64 Data URL for standalone reliable display ──
-    const mimeType = file.type || "image/jpeg";
-    const base64Data = buffer.toString("base64");
-    const dataUrl = `data:${mimeType};base64,${base64Data}`;
-
-    return NextResponse.json({
-      secure_url: dataUrl,
-      url: dataUrl,
-      success: true,
-    });
+    return NextResponse.json({ error: "Failed to upload image to storage provider", success: false }, { status: 500 });
   } catch (err: unknown) {
     console.error("Server upload API error:", err);
     const errorMessage = err instanceof Error ? err.message : "Upload failed";

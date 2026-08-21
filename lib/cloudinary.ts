@@ -1,48 +1,73 @@
-import { ref, deleteObject } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "@/lib/firebase/config";
 
 /**
- * Universal Image Uploader (Zero-CORS, Server-powered):
- * Posts file to Same-Origin Next.js API route (/api/upload),
- * which securely uploads to Firebase Storage or Cloudinary server-side with NO CORS issues.
+ * Universal Image Uploader:
+ * 1. Direct Cloudinary Unsigned Upload (Fastest, zero-latency)
+ * 2. Next.js Server-side /api/upload
+ * 3. Client-side Firebase Storage (Guaranteed fallback, hosted URL)
  */
 export async function uploadToCloudinary(file: File, folder = "products"): Promise<string> {
-  const apiEndpoints = ["/api/upload", "/api/admin/cloudinary/upload"];
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products";
 
-  for (const endpoint of apiEndpoints) {
-    try {
-      const apiFormData = new FormData();
-      apiFormData.append("file", file);
-      apiFormData.append("folder", folder);
-
-      const apiRes = await fetch(endpoint, {
-        method: "POST",
-        body: apiFormData,
-      });
-
-      if (apiRes.ok) {
-        const apiData = await apiRes.json();
-        if (apiData.secure_url || apiData.url) {
-          return (apiData.secure_url || apiData.url) as string;
-        }
-      }
-    } catch (err) {
-      console.warn(`Upload endpoint ${endpoint} error:`, err);
-    }
-  }
-
-  // Final fallback: Client-side Base64 Data URL to guarantee immediate upload success
+  // 1. Direct Client-side Cloudinary upload via unsigned preset
   try {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    formData.append("folder", folder);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: formData,
     });
 
-    return dataUrl;
-  } catch {
-    throw new Error("فشل رفع الصورة، يرجى المحاولة مرة أخرى.");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.secure_url) {
+        return data.secure_url as string;
+      }
+    }
+  } catch (err) {
+    console.warn("Direct Cloudinary upload failed, trying server API:", err);
+  }
+
+  // 2. Server-side API endpoint (/api/upload)
+  try {
+    const apiFormData = new FormData();
+    apiFormData.append("file", file);
+    apiFormData.append("folder", folder);
+
+    const apiRes = await fetch("/api/upload", {
+      method: "POST",
+      body: apiFormData,
+    });
+
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData.secure_url || apiData.url) {
+        return (apiData.secure_url || apiData.url) as string;
+      }
+    }
+  } catch (err) {
+    console.warn("Server API upload failed, trying Firebase storage fallback:", err);
+  }
+
+  // 3. Guaranteed Fallback: Client Firebase Storage SDK (Generates small hosted HTTPS URL)
+  try {
+    const rawExt = file.name.split(".").pop() || "jpg";
+    const cleanExt = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "jpg";
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${cleanExt}`;
+    const storagePath = `${folder}/${fileName}`;
+    const storageRef = ref(storage, storagePath);
+
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadUrl = await getDownloadURL(snapshot.ref);
+    return downloadUrl;
+  } catch (fbErr) {
+    console.error("Firebase Storage SDK upload failed:", fbErr);
+    throw new Error("فشل رفع الصورة إلى السحابة، يرجى التحقق من اتصالك والمحاولة مرة أخرى.");
   }
 }
 
@@ -80,17 +105,12 @@ export function getCloudinaryPublicId(url: string): string {
   }
 }
 
-/**
- * Universal Image Deletion:
- * Handles Cloudinary public IDs and Firebase Storage URLs cleanly.
- */
 export async function deleteFromCloudinary(urls: string | string[]): Promise<void> {
   const urlArray = Array.isArray(urls) ? urls : [urls];
 
   for (const url of urlArray) {
     if (!url || typeof url !== "string" || url.startsWith("data:")) continue;
 
-    // A. If Firebase Storage URL
     if (url.includes("firebasestorage.googleapis.com")) {
       try {
         const storageRef = ref(storage, url);
@@ -101,7 +121,6 @@ export async function deleteFromCloudinary(urls: string | string[]): Promise<voi
       continue;
     }
 
-    // B. If Cloudinary URL
     const publicId = getCloudinaryPublicId(url);
     if (publicId) {
       try {
