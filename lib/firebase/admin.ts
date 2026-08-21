@@ -4,6 +4,7 @@ import type { ServiceAccount } from "firebase-admin";
 const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
 const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
 const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "luno-629e0.firebasestorage.app";
 
 if (!admin.apps.length && projectId && clientEmail && privateKey) {
   const serviceAccount: ServiceAccount = {
@@ -14,6 +15,7 @@ if (!admin.apps.length && projectId && clientEmail && privateKey) {
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
+    storageBucket: storageBucket,
   });
 }
 
@@ -40,5 +42,14 @@ export const adminDb = {
     return admin.firestore().collection(collectionPath);
   }
 } as any;
+
+export const adminStorage = {
+  bucket: (name?: string) => {
+    if (!admin.apps.length) {
+      throw new Error("Firebase Admin SDK is not initialized. Check your environment variables.");
+    }
+    return admin.storage().bucket(name || storageBucket);
+  }
+};
 
 export default admin;

@@ -1,17 +1,38 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { ref, deleteObject } from "firebase/storage";
 import { storage } from "@/lib/firebase/config";
 
 /**
  * Universal Image Uploader:
- * 1. Direct Cloudinary Unsigned Upload (Fastest, zero-latency)
- * 2. Next.js Server-side /api/upload
- * 3. Client-side Firebase Storage (Guaranteed fallback, hosted URL)
+ * Posts to Next.js API route (/api/upload) on same origin (Zero CORS, Secure Server Pipeline)
  */
 export async function uploadToCloudinary(file: File, folder = "products"): Promise<string> {
+  // 1. Primary: Server-side API Route (Zero CORS, handles Cloudinary + Firebase Admin Storage)
+  try {
+    const apiFormData = new FormData();
+    apiFormData.append("file", file);
+    apiFormData.append("folder", folder);
+
+    const apiRes = await fetch("/api/upload", {
+      method: "POST",
+      body: apiFormData,
+    });
+
+    const apiData = await apiRes.json().catch(() => ({}));
+    if (apiRes.ok && (apiData.secure_url || apiData.url)) {
+      return (apiData.secure_url || apiData.url) as string;
+    }
+
+    if (apiData?.error) {
+      console.warn("Upload API returned error message:", apiData.error);
+    }
+  } catch (err) {
+    console.warn("Server API upload failed, checking client fallback:", err);
+  }
+
+  // 2. Direct Cloudinary Client Preset Upload (If configured)
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products";
 
-  // 1. Direct Client-side Cloudinary upload via unsigned preset
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -30,45 +51,10 @@ export async function uploadToCloudinary(file: File, folder = "products"): Promi
       }
     }
   } catch (err) {
-    console.warn("Direct Cloudinary upload failed, trying server API:", err);
+    console.warn("Client direct Cloudinary upload failed:", err);
   }
 
-  // 2. Server-side API endpoint (/api/upload)
-  try {
-    const apiFormData = new FormData();
-    apiFormData.append("file", file);
-    apiFormData.append("folder", folder);
-
-    const apiRes = await fetch("/api/upload", {
-      method: "POST",
-      body: apiFormData,
-    });
-
-    if (apiRes.ok) {
-      const apiData = await apiRes.json();
-      if (apiData.secure_url || apiData.url) {
-        return (apiData.secure_url || apiData.url) as string;
-      }
-    }
-  } catch (err) {
-    console.warn("Server API upload failed, trying Firebase storage fallback:", err);
-  }
-
-  // 3. Guaranteed Fallback: Client Firebase Storage SDK (Generates small hosted HTTPS URL)
-  try {
-    const rawExt = file.name.split(".").pop() || "jpg";
-    const cleanExt = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "jpg";
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${cleanExt}`;
-    const storagePath = `${folder}/${fileName}`;
-    const storageRef = ref(storage, storagePath);
-
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadUrl = await getDownloadURL(snapshot.ref);
-    return downloadUrl;
-  } catch (fbErr) {
-    console.error("Firebase Storage SDK upload failed:", fbErr);
-    throw new Error("فشل رفع الصورة إلى السحابة، يرجى التحقق من اتصالك والمحاولة مرة أخرى.");
-  }
+  throw new Error("فشل رفع الصورة إلى السحابة. يرجى التأكد من اتصال الإنترنت والمحاولة مرة أخرى.");
 }
 
 export async function uploadMultipleToCloudinary(files: File[], folder = "products"): Promise<string[]> {
