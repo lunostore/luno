@@ -2,8 +2,8 @@
 
 import { useState, useRef, MouseEvent } from "react";
 import Image from "next/image";
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
-import { Heart, ShoppingBag, Eye, Shirt, Layers, Users, Sparkles, Check } from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Heart, ShoppingBag, Shirt, Layers, Users, Sparkles, Check } from "lucide-react";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { useCart } from "@/features/cart/CartProvider";
@@ -18,7 +18,7 @@ interface ProductCardProps {
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { openProduct } = useProductModal();
-  const { addItem, openCart } = useCart();
+  const { addItem } = useCart();
 
   const isFavorite = isInWishlist(product.id);
   const displayPrice = product.salePrice ?? product.price;
@@ -99,7 +99,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.stopPropagation();
     
     // Check if product requires modal selection for sizes/variants
-    const hasMultipleSizes = (product.sizes?.length ?? 0) > 1;
+    const targetVariant = activeVariant || product.variants?.[0];
+    const availableSizes = targetVariant?.sizes || [];
+    const hasMultipleSizes = availableSizes.length > 1;
     const hasMultipleVariants = (product.variants?.length ?? 0) > 1;
 
     if (hasMultipleSizes || (hasMultipleVariants && selectedVariantIdx === null)) {
@@ -107,16 +109,16 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       return;
     }
 
-    const defaultSize = product.sizes?.[0] || "M";
-    const selectedColor = activeVariant
+    const defaultSize = availableSizes[0]?.size || "M";
+    const selectedColor = targetVariant
       ? {
-          name: activeVariant.colorName || "افتراضي",
-          hex: activeVariant.colorHex || "#000000",
-          image: activeVariant.image || product.mainImage || "",
+          name: targetVariant.colorName || "افتراضي",
+          hex: targetVariant.colorHex || "#000000",
+          image: targetVariant.image || product.mainImage || "",
         }
       : {
-          name: product.variants?.[0]?.colorName || "افتراضي",
-          hex: product.variants?.[0]?.colorHex || "#000000",
+          name: "افتراضي",
+          hex: "#000000",
           image: product.mainImage || "",
         };
 
