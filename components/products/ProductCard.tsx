@@ -129,7 +129,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-all duration-500 overflow-visible"
+        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-all duration-500 overflow-hidden"
       >
         {/* ── 3D FLOATING PRODUCT VISUAL AREA ── */}
         <div
@@ -197,37 +197,38 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION WITH HUGE DOME ABOVE RECTANGLE ── */}
+        {/* ── BOTTOM INFO SECTION (WITH RISING DOME & RECTANGLE ANIMATION) ── */}
         <div className="relative z-20 mt-auto overflow-visible">
-          {/* Extra Large Semi-Circle Dome (Black in Light mode, White in Dark mode) */}
-          <div
-            className={`absolute -top-20 sm:-top-24 md:-top-28 left-0 right-0 h-20 sm:h-24 md:h-28 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${
-              isHovered
-                ? "opacity-100 translate-y-0 scale-y-100"
-                : "opacity-0 translate-y-8 scale-y-50"
-            }`}
-            style={{ transformOrigin: "bottom center" }}
+          {/* Animated Rising Backdrop Curtain with Big Dome Leading from Bottom Up */}
+          <motion.div
+            initial={false}
+            animate={{
+              y: isHovered ? "0%" : "105%",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 200,
+              damping: 22,
+              mass: 0.7,
+            }}
+            className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible"
           >
-            <svg
-              className="w-full h-full text-black dark:text-white fill-current transition-colors duration-500"
-              viewBox="0 0 100 55"
-              preserveAspectRatio="none"
-            >
-              {/* Extra large, sweeping continuous circular dome arch */}
-              <path d="M 0,55 Q 50,0 100,55 Z" />
-            </svg>
-          </div>
+            {/* The High Semi-Circle Dome Header on Top of the Rising Layer */}
+            <div className="absolute -top-20 sm:-top-24 md:-top-28 left-0 right-0 h-20 sm:h-24 md:h-28 overflow-visible">
+              <svg
+                className="w-full h-full text-black dark:text-white fill-current"
+                viewBox="0 0 100 55"
+                preserveAspectRatio="none"
+              >
+                <path d="M 0,55 Q 50,0 100,55 Z" />
+              </svg>
+            </div>
+          </motion.div>
 
-          {/* Base Rectangle Content Container (Black in Light mode, White in Dark mode) */}
-          <div
-            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-4 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between z-20 ${
-              isHovered
-                ? "bg-black text-white dark:bg-white dark:text-black shadow-2xl"
-                : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"
-            }`}
-          >
+          {/* Content Layer (Text & Action Buttons) */}
+          <div className="relative px-5 pb-5 pt-4 z-10 flex flex-col justify-between transition-colors duration-400">
             {/* Product Title & Price */}
-            <div className="relative z-10 space-y-1.5 mb-4">
+            <div className="space-y-1.5 mb-4">
               <div className="flex items-center justify-between gap-2">
                 <h3
                   className={`font-black text-sm sm:text-base tracking-tight line-clamp-1 transition-colors duration-300 ${
@@ -256,7 +257,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
 
             {/* Bottom Actions Row */}
-            <div className="relative z-10 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               {/* Wishlist Button */}
               <button
                 type="button"
