@@ -388,12 +388,13 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     const onFormError = (formErrors: FieldErrors<ProductFormData>) => {
       console.warn("Validation errors:", formErrors);
       
-      const errorKeys = Object.keys(formErrors);
-      if (errorKeys.length === 0) return;
+      const errKeys = Object.keys(formErrors) as (keyof ProductFormData)[];
+      if (errKeys.length === 0) return;
 
-      const errorMessages = errorKeys.map((key) => {
-        const label = fieldLabels[key] || key;
-        const msg = formErrors[key]?.message || "بيانات ناقصة أو غير صحيحة";
+      const errorMessages = errKeys.map((key) => {
+        const label = fieldLabels[key] || String(key);
+        const errObj = formErrors[key];
+        const msg = errObj && "message" in errObj && typeof errObj.message === "string" ? errObj.message : "بيانات ناقصة أو غير صحيحة";
         return `• ${label}: ${msg}`;
       });
 
@@ -411,15 +412,16 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       );
 
       // Scroll smoothly to the first invalid input
-      const firstKey = errorKeys[0];
-      const el = document.querySelector(`[name="${firstKey}"]`) || document.querySelector(`#field-${firstKey}`);
+      const firstKey = errKeys[0];
+      const el = document.querySelector(`[name="${String(firstKey)}"]`) || document.querySelector(`#field-${String(firstKey)}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         (el as HTMLElement).focus?.();
       }
     };
 
-    const hasErrors = Object.keys(errors).length > 0;
+    const activeErrorKeys = Object.keys(errors) as (keyof ProductFormData)[];
+    const hasErrors = activeErrorKeys.length > 0;
 
     return (
       <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-10 max-w-4xl font-sans">
@@ -432,12 +434,16 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               <span>تنبيه: يوجد حقول ناقصة تمنع حفظ المنتج:</span>
             </div>
             <ul className="space-y-1 text-xs font-semibold mr-6 list-disc">
-              {Object.keys(errors).map((key) => (
-                <li key={key}>
-                  <strong className="text-red-900 dark:text-red-200">{fieldLabels[key] || key}:</strong>{" "}
-                  <span>{errors[key as keyof typeof errors]?.message || "يرجى تعبئة هذا الحقل"}</span>
-                </li>
-              ))}
+              {activeErrorKeys.map((key) => {
+                const errObj = errors[key];
+                const msg = errObj && "message" in errObj && typeof errObj.message === "string" ? errObj.message : "يرجى تعبئة هذا الحقل";
+                return (
+                  <li key={key}>
+                    <strong className="text-red-900 dark:text-red-200">{fieldLabels[key] || String(key)}:</strong>{" "}
+                    <span>{msg}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
