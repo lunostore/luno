@@ -160,27 +160,6 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
     }
   };
 
-  // Upload 3 detail images for the card thumbnails stack (لوجو، خامة، تفاصيل)
-  const handleDetailImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    const loadingToast = toast.loading(`Uploading ${files.length} detail photo(s)...`);
-    try {
-      const urls = await Promise.all(files.map((file) => uploadToCloudinary(file)));
-      const existing = watchedDetailImages;
-      const updated = Array.from(new Set([...existing, ...urls])).slice(0, 3);
-      setValue("detailImages", updated, { shouldValidate: true });
-      toast.success("Card detail photos uploaded successfully", { id: loadingToast });
-    } catch {
-      toast.error("Failed to upload detail photos", { id: loadingToast });
-    }
-  };
-
-  const removeDetailImage = (imgIdx: number) => {
-    const updated = watchedDetailImages.filter((_, idx) => idx !== imgIdx);
-    setValue("detailImages", updated, { shouldValidate: true });
-  };
-
   // Upload color-specific variant images (multiple images supported per color)
   const handleVariantImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
