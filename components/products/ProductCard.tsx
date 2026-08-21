@@ -268,24 +268,26 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
             {/* Bottom Actions Row */}
             <div className="flex items-center gap-2">
-              {/* Wishlist Button */}
+              {/* Wishlist Button (Full Clickable Area) */}
               <button
                 type="button"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   toggleWishlist(product);
                 }}
-                className={`w-10 h-10 rounded-xl transition-all duration-300 flex items-center justify-center flex-shrink-0 ${
+                className={`relative z-30 w-11 h-11 rounded-xl transition-all duration-300 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 hover:scale-105 pointer-events-auto ${
                   isHovered
-                    ? "bg-transparent text-white border-zinc-700 hover:border-zinc-500 dark:text-black dark:border-zinc-300 dark:hover:border-zinc-500"
-                    : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300"
+                    ? "bg-transparent text-white border border-zinc-700 hover:border-zinc-400 hover:bg-white/10 dark:text-black dark:border-zinc-300 dark:hover:border-black dark:hover:bg-black/5"
+                    : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 }`}
                 title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+                aria-label={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
               >
                 <Heart
-                  size={16}
-                  className={`transition-colors ${
-                    isFavorite ? "fill-red-500 text-red-500" : "currentColor"
+                  size={18}
+                  className={`pointer-events-none transition-transform duration-200 ${
+                    isFavorite ? "fill-red-500 text-red-500 scale-110" : "currentColor"
                   }`}
                 />
               </button>
