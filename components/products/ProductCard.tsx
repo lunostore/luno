@@ -197,25 +197,27 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION WITH CONTAINED RISING DOME ── */}
-        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-hidden">
+        {/* ── BOTTOM INFO SECTION (WITH RISING DOME & RECTANGLE ANIMATION) ── */}
+        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-visible">
           {/* Animated Rising Backdrop Curtain with Big Dome Leading from Bottom Up */}
           <motion.div
             initial={false}
             animate={{
-              y: isHovered ? "0%" : "150%",
+              y: isHovered ? 0 : 30,
+              scaleY: isHovered ? 1 : 0,
               opacity: isHovered ? 1 : 0,
             }}
+            style={{ transformOrigin: "bottom center" }}
             transition={{
               type: "spring",
-              stiffness: 220,
-              damping: 24,
+              stiffness: 240,
+              damping: 22,
               mass: 0.7,
             }}
-            className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible"
+            className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible shadow-2xl"
           >
-            {/* The High Semi-Circle Dome Header on Top of the Rising Layer */}
-            <div className="absolute -top-20 sm:-top-24 md:-top-28 left-0 right-0 h-20 sm:h-24 md:h-28 overflow-visible">
+            {/* The High Semi-Circle Dome Header on Top of the Rising Layer (Never Clipped) */}
+            <div className="absolute -top-20 sm:-top-24 md:-top-28 left-0 right-0 h-20 sm:h-24 md:h-28 overflow-visible pointer-events-none">
               <svg
                 className="w-full h-full text-black dark:text-white fill-current"
                 viewBox="0 0 100 55"
