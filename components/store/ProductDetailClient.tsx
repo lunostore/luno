@@ -226,39 +226,45 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
     <div className="pt-2 sm:pt-4 pb-20 min-h-screen relative bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white">
       {/* ── TOP STICKY PRODUCT HEADER BAR ── */}
       <header className="sticky top-0 left-0 right-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 px-4 sm:px-6 lg:px-8 py-3 transition-colors">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left: Back to Shop */}
-          <button
-            type="button"
-            onClick={handleClose}
-            className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-zinc-700 hover:text-black dark:text-zinc-300 dark:hover:text-white transition-colors cursor-pointer group"
-          >
-            <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
-            <span>العودة للمتجر</span>
-          </button>
+        <div className="max-w-7xl mx-auto flex items-center justify-between relative">
+          {/* Left Side: Back to Shop + Theme Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3 z-10">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-zinc-700 hover:text-black dark:text-zinc-300 dark:hover:text-white transition-colors cursor-pointer group py-1"
+            >
+              <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span>العودة للمتجر</span>
+            </button>
 
-          {/* Center: Brand Logo */}
-          <div onClick={handleClose} className="cursor-pointer">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.svg"
-              alt="Luno Store"
-              className="h-6 sm:h-7 w-auto object-contain dark:invert"
-            />
-          </div>
-
-          {/* Right: Actions (Theme, Wishlist, Cart, Close) */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            {/* Theme Toggle */}
+            {/* Theme Toggle (Light / Dark mode) */}
             <button
               type="button"
               onClick={toggleTheme}
               className="p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              title="تبديل المظهر"
+              title="تبديل المظهر (Dark / Light)"
+              aria-label="Toggle Theme"
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+          </div>
 
+          {/* Exact Center: LUNO Brand Logo */}
+          <div
+            onClick={handleClose}
+            className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 cursor-pointer z-10 flex items-center justify-center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.svg"
+              alt="Luno Store Logo"
+              className="h-6 sm:h-7 w-auto object-contain dark:invert hover:opacity-80 transition-opacity"
+            />
+          </div>
+
+          {/* Right Side: Actions (Wishlist, Cart, Close X) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 z-10">
             {/* Wishlist Toggle */}
             <button
               type="button"
@@ -293,7 +299,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
             <button
               type="button"
               onClick={handleClose}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center transition-all ml-1 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center transition-all ml-0.5 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
               title="إغلاق / Close"
             >
               <X size={16} />
