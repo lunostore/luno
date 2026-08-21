@@ -19,7 +19,7 @@ export const productSchema = z.object({
   sku: z.string().min(1, "الكود مطلوب"),
   description: z.string().optional().default(""),
   price: z.coerce.number().min(0, "السعر يجب أن يكون رقماً موجباً"),
-  salePrice: z.coerce.number().optional().nullable(),
+  salePrice: z.coerce.number().optional(),
   category: z.string().min(1, "اختر الفئة"),
   brand: z.string().default("LUNO"),
   mainImage: z.string().min(1, "صورة الغلاف الرئيسية مطلوبة"),

@@ -319,12 +319,31 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           stock: typeof s.stock === "number" && !isNaN(s.stock) ? s.stock : (parseInt(String(s.stock)) || 0),
         })),
       }));
-      const sanitizedData: ProductFormData = {
-        ...data,
+      const sanitizedData: Omit<Product, "id" | "createdAt"> = {
+        name: data.name,
+        slug: data.slug,
+        sku: data.sku,
+        description: data.description || "",
+        subtitle: data.subtitle || "",
         price: typeof data.price === "number" && !isNaN(data.price) ? data.price : (parseFloat(String(data.price)) || 0),
         salePrice: data.salePrice !== undefined && data.salePrice !== null && String(data.salePrice) !== ""
-          ? parseFloat(String(data.salePrice)) || 0
+          ? (parseFloat(String(data.salePrice)) || undefined)
           : undefined,
+        category: data.category,
+        brand: data.brand || "LUNO",
+        mainImage: data.mainImage,
+        hoverImage: data.hoverImage || "",
+        images: data.images || [],
+        detailImages: data.detailImages || [],
+        material: data.material || "100% Premium Cotton",
+        weight: data.weight || "240 GSM",
+        fit: data.fit || "Oversized Fit",
+        sizeChartType: data.sizeChartType || "",
+        sizeChartId: data.sizeChartId || "",
+        sizeChartUrl: data.sizeChartUrl || "",
+        featured: Boolean(data.featured),
+        bestSeller: Boolean(data.bestSeller),
+        isNew: Boolean(data.isNew),
         variants: sanitizedVariants,
       };
 
