@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Minus, Plus, ChevronLeft, ChevronRight, Heart, X } from "lucide-react";
+import { ShoppingBag, Minus, Plus, ChevronLeft, ChevronRight, Heart, X, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { subscribeToProducts } from "@/lib/firebase/firestore";
 import { useCart } from "@/features/cart/CartProvider";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
+import { useTheme } from "@/features/theme/ThemeProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
 import type { Product, ProductVariant } from "@/types/product";
 import { Spinner } from "@/components/ui/Spinner";
@@ -19,7 +20,9 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
   const rawSlug = (params?.slug as string) || "";
   const targetSlug = overrideSlug || rawSlug;
   const router = useRouter();
-  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { toggleWishlist, isInWishlist, wishlist, toggleWishlistDrawer } = useWishlist();
+  const { theme, toggleTheme } = useTheme();
+  const { addItem, openCart, totalItems, toggleCart } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -222,29 +225,86 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
   };
 
   return (
-    <div className="pt-14 sm:pt-16 pb-20 min-h-screen relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-200/60 dark:border-zinc-800/60">
+    <div className="pt-2 sm:pt-4 pb-20 min-h-screen relative bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white">
+      {/* ── TOP STICKY PRODUCT HEADER BAR ── */}
+      <header className="sticky top-0 left-0 right-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 px-4 sm:px-6 lg:px-8 py-3 transition-colors">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Left: Back to Shop */}
           <button
             type="button"
             onClick={handleClose}
-            className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-zinc-700 hover:text-black dark:text-zinc-300 dark:hover:text-white transition-colors cursor-pointer group"
           >
-            <ChevronLeft size={18} />
-            <span>العودة للمتجر / Back to Shop</span>
+            <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+            <span>العودة للمتجر</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handleClose}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
-            title="إغلاق / Close"
-            aria-label="Close product details"
-          >
-            <X size={20} />
-          </button>
+          {/* Center: Brand Logo */}
+          <div onClick={handleClose} className="cursor-pointer">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.svg"
+              alt="Luno Store"
+              className="h-6 sm:h-7 w-auto object-contain dark:invert"
+            />
+          </div>
+
+          {/* Right: Actions (Theme, Wishlist, Cart, Close) */}
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title="تبديل المظهر"
+            >
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
+            {/* Wishlist Toggle */}
+            <button
+              type="button"
+              onClick={toggleWishlistDrawer}
+              className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title="المفضلة"
+            >
+              <Heart size={18} className={wishlist.length > 0 ? "fill-red-500 text-red-500" : ""} />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
+            </button>
+
+            {/* Cart Toggle */}
+            <button
+              type="button"
+              onClick={toggleCart}
+              className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title="سلة الشراء"
+            >
+              <ShoppingBag size={18} />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-black text-white dark:bg-white dark:text-black text-[9px] font-black rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
+            {/* Close Modal (X) */}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center transition-all ml-1 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+              title="إغلاق / Close"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
+      </header>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="space-y-3">
             <motion.div

@@ -9,14 +9,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/features/cart/CartProvider";
 import { formatPrice } from "@/lib/utils";
 
+import { useProductModal } from "@/features/product-modal/ProductModalProvider";
+
 export function CartSidebar() {
   const router = useRouter();
   const { isOpen, closeCart, items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
+  const { closeProduct } = useProductModal();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) return null;
+
+  const handleGoToCheckout = () => {
+    closeCart();
+    closeProduct();
+    router.push("/checkout");
+  };
 
   // createPortal mounts directly into document.body (outside ALL React tree contexts)
   // This is the ONLY fix for iOS Safari position:fixed scroll bug
@@ -67,7 +76,7 @@ export function CartSidebar() {
                     <p className="font-bold text-sm">سلة الشراء فارغة</p>
                     <p className="text-xs text-zinc-400 mt-1">أضف منتجاتك المفضلة لبدء التسوق الآن</p>
                   </div>
-                  <button type="button" onClick={() => { closeCart(); router.push("/shop"); }} className="px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-xl text-xs font-bold hover:opacity-90 transition-all cursor-pointer">
+                  <button type="button" onClick={() => { closeCart(); closeProduct(); router.push("/shop"); }} className="px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-xl text-xs font-bold hover:opacity-90 transition-all cursor-pointer">
                     تصفح المنتجات
                   </button>
                 </div>
@@ -122,10 +131,14 @@ export function CartSidebar() {
                   <span className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">المجموع الكلي</span>
                   <span className="font-black text-base">{formatPrice(totalPrice)}</span>
                 </div>
-                <Link href="/checkout" onClick={closeCart} className="flex items-center justify-center gap-2 w-full py-3.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold text-xs hover:opacity-90 transition-all shadow-lg cursor-pointer">
+                <button
+                  type="button"
+                  onClick={handleGoToCheckout}
+                  className="flex items-center justify-center gap-2 w-full py-3.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold text-xs hover:opacity-90 transition-all shadow-lg cursor-pointer"
+                >
                   <span>إتمام الشراء الآن</span>
                   <ArrowRight size={14} />
-                </Link>
+                </button>
               </div>
             )}
           </motion.aside>

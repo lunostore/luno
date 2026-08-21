@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { usePathname, useSearchParams } from "next/navigation";
 import ProductDetailClient from "@/components/store/ProductDetailClient";
 
 interface ProductModalContextValue {
@@ -24,6 +25,8 @@ export function useProductModal() {
 export function ProductModalProvider({ children }: { children: ReactNode }) {
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
@@ -33,7 +36,7 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
     setActiveProductId(productId);
     // Lock body scroll
     document.body.style.overflow = "hidden";
-    // Update URL without navigation (shallow)
+    // Update URL without full page reload
     window.history.pushState(
       { productModal: productId },
       "",
@@ -44,14 +47,25 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
   const closeProduct = useCallback(() => {
     setActiveProductId((prev) => {
       if (prev !== null) {
-        // Restore body scroll
         document.body.style.overflow = "";
-        // Go back in history to restore the original URL
-        window.history.back();
+        // Clean URL if it has modal search param
+        if (typeof window !== "undefined" && window.location.search.includes("id=")) {
+          window.history.back();
+        }
       }
       return null;
     });
   }, []);
+
+  // Auto-close modal whenever user navigates to checkout or other pages
+  useEffect(() => {
+    if (pathname === "/checkout" || pathname === "/cart" || pathname === "/order-success") {
+      if (activeProductId) {
+        setActiveProductId(null);
+        document.body.style.overflow = "";
+      }
+    }
+  }, [pathname, activeProductId]);
 
   // Handle browser back/forward button
   useEffect(() => {
