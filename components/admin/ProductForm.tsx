@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, X, Upload, Trash2, Palette, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -231,6 +231,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       colorName: newColorName.trim(),
       colorHex: newColorHex,
       image: "",
+      images: [],
       sizes: [
         { size: "S", stock: 10 },
         { size: "M", stock: 10 },
@@ -345,9 +346,9 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       }
       router.refresh();
       router.push("/admin/products");
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Save product error:", err);
-        const errMsg = err?.message || "حدث خطأ أثناء حفظ المنتج في قاعدة البيانات";
+        const errMsg = err instanceof Error ? err.message : "حدث خطأ أثناء حفظ المنتج في قاعدة البيانات";
         toast.error(errMsg);
       } finally {
         setSaving(false);
@@ -365,7 +366,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       description: "وصف المنتج",
     };
 
-    const onFormError = (formErrors: any) => {
+    const onFormError = (formErrors: FieldErrors<ProductFormData>) => {
       console.warn("Validation errors:", formErrors);
       
       const errorKeys = Object.keys(formErrors);
