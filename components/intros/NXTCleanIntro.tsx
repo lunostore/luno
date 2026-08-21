@@ -16,40 +16,43 @@ export function NXTCleanIntro({ onComplete }: NXTCleanIntroProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    // Total duration: faster ~2.0 seconds
+    // Total duration: 1.8s then curtain slide up
     const timer = setTimeout(() => {
       setShow(false);
-      setTimeout(() => {
-        onCompleteRef.current();
-      }, 400);
-    }, 2000);
+    }, 1800);
 
     return () => clearTimeout(timer);
   }, []);
 
   const handleSkip = () => {
     setShow(false);
-    setTimeout(() => {
-      onCompleteRef.current();
-    }, 200);
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => onCompleteRef.current()}>
       {show && (
         <motion.div
           key="nxt-only-clean-intro"
           onClick={handleSkip}
           className="fixed inset-0 z-[99999] bg-black text-white flex items-center justify-center overflow-hidden select-none cursor-pointer"
-          initial={{ opacity: 1 }}
+          initial={{ y: 0, opacity: 1 }}
           exit={{
-            opacity: 0,
-            filter: "blur(8px)",
-            transition: { duration: 0.4, ease: [0.77, 0, 0.175, 1] },
+            y: "-100%",
+            transition: {
+              duration: 0.85,
+              ease: [0.76, 0, 0.24, 1],
+            },
           }}
         >
-          {/* Main Container */}
-          <div className="relative flex items-center justify-center px-8 py-12 overflow-hidden">
+          {/* Main Container with subtle parallax exit */}
+          <motion.div
+            exit={{
+              y: -50,
+              opacity: 0.8,
+              transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+            }}
+            className="relative flex items-center justify-center px-8 py-12 overflow-hidden"
+          >
             {/* Sliding Entry: Right to Left (Faster 0.7s) */}
             <motion.div
               initial={{ x: 160, opacity: 0, filter: "blur(12px)" }}
@@ -94,7 +97,7 @@ export function NXTCleanIntro({ onComplete }: NXTCleanIntroProps) {
                 }}
               />
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Minimal Bottom Line Accent */}
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900">
@@ -102,7 +105,7 @@ export function NXTCleanIntro({ onComplete }: NXTCleanIntroProps) {
               className="h-full bg-white shadow-[0_0_12px_white]"
               initial={{ scaleX: 0, originX: 1 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 2.0, ease: "linear" }}
+              transition={{ duration: 1.8, ease: "linear" }}
             />
           </div>
         </motion.div>

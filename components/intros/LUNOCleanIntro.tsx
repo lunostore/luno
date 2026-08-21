@@ -16,40 +16,43 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    // Fast 1.8 seconds duration
+    // 1.7 seconds display duration then initiate curtain slide up
     const timer = setTimeout(() => {
       setShow(false);
-      setTimeout(() => {
-        onCompleteRef.current();
-      }, 350);
-    }, 1800);
+    }, 1700);
 
     return () => clearTimeout(timer);
   }, []);
 
   const handleSkip = () => {
     setShow(false);
-    setTimeout(() => {
-      onCompleteRef.current();
-    }, 200);
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => onCompleteRef.current()}>
       {show && (
         <motion.div
           key="luno-minimal-light-intro"
           onClick={handleSkip}
           className="fixed inset-0 z-[99999] bg-black text-white flex items-center justify-center overflow-hidden select-none cursor-pointer"
-          initial={{ opacity: 1 }}
+          initial={{ y: 0, opacity: 1 }}
           exit={{
-            opacity: 0,
-            filter: "blur(6px)",
-            transition: { duration: 0.35, ease: [0.77, 0, 0.175, 1] },
+            y: "-100%",
+            transition: {
+              duration: 0.85,
+              ease: [0.76, 0, 0.24, 1], // Cinematic luxury ease curve
+            },
           }}
         >
-          {/* Main Typography & Light Beam Container */}
-          <div className="relative flex flex-col items-center justify-center px-8 py-12 overflow-hidden">
+          {/* Main Typography & Light Beam Container with subtle parallax exit */}
+          <motion.div
+            exit={{
+              y: -50,
+              opacity: 0.8,
+              transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+            }}
+            className="relative flex flex-col items-center justify-center px-8 py-12 overflow-hidden"
+          >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, filter: "blur(10px)" }}
               animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
@@ -93,7 +96,7 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
                 }}
               />
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Minimalist Accent Bottom Progress Line */}
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900">
@@ -101,7 +104,7 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
               className="h-full bg-white shadow-[0_0_12px_white]"
               initial={{ scaleX: 0, originX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 1.8, ease: "easeInOut" }}
+              transition={{ duration: 1.7, ease: "easeInOut" }}
             />
           </div>
         </motion.div>

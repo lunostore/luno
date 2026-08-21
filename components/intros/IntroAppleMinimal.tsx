@@ -13,8 +13,7 @@ export function IntroAppleMinimal({ onComplete }: { onComplete: () => void }) {
     const t3 = setTimeout(() => setStep("o"), 1800);       // 1.8s: O appears
     const t4 = setTimeout(() => setStep("merge"), 2500);   // 2.5s: Merge into full Luno Store Logo
     const t5 = setTimeout(() => setStep("slogan"), 3800);  // 3.8s: Slogan & Line reveal
-    const t6 = setTimeout(() => setStep("exit"), 5200);    // 5.2s: Transition to header
-    const t7 = setTimeout(() => onComplete(), 6000);       // 6.0s: Finish
+    const t6 = setTimeout(() => setStep("exit"), 5000);    // 5.0s: Transition
 
     return () => {
       clearTimeout(t0);
@@ -24,19 +23,18 @@ export function IntroAppleMinimal({ onComplete }: { onComplete: () => void }) {
       clearTimeout(t4);
       clearTimeout(t5);
       clearTimeout(t6);
-      clearTimeout(t7);
     };
-  }, [onComplete]);
+  }, []);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={onComplete}>
       {step !== "exit" ? (
         <motion.div
           className="fixed inset-0 bg-[#020202] z-[99999] flex flex-col items-center justify-center overflow-hidden select-none"
-          initial={{ opacity: 1 }}
+          initial={{ y: 0, opacity: 1 }}
           exit={{
-            opacity: 0,
-            transition: { duration: 0.8, ease: [0.77, 0, 0.175, 1] },
+            y: "-100%",
+            transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
           }}
         >
           {/* Ambient Lighting Volumetric Glow */}

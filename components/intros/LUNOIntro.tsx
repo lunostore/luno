@@ -114,33 +114,32 @@ export function LUNOIntro({ onComplete }: LUNOIntroProps) {
   // Timeline sequences — runs once cleanly without timer cancellations
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("reveal"), 1200);
-    const t2 = setTimeout(() => setPhase("exit"), 3800);
-    const t3 = setTimeout(() => {
-      onCompleteRef.current();
-    }, 4400);
+    const t2 = setTimeout(() => setPhase("exit"), 3600);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      clearTimeout(t3);
     };
   }, []);
 
   const handleSkip = () => {
     setPhase("exit");
-    setTimeout(() => {
-      onCompleteRef.current();
-    }, 300);
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => onCompleteRef.current()}>
       {phase !== "exit" && (
         <motion.div
           key="luno-luxury-intro"
           className="fixed inset-0 z-[99999] bg-black text-white overflow-hidden select-none flex items-center justify-center"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.05, transition: { duration: 0.6, ease: [0.77, 0, 0.175, 1] } }}
+          initial={{ y: 0, opacity: 1 }}
+          exit={{
+            y: "-100%",
+            transition: {
+              duration: 0.85,
+              ease: [0.76, 0, 0.24, 1],
+            },
+          }}
         >
           {/* Canvas WebGL/2D Animated Background */}
           <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
