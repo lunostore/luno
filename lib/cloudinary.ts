@@ -6,7 +6,7 @@ import { storage } from "@/lib/firebase/config";
  * Shrinks heavy 3MB-10MB images down to ~50KB-120KB WebP without losing visual sharpness,
  * guaranteeing instantaneous upload and 0 Firestore document size overflow errors.
  */
-export async function compressImageClient(file: File, maxDimension = 1000, quality = 0.85): Promise<File> {
+export async function compressImageClient(file: File, maxDimension = 1200, quality = 0.88): Promise<File> {
   // If file is already tiny (< 80KB), return as is
   if (file.size < 80 * 1024) return file;
 
@@ -44,7 +44,7 @@ export async function compressImageClient(file: File, maxDimension = 1000, quali
 
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Export as WebP for optimal compression while preserving PNG transparency
+      // Export as WebP to preserve transparency while ensuring minimal weight
       canvas.toBlob(
         (blob) => {
           if (!blob) {
@@ -67,14 +67,39 @@ export async function compressImageClient(file: File, maxDimension = 1000, quali
 
 /**
  * Universal Image Uploader:
- * 1. Automatically compresses image on client to ~50KB-90KB
- * 2. Uploads via Next.js Server-side /api/upload (Zero CORS)
- * 3. Fallback to direct Cloudinary
+ * 1. Direct Cloudinary Unsigned Upload (Ultra-fast CDN)
+ * 2. Next.js Server-side /api/upload
+ * 3. Compact Safe Fallback
  */
 export async function uploadToCloudinary(file: File, folder = "products"): Promise<string> {
   const optimizedFile = await compressImageClient(file);
 
-  // 1. Primary: Server-side API Route (Zero CORS)
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products";
+
+  // 1. Direct Cloudinary Client Preset Upload (Fastest)
+  try {
+    const formData = new FormData();
+    formData.append("file", optimizedFile);
+    formData.append("upload_preset", uploadPreset);
+    formData.append("folder", folder);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data?.secure_url) {
+      return data.secure_url as string;
+    } else if (data?.error) {
+      console.warn("Direct Cloudinary upload notice:", data.error);
+    }
+  } catch (err) {
+    console.warn("Client direct Cloudinary upload failed, checking server API:", err);
+  }
+
+  // 2. Server-side API Route Fallback (/api/upload)
   try {
     const apiFormData = new FormData();
     apiFormData.append("file", optimizedFile);
@@ -90,35 +115,10 @@ export async function uploadToCloudinary(file: File, folder = "products"): Promi
       return (apiData.secure_url || apiData.url) as string;
     }
   } catch (err) {
-    console.warn("Server API upload failed, checking client fallback:", err);
+    console.warn("Server API upload failed, checking fallback:", err);
   }
 
-  // 2. Direct Cloudinary Client Preset Upload
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "hvotfqtr";
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "luno_products";
-
-  try {
-    const formData = new FormData();
-    formData.append("file", optimizedFile);
-    formData.append("upload_preset", uploadPreset);
-    formData.append("folder", folder);
-
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.secure_url) {
-        return data.secure_url as string;
-      }
-    }
-  } catch (err) {
-    console.warn("Client direct Cloudinary upload failed:", err);
-  }
-
-  // 3. Fallback: Ultra-compact WebP Data URL (< 60KB safe for Firestore)
+  // 3. Fallback: Compact WebP Data URL (< 60KB safe for Firestore)
   try {
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
