@@ -223,15 +223,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             }}
             className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible shadow-2xl"
           >
-            {/* The High Semi-Circle Dome Header on Top of the Rising Layer (Extra Large Panoramic Radius) */}
-            <div className="absolute -top-28 sm:-top-32 md:-top-36 left-0 right-0 h-28 sm:h-32 md:h-36 overflow-visible pointer-events-none">
+            {/* Wide, Smooth Convex Arc (مطابق تماماً للتصميم المرجعي) */}
+            <div className="absolute -top-12 sm:-top-14 left-0 right-0 h-12 sm:h-14 overflow-visible pointer-events-none">
               <svg
                 className="w-full h-full text-black dark:text-white fill-current"
-                viewBox="0 0 100 60"
+                viewBox="0 0 100 28"
                 preserveAspectRatio="none"
               >
-                {/* Extra large, sweeping panoramic dome arc */}
-                <path d="M 0,60 C 12,-4 88,-4 100,60 Z" />
+                {/* Smooth, continuous convex dome curve */}
+                <path d="M 0,28 Q 50,0 100,28 Z" />
               </svg>
             </div>
           </motion.div>
@@ -268,8 +268,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
 
             {/* Bottom Actions Row */}
-            <div className="flex items-center gap-2">
-              {/* Wishlist Button (Full Clickable Area) */}
+            <div className="flex items-center gap-2.5">
+              {/* Wishlist Button (Matching Reference) */}
               <button
                 type="button"
                 onMouseDown={(e) => e.stopPropagation()}
@@ -279,7 +279,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   e.stopPropagation();
                   toggleWishlist(product);
                 }}
-                className={`relative z-30 w-11 h-11 rounded-xl transition-all duration-300 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 hover:scale-105 pointer-events-auto ${
+                className={`relative z-30 w-11 h-11 rounded-2xl transition-all duration-300 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 hover:scale-105 pointer-events-auto ${
                   isHovered
                     ? "bg-transparent text-white border border-zinc-700 hover:border-zinc-400 hover:bg-white/10 dark:text-black dark:border-zinc-300 dark:hover:border-black dark:hover:bg-black/5"
                     : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
@@ -295,20 +295,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 />
               </button>
 
-              {/* Add to Cart Button */}
+              {/* Add to Cart Button (Matching Reference Pill Shape) */}
               <button
                 type="button"
                 onMouseDown={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={handleAddToCart}
-                className={`flex-1 h-11 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm ${
+                className={`flex-1 h-11 px-5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm ${
                   isHovered
                     ? isAddedBriefly
                       ? "bg-emerald-500 text-white"
-                      : "bg-white text-black hover:bg-zinc-100 dark:bg-black dark:text-white dark:hover:bg-zinc-800 shadow-md font-extrabold"
+                      : "bg-white text-black hover:bg-zinc-100 dark:bg-black dark:text-white dark:hover:bg-zinc-800 shadow-md font-black"
                     : isAddedBriefly
                     ? "bg-emerald-600 text-white"
-                    : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                    : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-bold"
                 }`}
               >
                 {isAddedBriefly ? (
