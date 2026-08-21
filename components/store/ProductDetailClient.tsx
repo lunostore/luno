@@ -33,8 +33,6 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
   const [adding, setAdding] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
-  const { addItem, openCart } = useCart();
-
   useEffect(() => {
     if (typeof window !== "undefined" && !onClose) {
       window.scrollTo({ top: 0, behavior: "instant" });
