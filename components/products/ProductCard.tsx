@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, MouseEvent } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { Heart, Eye, Shirt, Layers, Users } from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { Heart, ShoppingBag, Eye, Shirt, Layers, Users, Sparkles, Check } from "lucide-react";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
+import { useCart } from "@/features/cart/CartProvider";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
 import type { Product } from "@/types/product";
 
@@ -17,6 +18,7 @@ interface ProductCardProps {
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { openProduct } = useProductModal();
+  const { addItem, openCart } = useCart();
 
   const isFavorite = isInWishlist(product.id);
   const displayPrice = product.salePrice ?? product.price;
@@ -25,37 +27,102 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     ? getDiscountPercentage(product.price, product.salePrice!)
     : 0;
 
-  const staggerDelay = (index % 4) * 0.08;
-
-  // Selected Color Variant state (null initially so product.mainImage is always default)
+  const [isHovered, setIsHovered] = useState(false);
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
+  const [isAddedBriefly, setIsAddedBriefly] = useState(false);
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const imageAreaRef = useRef<HTMLDivElement>(null);
+
+  // 3D Tilt Motion Values
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Magnetic cursor follower for image preview badge ("عرض" / "View")
+  const badgeX = useMotionValue(0);
+  const badgeY = useMotionValue(0);
+
+  const springConfig = { damping: 22, stiffness: 220 };
+  const smoothX = useSpring(mouseX, springConfig);
+  const smoothY = useSpring(mouseY, springConfig);
+  const smoothBadgeX = useSpring(badgeX, { damping: 28, stiffness: 300 });
+  const smoothBadgeY = useSpring(badgeY, { damping: 28, stiffness: 300 });
+
+  // 3D dynamic rotation calculations
+  const rotateX = useTransform(smoothY, [-0.5, 0.5], [10, -10]);
+  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-10, 10]);
+  const itemElevateY = useTransform(smoothY, [-0.5, 0.5], [-14, -4]);
+  const shadowScale = useTransform(smoothY, [-0.5, 0.5], [0.85, 1.15]);
+
   const activeVariant =
     selectedVariantIdx !== null && product.variants?.[selectedVariantIdx]
       ? product.variants[selectedVariantIdx]
       : null;
 
-  // Second Image for hover effect over the main image area
   const secondImage =
     product.hoverImage ||
     (product.images && product.images.length > 0 ? product.images[0] : null) ||
     null;
 
-  // Base primary image (ALWAYS product.mainImage initially unless user selected a specific color)
   const basePrimaryImage =
     (activeVariant && activeVariant.image) || product.mainImage || "/placeholder.jpg";
 
-  // Mouse hover state over main image container
-  const [isHoveringMain, setIsHoveringMain] = useState(false);
-
-  // Active display image priority:
-  // 1. Hover state -> secondImage (if available)
-  // 2. Default state -> basePrimaryImage (product.mainImage)
   const currentDisplayImage =
-    isHoveringMain && secondImage ? secondImage : basePrimaryImage;
+    isHovered && secondImage ? secondImage : basePrimaryImage;
 
-  // Open product in modal overlay (no page navigation = no reload)
-  const navigateToProduct = () => {
-    openProduct(product.id);
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+
+    if (imageAreaRef.current) {
+      const imgRect = imageAreaRef.current.getBoundingClientRect();
+      badgeX.set(e.clientX - imgRect.left);
+      badgeY.set(e.clientY - imgRect.top);
+    }
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  const handleQuickAddToCart = (e: MouseEvent) => {
+    e.stopPropagation();
+    
+    // Check if product requires modal selection for sizes/variants
+    const hasMultipleSizes = (product.sizes?.length ?? 0) > 1;
+    const hasMultipleVariants = (product.variants?.length ?? 0) > 1;
+
+    if (hasMultipleSizes || (hasMultipleVariants && selectedVariantIdx === null)) {
+      openProduct(product.id);
+      return;
+    }
+
+    const defaultSize = product.sizes?.[0] || "M";
+    const selectedColor = activeVariant
+      ? {
+          name: activeVariant.colorName || "افتراضي",
+          hex: activeVariant.colorHex || "#000000",
+          image: activeVariant.image || product.mainImage || "",
+        }
+      : {
+          name: product.variants?.[0]?.colorName || "افتراضي",
+          hex: product.variants?.[0]?.colorHex || "#000000",
+          image: product.mainImage || "",
+        };
+
+    addItem(product, 1, defaultSize, selectedColor);
+    setIsAddedBriefly(true);
+    setTimeout(() => setIsAddedBriefly(false), 1400);
   };
 
   const isNewProduct =
@@ -66,148 +133,205 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 40, scale: 0.93, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{
-        duration: 0.65,
-        delay: staggerDelay,
+        duration: 0.6,
+        delay: (index % 4) * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="group relative h-full flex flex-col"
+      className="relative h-full select-none"
+      style={{ perspective: 1200 }}
     >
-      {/* Main Card Wrapper — Completely Borderless & Shadowless Floating Container */}
-      <div
-        onClick={navigateToProduct}
-        onMouseLeave={() => {
-          setIsHoveringMain(false);
+      <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={() => openProduct(product.id)}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
         }}
-        className="block bg-transparent rounded-[2rem] p-4 sm:p-5 shadow-none transition-all duration-300 cursor-pointer select-none overflow-hidden h-full flex flex-col justify-between border-0"
+        className="group relative flex flex-col justify-between h-full bg-[#f6f6f7] dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-[border-color,box-shadow] duration-500"
       >
-        <div>
-          {/* Top Badges & Actions Overlay */}
-          <div className="flex items-center justify-between mb-3.5 z-20 relative h-9">
-            {/* Left Badges (NEW / SALE / BEST SELLER) */}
-            <div className="flex items-center gap-2">
-              {isNewProduct ? (
-                <span className="text-amber-700 dark:text-amber-300 bg-amber-400/20 dark:bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
-                  NEW
-                </span>
-              ) : hasDiscount ? (
-                <span className="text-red-600 dark:text-red-400 bg-red-500/20 dark:bg-red-500/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
-                  -{discountPct}%
-                </span>
-              ) : product.bestSeller ? (
-                <span className="text-amber-700 dark:text-amber-300 bg-amber-400/20 dark:bg-amber-400/15 text-[10px] font-extrabold uppercase px-3 py-1 rounded-lg tracking-wider backdrop-blur-md">
-                  BEST SELLER
-                </span>
-              ) : null}
-            </div>
-
-            {/* Right Wishlist Heart Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleWishlist(product);
-              }}
-              className="w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white flex items-center justify-center transition-all backdrop-blur-md hover:scale-110 active:scale-95 border-0 shadow-none"
-              title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
-            >
-              <Heart
-                size={15}
-                className={isFavorite ? "fill-red-500 text-red-500" : "text-zinc-700 dark:text-white"}
-              />
-            </button>
-          </div>
-
-          {/* ── PRODUCT IMAGES DISPLAY SECTION ── */}
-          <div
-            onMouseEnter={() => setIsHoveringMain(true)}
-            onMouseLeave={() => setIsHoveringMain(false)}
-            className="w-full relative aspect-[4/5] rounded-2xl overflow-hidden bg-black flex items-center justify-center border-0 dark:border dark:border-zinc-800/80 shadow-none mb-4"
-          >
-            <motion.div
-              className="w-full h-full relative"
-              whileHover={{ scale: 1.04 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Image
-                key={currentDisplayImage}
-                src={currentDisplayImage}
-                alt={product.name}
-                fill
-                priority={index < 4}
-                quality={95}
-                crossOrigin="anonymous"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-contain object-center p-1.5 transition-all duration-500"
-              />
-            </motion.div>
-
-            {/* Quick Hover Overlay */}
-            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-              <span className="bg-black/80 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
-                <Eye size={12} />
-                عرض التفاصيل
+        {/* Top Badges & Actions */}
+        <div className="absolute top-4 inset-x-4 flex items-center justify-between z-30 pointer-events-none">
+          {/* Status Badges */}
+          <div className="flex items-center gap-1.5 pointer-events-auto">
+            {isNewProduct ? (
+              <span className="text-[10px] sm:text-xs font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-black/90 text-white dark:bg-white dark:text-black shadow-sm flex items-center gap-1 backdrop-blur-md">
+                <Sparkles size={11} className="text-amber-400" />
+                NEW
               </span>
-            </div>
+            ) : hasDiscount ? (
+              <span className="text-[10px] sm:text-xs font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-red-600 text-white shadow-sm">
+                -{discountPct}%
+              </span>
+            ) : product.bestSeller ? (
+              <span className="text-[10px] sm:text-xs font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-amber-500 text-black font-extrabold shadow-sm">
+                BEST SELLER
+              </span>
+            ) : null}
           </div>
+
+          {/* Wishlist Button (Always accessible) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleWishlist(product);
+            }}
+            className="w-9 h-9 rounded-full bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 flex items-center justify-center pointer-events-auto transition-all duration-300 hover:scale-110 active:scale-95 shadow-sm hover:shadow-md border border-zinc-200/60 dark:border-zinc-700/60 backdrop-blur-md"
+            title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+          >
+            <Heart
+              size={16}
+              className={`transition-colors ${
+                isFavorite ? "fill-red-500 text-red-500" : "text-zinc-700 dark:text-zinc-300"
+              }`}
+            />
+          </button>
         </div>
 
-        {/* ── PRODUCT INFO & DETAILS SECTION ── */}
-        <div className="flex-1 flex flex-col justify-between space-y-3 pt-1">
-          <div>
-            {/* Header Row: Title & Price */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base sm:text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wide leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
+        {/* ── 3D FLOATING PRODUCT IMAGE & FLOOR SHADOW ── */}
+        <div
+          ref={imageAreaRef}
+          className="relative w-full aspect-[4/4.2] sm:aspect-[4/4.4] flex items-center justify-center p-4 pt-10 overflow-hidden"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          {/* Realistic 3D Elliptical Floor Drop Shadow */}
+          <motion.div
+            style={{
+              scaleX: shadowScale,
+              transformStyle: "preserve-3d",
+              transform: "translateZ(5px)",
+            }}
+            animate={{
+              scale: isHovered ? 1.08 : 0.95,
+              opacity: isHovered ? 0.45 : 0.28,
+              y: isHovered ? 6 : 0,
+            }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="absolute bottom-5 left-1/2 -translate-x-1/2 w-3/5 h-5 rounded-[100%] bg-black blur-md pointer-events-none dark:opacity-60"
+          />
+
+          {/* Floating Garment Container */}
+          <motion.div
+            style={{
+              y: isHovered ? itemElevateY : 0,
+              transformStyle: "preserve-3d",
+              transform: isHovered
+                ? "translateZ(45px) scale(1.05)"
+                : "translateZ(20px) scale(1)",
+            }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="relative w-full h-full flex items-center justify-center"
+          >
+            <Image
+              key={currentDisplayImage}
+              src={currentDisplayImage}
+              alt={product.name}
+              fill
+              priority={index < 4}
+              quality={95}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-contain object-center drop-shadow-md transition-transform duration-500 pointer-events-none"
+            />
+          </motion.div>
+
+          {/* Magnetic Follower Badge ("عرض" / "View") */}
+          <motion.div
+            style={{
+              left: smoothBadgeX,
+              top: smoothBadgeY,
+              transform: "translate(-50%, -50%) translateZ(60px)",
+              pointerEvents: "none",
+            }}
+            animate={{
+              opacity: isHovered ? 1 : 0,
+              scale: isHovered ? 1 : 0.4,
+            }}
+            transition={{ duration: 0.2 }}
+            className="absolute z-40 hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white/95 dark:bg-zinc-900/95 text-zinc-900 dark:text-white text-xs font-black shadow-xl backdrop-blur-md border border-zinc-200/80 dark:border-zinc-700/80"
+          >
+            عرض
+          </motion.div>
+        </div>
+
+        {/* ── BOTTOM INFO & CURVED DOME HOVER SECTION ── */}
+        <div className="relative z-20 mt-auto">
+          {/* Curved Dome Dark Transition Background */}
+          <div
+            className={`transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] p-4 sm:p-5 flex flex-col justify-between ${
+              isHovered
+                ? "bg-black dark:bg-[#09090b] text-white rounded-t-[32px] sm:rounded-t-[38px] shadow-2xl"
+                : "bg-transparent text-zinc-900 dark:text-white rounded-t-none"
+            }`}
+          >
+            {/* Product Title & Price */}
+            <div>
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3
+                  className={`font-black text-sm sm:text-base tracking-tight uppercase line-clamp-1 transition-colors duration-300 ${
+                    isHovered ? "text-white" : "text-zinc-900 dark:text-white"
+                  }`}
+                >
                   {product.name}
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5 line-clamp-1">
-                  {product.subtitle || "Premium Oversized Fit"}
-                </p>
+                <div className="text-right flex-shrink-0">
+                  <span
+                    className={`font-black text-sm sm:text-base transition-colors duration-300 ${
+                      isHovered ? "text-amber-400" : "text-amber-600 dark:text-[#D4B886]"
+                    }`}
+                  >
+                    {formatPrice(displayPrice)}
+                  </span>
+                  {hasDiscount && (
+                    <p className="text-[10px] text-zinc-400 line-through font-semibold leading-none">
+                      {formatPrice(product.price)}
+                    </p>
+                  )}
+                </div>
               </div>
 
-              <div className="text-right flex-shrink-0">
-                <span className="text-base sm:text-lg font-black text-amber-600 dark:text-[#D4B886]">
-                  {formatPrice(displayPrice)}
+              {/* Subtitle / Short Description */}
+              <p
+                className={`text-[11px] sm:text-xs line-clamp-2 leading-relaxed transition-colors duration-300 ${
+                  isHovered ? "text-zinc-400" : "text-zinc-500 dark:text-zinc-400"
+                }`}
+              >
+                {product.description || product.subtitle || "Premium Oversized Heavyweight Cotton"}
+              </p>
+
+              {/* Specifications Pills */}
+              <div className="flex items-center gap-2.5 text-[10px] text-zinc-400 pt-2 pb-1">
+                <span className="flex items-center gap-1">
+                  <Shirt size={11} className="opacity-70" />
+                  {product.material || "100% قطن"}
                 </span>
-                {hasDiscount && (
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 line-through font-semibold">
-                    {formatPrice(product.price)}
-                  </p>
-                )}
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Layers size={11} className="opacity-70" />
+                  {product.weight || "240 GSM"}
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Users size={11} className="opacity-70" />
+                  {product.fit || "Oversized"}
+                </span>
               </div>
-            </div>
 
-            {/* Specifications Row (Icon Badges) */}
-            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium pt-1 pb-2 h-7 overflow-hidden">
-              <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Shirt size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
-                {product.material || "100% Cotton"}
-              </span>
-
-              <span className="text-zinc-300 dark:text-zinc-700">|</span>
-
-              <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Layers size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
-                {product.weight || "230 GSM"}
-              </span>
-
-              <span className="text-zinc-600">|</span>
-
-              <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Users size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
-                {product.fit || "Unisex"}
-              </span>
-            </div>
-
-            {/* Color Swatches selection */}
-            <div className="h-7 flex items-center pt-1.5">
-              {product.variants && product.variants.length > 1 ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">
+              {/* Color Variants Swatches */}
+              {product.variants && product.variants.length > 1 && (
+                <div className="flex items-center gap-2 pt-1.5 pb-2">
+                  <span
+                    className={`text-[9px] font-bold uppercase tracking-wider ${
+                      isHovered ? "text-zinc-400" : "text-zinc-500"
+                    }`}
+                  >
                     الألوان:
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -219,9 +343,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                           e.stopPropagation();
                           setSelectedVariantIdx(vIdx);
                         }}
-                        className={`w-4 h-4 rounded-full transition-all border-2 border-black dark:border-white shadow-sm ${
+                        className={`w-3.5 h-3.5 rounded-full transition-all border ${
+                          isHovered
+                            ? "border-zinc-600 hover:border-white"
+                            : "border-zinc-300 dark:border-zinc-700"
+                        } ${
                           selectedVariantIdx === vIdx
-                            ? "ring-2 ring-amber-500 dark:ring-amber-400 scale-125 z-10"
+                            ? "ring-2 ring-amber-400 scale-125 z-10"
                             : "opacity-80 hover:opacity-100 hover:scale-110"
                         }`}
                         style={{ backgroundColor: variant.colorHex }}
@@ -230,11 +358,61 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     ))}
                   </div>
                 </div>
-              ) : null}
+              )}
+            </div>
+
+            {/* Bottom Actions Row */}
+            <div className="pt-3 mt-1 border-t border-zinc-200/50 dark:border-zinc-800/50 flex items-center gap-2">
+              {/* Wishlist Small Action */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleWishlist(product);
+                }}
+                className={`p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center ${
+                  isHovered
+                    ? "bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-800"
+                    : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
+                }`}
+                title="المفضلة"
+              >
+                <Heart
+                  size={15}
+                  className={isFavorite ? "fill-red-500 text-red-500" : ""}
+                />
+              </button>
+
+              {/* Add to Cart Button (transforms into sleek white pill on hover) */}
+              <button
+                type="button"
+                onClick={handleQuickAddToCart}
+                className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm ${
+                  isHovered
+                    ? isAddedBriefly
+                      ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                      : "bg-white text-black hover:bg-zinc-100 shadow-lg"
+                    : isAddedBriefly
+                    ? "bg-emerald-600 text-white"
+                    : "bg-zinc-900 text-white dark:bg-zinc-800 hover:bg-black dark:hover:bg-zinc-700"
+                }`}
+              >
+                {isAddedBriefly ? (
+                  <>
+                    <Check size={15} className="animate-bounce" />
+                    تمت الإضافة!
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={14} />
+                    إضافة للسلة
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </motion.article>
   );
 }
