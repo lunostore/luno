@@ -129,9 +129,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-all duration-500 overflow-hidden"
+        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-all duration-500 overflow-visible"
       >
-        {/* ── 3D FLOATING PRODUCT VISUAL AREA ── */}
+        {/* ── 3D FLOATING PRODUCT VISUAL AREA (POPS OUT OVER TOP) ── */}
         <div
           ref={imageContainerRef}
           className="relative w-full aspect-[4/4.2] flex items-center justify-center p-3 overflow-visible z-30"
@@ -197,18 +197,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION (WITH RISING DOME & RECTANGLE ANIMATION) ── */}
-        <div className="relative z-20 mt-auto overflow-visible">
+        {/* ── BOTTOM INFO SECTION WITH CONTAINED RISING DOME ── */}
+        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-hidden">
           {/* Animated Rising Backdrop Curtain with Big Dome Leading from Bottom Up */}
           <motion.div
             initial={false}
             animate={{
-              y: isHovered ? "0%" : "105%",
+              y: isHovered ? "0%" : "150%",
+              opacity: isHovered ? 1 : 0,
             }}
             transition={{
               type: "spring",
-              stiffness: 200,
-              damping: 22,
+              stiffness: 220,
+              damping: 24,
               mass: 0.7,
             }}
             className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible"
