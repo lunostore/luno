@@ -24,6 +24,8 @@ export const productSchema = z.object({
   brand: z.string().default("LUNO"),
   mainImage: z.string().min(1, "صورة الغلاف الرئيسية مطلوبة"),
   hoverImage: z.string().optional().or(z.literal("")),
+  imageScale: z.coerce.number().optional().default(100),
+  imageOffsetY: z.coerce.number().optional().default(0),
   images: z.array(z.string()).optional(),
   subtitle: z.string().optional(),
   detailImages: z.array(z.string()).optional(),

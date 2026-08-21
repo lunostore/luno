@@ -19,8 +19,10 @@ export interface Product {
   brand: string;
   mainImage: string;
   hoverImage?: string; // صورة الهوفر الثانية المعروضة عند تمرير الماوس
+  imageScale?: number; // مقياس حجم الصورة بالنسبة المئوية (مثلاً 100% أو 120%)
+  imageOffsetY?: number; // إزاحة الصورة عمودياً بالبكسل
   images?: string[];   // معرض الصور الإضافية
-  detailImages?: string[]; // 3 صور التفاصيل المصغرة للكارت (لوجو، خامة، تفاصيل إضافية)
+  detailImages?: string[]; // صور إضافية قديمة
   material?: string;   // الخامة مثل 100% Cotton
   weight?: string;     // الوزن/الخامة مثل 230 GSM
   fit?: string;        // القصة مثل Unisex / Boxy Fit

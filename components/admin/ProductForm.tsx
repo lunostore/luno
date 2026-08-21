@@ -70,6 +70,8 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           featured: initialData.featured ?? true,
           bestSeller: initialData.bestSeller ?? false,
           isNew: initialData.isNew ?? true,
+          imageScale: initialData.imageScale ?? 100,
+          imageOffsetY: initialData.imageOffsetY ?? 0,
           variants: initialData.variants || [],
         }
       : {
@@ -83,6 +85,8 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           brand: "LUNO",
           mainImage: "",
           hoverImage: "",
+          imageScale: 100,
+          imageOffsetY: 0,
           images: [],
           detailImages: [],
           material: "100% Premium Cotton",
@@ -113,9 +117,10 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   const watchedVariants = watch("variants") || [];
   const watchedMainImage = watch("mainImage");
   const watchedHoverImage = watch("hoverImage");
+  const watchedImageScale = watch("imageScale") ?? 100;
+  const watchedImageOffsetY = watch("imageOffsetY") ?? 0;
   const watchedSizeChartId = watch("sizeChartId");
   const watchedSizeChartUrl = watch("sizeChartUrl");
-  const watchedDetailImages = watch("detailImages") || [];
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
@@ -333,6 +338,8 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
         brand: data.brand || "LUNO",
         mainImage: data.mainImage,
         hoverImage: data.hoverImage || "",
+        imageScale: typeof data.imageScale === "number" && !isNaN(data.imageScale) ? data.imageScale : 100,
+        imageOffsetY: typeof data.imageOffsetY === "number" && !isNaN(data.imageOffsetY) ? data.imageOffsetY : 0,
         images: data.images || [],
         detailImages: data.detailImages || [],
         material: data.material || "100% Premium Cotton",
@@ -620,53 +627,6 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       </div>
 
 
-      {/* 2. Card Detail Images (3 Thumbnail Photos for Card Stack) */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
-        <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">Card Detail Photos (3 صور المصغرة للكارت)</h2>
-        <p className="text-[10px] text-zinc-400 font-medium mb-6">
-          أضف 3 صور للتفاصيل المعروضة عمودياً يمين الكارت (صورة اللوجو، صورة الخاطة/التيكيت، صورة الظهر أو التفاصيل الإضافية).
-        </p>
-
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-4">
-            {watchedDetailImages.map((imgUrl, imgIdx) => (
-              <div key={imgIdx} className="w-24 h-24 rounded-2xl bg-zinc-50 border border-zinc-200 relative overflow-hidden group shadow-sm flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imgUrl} alt={`Detail ${imgIdx + 1}`} className="w-full h-full object-contain p-1" />
-                <button
-                  type="button"
-                  onClick={() => removeDetailImage(imgIdx)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-110"
-                  title="إزالة الصورة"
-                >
-                  <X size={12} />
-                </button>
-                <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">
-                  صورة {imgIdx + 1}
-                </span>
-              </div>
-            ))}
-
-            {watchedDetailImages.length < 3 && (
-              <label className="w-24 h-24 rounded-2xl border-2 border-dashed border-zinc-200 hover:border-zinc-400 bg-zinc-50/50 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all">
-                <Upload size={16} className="text-zinc-400" />
-                <span className="text-[9px] font-bold text-zinc-500 text-center px-1">
-                  رفع صور التفاصيل ({3 - watchedDetailImages.length} متبقية)
-                </span>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  multiple 
-                  className="hidden" 
-                  onChange={handleDetailImagesUpload}
-                />
-              </label>
-            )}
-          </div>
-        </div>
-      </div>
-
-
       {/* 2. Cover / Main Image Card */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
         <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest mb-2">صورة غلاف المنتج الرئيسية</h2>
@@ -742,6 +702,107 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
             <p className="text-[9px] text-zinc-400 font-mono leading-none truncate max-w-md">
               {watchedHoverImage || "إذا لم ترفع صورة، سيتم استخدام صورة اللون الثاني تلقائياً عند الهوفر"}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 2c. Custom Image Sizing & Offset Controls on the Card (التحكم في أبعاد وموضع الصورة على الكارت) */}
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)] space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-black text-xs text-zinc-900 uppercase tracking-widest flex items-center gap-2">
+              <span>🎛️ التحكم في أبعاد وحجم صورة المنتج على الكارت</span>
+              <span className="text-[9px] bg-zinc-100 text-zinc-700 font-bold px-2 py-0.5 rounded-full">
+                مباشر على الموقع
+              </span>
+            </h2>
+            <p className="text-[10px] text-zinc-400 font-medium mt-1">
+              يمكنك تكبير أو تصغير حجم التيشرت ورفع أو خفض موضعه ليظهر بالبروز والشكل المثالي على كروت المتجر.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setValue("imageScale", 100, { shouldValidate: true });
+              setValue("imageOffsetY", 0, { shouldValidate: true });
+            }}
+            className="text-[10px] font-bold text-zinc-500 hover:text-black border border-zinc-200 px-3 py-1.5 rounded-xl transition-all hover:bg-zinc-50 cursor-pointer"
+          >
+            إعادة ضبط (100%)
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          {/* Live Mini Card Preview */}
+          <div className="w-full aspect-[4/4.2] max-w-[190px] mx-auto bg-zinc-50 rounded-2xl border border-zinc-200 p-2 relative flex flex-col justify-between overflow-hidden shadow-inner">
+            <div className="relative w-full h-full flex items-center justify-center">
+              {watchedMainImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={watchedMainImage}
+                  alt="Preview Card"
+                  style={{
+                    transform: `scale(${watchedImageScale / 100}) translateY(${watchedImageOffsetY}px)`,
+                    transition: "transform 0.15s ease-out",
+                  }}
+                  className="object-contain w-[88%] h-[88%]"
+                />
+              ) : (
+                <span className="text-[10px] text-zinc-300 font-bold">معاينة الحجم</span>
+              )}
+            </div>
+            <div className="bg-black text-white text-[8px] font-black py-1 px-2 rounded-lg text-center opacity-90">
+              معاينة الكارت ({watchedImageScale}%)
+            </div>
+          </div>
+
+          {/* Sliders Area */}
+          <div className="md:col-span-2 space-y-5">
+            {/* Scale Slider */}
+            <div className="space-y-2 bg-zinc-50/70 p-4 rounded-xl border border-zinc-100">
+              <div className="flex items-center justify-between text-xs font-bold text-zinc-800">
+                <span>حجم وتكبير الصورة (Scale):</span>
+                <span className="font-mono text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                  {watchedImageScale}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="70"
+                max="150"
+                step="2"
+                {...register("imageScale", { valueAsNumber: true })}
+                className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-zinc-900"
+              />
+              <div className="flex justify-between text-[9px] text-zinc-400 font-mono">
+                <span>أصغر (70%)</span>
+                <span>افتراضي (100%)</span>
+                <span>أكبر (150%)</span>
+              </div>
+            </div>
+
+            {/* Vertical Offset Slider */}
+            <div className="space-y-2 bg-zinc-50/70 p-4 rounded-xl border border-zinc-100">
+              <div className="flex items-center justify-between text-xs font-bold text-zinc-800">
+                <span>الموضع العمودي (إزاحة للأعلى أو للأسفل):</span>
+                <span className="font-mono text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
+                  {watchedImageOffsetY > 0 ? `+${watchedImageOffsetY}px` : `${watchedImageOffsetY}px`}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="-50"
+                max="50"
+                step="2"
+                {...register("imageOffsetY", { valueAsNumber: true })}
+                className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-zinc-900"
+              />
+              <div className="flex justify-between text-[9px] text-zinc-400 font-mono">
+                <span>للأعلى (-50px)</span>
+                <span>في المنتصف (0px)</span>
+                <span>للأسفل (+50px)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

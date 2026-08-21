@@ -105,6 +105,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     setTimeout(() => setIsAddedBriefly(false), 1400);
   };
 
+  const customScale = product.imageScale ? product.imageScale / 100 : 1;
+  const customOffsetY = product.imageOffsetY || 0;
+  const baseScale = 1.12 * customScale;
+  const hoverScale = 1.25 * customScale;
+  const baseY = customOffsetY;
+  const hoverY = -55 + customOffsetY;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 30 }}
@@ -140,19 +147,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* 3D Soft Floor Shadow Under the Shirt */}
           <motion.div
             animate={{
-              scale: isHovered ? 1.35 : 1.05,
+              scale: isHovered ? 1.35 * customScale : 1.05 * customScale,
               opacity: isHovered ? 0.55 : 0.25,
-              y: isHovered ? 20 : 0,
+              y: isHovered ? 20 + customOffsetY : customOffsetY,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[85%] h-9 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.4)_0%,_rgba(255,255,255,0.08)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
           />
 
-          {/* Garment Image: Enlarged and pops up on hover */}
+          {/* Garment Image: Custom scale and offset from admin */}
           <motion.div
             animate={{
-              y: isHovered ? -55 : 0,
-              scale: isHovered ? 1.25 : 1.12,
+              y: isHovered ? hoverY : baseY,
+              scale: isHovered ? hoverScale : baseScale,
             }}
             transition={{
               type: "spring",
