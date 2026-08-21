@@ -197,27 +197,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION WITH DOME (نصف دائرة بارزة بدون أي قص) ── */}
-        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-visible">
-          {/* Black Dome Arc Layer (Positioned on top of the black container) */}
+        {/* ── BOTTOM INFO SECTION WITH SEAMLESS FULL-WIDTH DOME (نصف دائرة كاملة ومثالية) ── */}
+        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-hidden">
           <div
-            className={`absolute -top-12 left-0 right-0 h-14 pointer-events-none transition-all duration-500 ease-out z-10 ${
-              isHovered ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"
-            }`}
-            style={{ transformOrigin: "bottom center" }}
-          >
-            <svg
-              className="w-full h-full text-black fill-current"
-              viewBox="0 0 100 40"
-              preserveAspectRatio="none"
-            >
-              <path d="M 0,40 Q 50,-5 100,40 Z" />
-            </svg>
-          </div>
-
-          {/* Black Content Container */}
-          <div
-            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-7 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between z-20 ${
+            style={{
+              borderTopLeftRadius: isHovered ? "50% 45px" : "0px",
+              borderTopRightRadius: isHovered ? "50% 45px" : "0px",
+            }}
+            className={`relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] px-5 pb-5 pt-8 rounded-b-[28px] sm:rounded-b-[32px] flex flex-col justify-between ${
               isHovered
                 ? "bg-black text-white shadow-2xl"
                 : "bg-white dark:bg-[#121214] text-zinc-900 dark:text-white"
