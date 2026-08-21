@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Minus, Plus, ChevronLeft, ChevronRight, Heart, X, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
-import { subscribeToProducts } from "@/lib/firebase/firestore";
+import { subscribeToProducts, getProductById, getProductBySlug } from "@/lib/firebase/firestore";
 import { useCart } from "@/features/cart/CartProvider";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useTheme } from "@/features/theme/ThemeProvider";
@@ -33,15 +33,81 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
   const [adding, setAdding] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
+  const applyProduct = useCallback((matched: Product) => {
+    setProduct(matched);
+    setSelectedColor((prev) => {
+      if (prev) {
+        const currentVar = matched.variants?.find((v) => v.colorHex === prev.hex || v.colorName === prev.name);
+        if (currentVar) {
+          return {
+            name: currentVar.colorName || "افتراضي",
+            hex: currentVar.colorHex || "#000000",
+            image: currentVar.image || matched.mainImage || "",
+          };
+        }
+      }
+      if (matched?.variants && matched.variants.length > 0 && matched.variants[0]) {
+        const firstVariant = matched.variants[0];
+        return {
+          name: firstVariant.colorName || "افتراضي",
+          hex: firstVariant.colorHex || "#000000",
+          image: firstVariant.image || matched.mainImage || "",
+        };
+      }
+      return {
+        name: "افتراضي",
+        hex: "#000000",
+        image: matched.mainImage || "",
+      };
+    });
+
+    setSelectedSize((prev) => {
+      if (prev) return prev;
+      const firstVariant = matched.variants?.[0];
+      return (
+        firstVariant?.sizes?.find((s) => s.stock > 0)?.size ||
+        firstVariant?.sizes?.[0]?.size ||
+        "قياسي"
+      );
+    });
+  }, []);
+
   useEffect(() => {
     if (typeof window !== "undefined" && !onClose) {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
 
-    if (!targetSlug) return;
+    if (!targetSlug) {
+      setLoading(false);
+      return;
+    }
 
-    // Realtime subscription so any admin edits to prices/images/stocks reflect immediately without refresh
+    let isMounted = true;
+
+    // 1. Direct fast fetch by Document ID or Slug
+    const fetchDirect = async () => {
+      try {
+        const decodedParam = decodeURIComponent(targetSlug).trim();
+        const byId = await getProductById(decodedParam);
+        if (isMounted && byId) {
+          applyProduct(byId);
+          setLoading(false);
+          return;
+        }
+        const bySlug = await getProductBySlug(decodedParam);
+        if (isMounted && bySlug) {
+          applyProduct(bySlug);
+          setLoading(false);
+        }
+      } catch (e) {
+        console.error("Direct product fetch fallback:", e);
+      }
+    };
+    fetchDirect();
+
+    // 2. Realtime subscription for live updates
     const unsubscribe = subscribeToProducts((allProducts) => {
+      if (!isMounted) return;
       const decodedParam = decodeURIComponent(targetSlug).toLowerCase().trim();
       const matched =
         allProducts.find((p) => p.id === targetSlug) ||
@@ -54,48 +120,22 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
         );
 
       if (matched) {
-        setProduct(matched);
-        setSelectedColor((prev) => {
-          if (prev) {
-            const currentVar = matched.variants?.find((v) => v.colorHex === prev.hex || v.colorName === prev.name);
-            if (currentVar) {
-              return {
-                name: currentVar.colorName || "افتراضي",
-                hex: currentVar.colorHex || "#000000",
-                image: currentVar.image || matched.mainImage || "",
-              };
-            }
-          }
-          if (matched?.variants && matched.variants.length > 0 && matched.variants[0]) {
-            const firstVariant = matched.variants[0];
-            return {
-              name: firstVariant.colorName || "افتراضي",
-              hex: firstVariant.colorHex || "#000000",
-              image: firstVariant.image || matched.mainImage || "",
-            };
-          }
-          return {
-            name: "افتراضي",
-            hex: "#000000",
-            image: matched.mainImage || "",
-          };
-        });
-
-        setSelectedSize((prev) => {
-          if (prev) return prev;
-          const firstVariant = matched.variants?.[0];
-          return (
-            firstVariant?.sizes?.find((s) => s.stock > 0)?.size ||
-            firstVariant?.sizes?.[0]?.size ||
-            "قياسي"
-          );
-        });
+        applyProduct(matched);
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, [targetSlug, onClose]);
+    // 3. Safety timeout so modal never hangs in loading state
+    const timer = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 3500);
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [targetSlug, onClose, applyProduct]);
 
   const hasVariants = Boolean(product?.variants && product.variants.length > 0);
   const activeVariant = hasVariants && product?.variants
@@ -129,76 +169,6 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
     return () => clearInterval(interval);
   }, [galleryImages.length, activeImage]);
 
-  if (loading) {
-    return (
-      <div className="pt-20 min-h-screen flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="pt-32 min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <h2 className="text-2xl font-bold mb-2">المنتج غير موجود</h2>
-        <p className="text-gray-500 text-sm mb-6">عفواً، لم نتمكن من العثور على بيانات هذا المنتج.</p>
-        <button
-          onClick={() => router.push("/")}
-          className="px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold text-sm"
-        >
-          العودة للمتجر
-        </button>
-      </div>
-    );
-  }
-
-  const displayPrice = product.salePrice ?? product.price;
-  const hasDiscount = product.salePrice && product.salePrice < product.price;
-  const discountPct = hasDiscount
-    ? getDiscountPercentage(product.price, product.salePrice!)
-    : 0;
-
-  const inWishlist = product ? isInWishlist(product.id) : false;
-  const availableSizes = activeVariant?.sizes || [];
-  const sizeStock = hasVariants
-    ? activeVariant?.sizes?.find((s) => s.size === selectedSize)?.stock ?? 99
-    : 99;
-
-  const sizeChartImg = product.sizeChartUrl || (product.sizeChartType === "pants" ? "/size-chart-pants.png" : product.sizeChartType === "tshirt" ? "/size-chart-tshirt.png" : null);
-
-  const handleColorSelect = (variant: ProductVariant) => {
-    setSelectedColor({
-      name: variant.colorName || "افتراضي",
-      hex: variant.colorHex || "#000000",
-      image: variant.image || product.mainImage || "",
-    });
-    const firstInStock =
-      variant.sizes?.find((s) => s.stock > 0)?.size || variant.sizes?.[0]?.size || "قياسي";
-    setSelectedSize(firstInStock);
-    setActiveImage(0);
-    setQuantity(1);
-  };
-
-  const handleAddToCart = async () => {
-    const finalSize = selectedSize || "قياسي";
-    const finalColor = selectedColor || {
-      name: "افتراضي",
-      hex: "#000000",
-      image: product.mainImage || "",
-    };
-
-    if (sizeStock === 0) {
-      toast.error("هذا المقاس غير متوفر حالياً");
-      return;
-    }
-    setAdding(true);
-    addItem(product, quantity, finalSize, finalColor);
-    await new Promise((r) => setTimeout(r, 400));
-    setAdding(false);
-    toast.success(`تمت إضافة ${product.name} إلى السلة بنجاح!`);
-    openCart();
-  };
-
   const handleClose = () => {
     if (onClose) {
       onClose();
@@ -222,9 +192,57 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
     }
   };
 
+  const displayPrice = product?.salePrice ?? product?.price ?? 0;
+  const hasDiscount = Boolean(product?.salePrice && product?.price && product.salePrice < product.price);
+  const discountPct = hasDiscount && product
+    ? getDiscountPercentage(product.price, product.salePrice!)
+    : 0;
+
+  const inWishlist = product ? isInWishlist(product.id) : false;
+  const availableSizes = activeVariant?.sizes || [];
+  const sizeStock = hasVariants
+    ? activeVariant?.sizes?.find((s) => s.size === selectedSize)?.stock ?? 99
+    : 99;
+
+  const sizeChartImg = product?.sizeChartUrl || (product?.sizeChartType === "pants" ? "/size-chart-pants.png" : product?.sizeChartType === "tshirt" ? "/size-chart-tshirt.png" : null);
+
+  const handleColorSelect = (variant: ProductVariant) => {
+    setSelectedColor({
+      name: variant.colorName || "افتراضي",
+      hex: variant.colorHex || "#000000",
+      image: variant.image || product?.mainImage || "",
+    });
+    const firstInStock =
+      variant.sizes?.find((s) => s.stock > 0)?.size || variant.sizes?.[0]?.size || "قياسي";
+    setSelectedSize(firstInStock);
+    setActiveImage(0);
+    setQuantity(1);
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    const finalSize = selectedSize || "قياسي";
+    const finalColor = selectedColor || {
+      name: "افتراضي",
+      hex: "#000000",
+      image: product.mainImage || "",
+    };
+
+    if (sizeStock === 0) {
+      toast.error("هذا المقاس غير متوفر حالياً");
+      return;
+    }
+    setAdding(true);
+    addItem(product, quantity, finalSize, finalColor);
+    await new Promise((r) => setTimeout(r, 400));
+    setAdding(false);
+    toast.success(`تمت إضافة ${product.name} إلى السلة بنجاح!`);
+    openCart();
+  };
+
   return (
     <div className="pt-2 sm:pt-4 pb-20 min-h-screen relative bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white">
-      {/* ── TOP STICKY PRODUCT HEADER BAR ── */}
+      {/* ── TOP STICKY PRODUCT HEADER BAR (ALWAYS VISIBLE IN ALL STATES) ── */}
       <header className="sticky top-0 left-0 right-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 px-4 sm:px-6 lg:px-8 py-3 transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between relative">
           {/* Left Side: Back to Shop + Theme Toggle */}
@@ -242,7 +260,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               title="تبديل المظهر (Dark / Light)"
               aria-label="Toggle Theme"
             >
@@ -269,7 +287,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
             <button
               type="button"
               onClick={toggleWishlistDrawer}
-              className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               title="المفضلة"
             >
               <Heart size={18} className={wishlist.length > 0 ? "fill-red-500 text-red-500" : ""} />
@@ -284,7 +302,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
             <button
               type="button"
               onClick={toggleCart}
-              className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               title="سلة الشراء"
             >
               <ShoppingBag size={18} />
@@ -308,7 +326,27 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* ── CONDITIONAL BODY STATES ── */}
+      {loading ? (
+        <div className="pt-24 min-h-[60vh] flex flex-col items-center justify-center gap-3">
+          <Spinner size="lg" />
+          <p className="text-xs text-zinc-400 font-medium">جاري تحميل تفاصيل المنتج...</p>
+        </div>
+      ) : !product ? (
+        <div className="pt-24 min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+          <h2 className="text-xl font-bold mb-2">المنتج غير متوفر حالياً</h2>
+          <p className="text-zinc-500 text-xs mb-6">عفواً، لم نتمكن من العثور على بيانات هذا المنتج.</p>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold text-xs cursor-pointer hover:opacity-90 transition-opacity"
+          >
+            العودة للمتجر
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="space-y-3">
             <motion.div
@@ -637,6 +675,8 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
           </div>
         )}
       </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }

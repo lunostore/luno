@@ -46,16 +46,14 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const closeProduct = useCallback(() => {
-    setActiveProductId((prev) => {
-      if (prev !== null) {
-        document.body.style.overflow = "";
-        // Clean URL if it has modal search param
-        if (typeof window !== "undefined" && window.location.search.includes("id=")) {
-          window.history.back();
-        }
-      }
-      return null;
-    });
+    setActiveProductId(null);
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
+    if (typeof window !== "undefined" && window.location.search.includes("id=")) {
+      const cleanUrl = window.location.pathname.startsWith("/products") ? "/" : window.location.pathname;
+      window.history.replaceState(null, "", cleanUrl);
+    }
   }, []);
 
   // Auto-close modal whenever user navigates to other pages (e.g. /checkout)
@@ -63,10 +61,27 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
     if (pathname && pathname !== "/" && !pathname.startsWith("/products")) {
       if (activeProductId) {
         setActiveProductId(null);
-        document.body.style.overflow = "";
+        if (typeof document !== "undefined") {
+          document.body.style.overflow = "";
+        }
       }
     }
   }, [pathname, activeProductId]);
+
+  // Guarantee body scroll lock is always cleared whenever modal closes or unmounts
+  useEffect(() => {
+    if (!activeProductId && typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
+  }, [activeProductId]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "";
+      }
+    };
+  }, []);
 
   // Handle browser back/forward button
   useEffect(() => {

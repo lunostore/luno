@@ -33,7 +33,7 @@ type OnlineMethod = "vodafone_cash" | "instapay";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, clearCart, isHydrated } = useCart();
   const { settings: siteSettings } = useSiteSettings();
 
   const [submitting, setSubmitting] = useState(false);
@@ -89,10 +89,6 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setMounted(true);
-    if (items.length === 0) {
-      setIsRedirecting(true);
-      router.replace("/");
-    }
     // Load shipping rates
     getShippingRates()
       .then((data) => {
@@ -103,7 +99,15 @@ export default function CheckoutPage() {
         }
       })
       .catch(console.error);
-  }, [items, router, setValue]);
+  }, [setValue]);
+
+  // Only redirect if cart has finished hydration and is truly empty
+  useEffect(() => {
+    if (isHydrated && items.length === 0) {
+      setIsRedirecting(true);
+      router.replace("/");
+    }
+  }, [isHydrated, items.length, router]);
 
   // Sync paymentMethod field with category/method state
   useEffect(() => {
@@ -120,7 +124,7 @@ export default function CheckoutPage() {
   const currentShippingCost = activeRateObj?.price ?? 50;
   const finalOrderTotal = totalPrice + currentShippingCost;
 
-  if (!mounted || items.length === 0 || isRedirecting) {
+  if (!mounted || !isHydrated || items.length === 0 || isRedirecting) {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <Spinner size="lg" />
