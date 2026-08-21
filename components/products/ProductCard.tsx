@@ -271,6 +271,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               {/* Wishlist Button (Full Clickable Area) */}
               <button
                 type="button"
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -295,8 +297,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               {/* Add to Cart Button */}
               <button
                 type="button"
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={handleAddToCart}
-                className={`flex-1 h-10 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm ${
+                className={`flex-1 h-11 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm ${
                   isHovered
                     ? isAddedBriefly
                       ? "bg-emerald-500 text-white"

@@ -8,6 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { toast } from "sonner";
 import type { Product } from "@/types/product";
 
 interface WishlistContextType {
@@ -44,10 +45,16 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       let next;
       if (exists) {
         next = prev.filter((item) => item.id !== product.id);
+        toast.info(`تمت إزالة ${product.name} من المفضلة`);
       } else {
         next = [...prev, product];
+        toast.success(`تمت إضافة ${product.name} إلى المفضلة! ❤️`);
       }
-      localStorage.setItem("luno-wishlist", JSON.stringify(next));
+      try {
+        localStorage.setItem("luno-wishlist", JSON.stringify(next));
+      } catch (e) {
+        console.error("Failed to save wishlist", e);
+      }
       return next;
     });
   }, []);
