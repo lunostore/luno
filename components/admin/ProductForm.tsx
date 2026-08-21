@@ -345,16 +345,82 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       }
       router.refresh();
       router.push("/admin/products");
-    } catch {
-      toast.error("فشل حفظ المنتج. يرجى التحقق من مدخلات النموذج.");
-    } finally {
-      setSaving(false);
-    }
-  };
+      } catch (err: any) {
+        console.error("Save product error:", err);
+        const errMsg = err?.message || "حدث خطأ أثناء حفظ المنتج في قاعدة البيانات";
+        toast.error(errMsg);
+      } finally {
+        setSaving(false);
+      }
+    };
 
+    const fieldLabels: Record<string, string> = {
+      name: "اسم المنتج",
+      slug: "رابط المنتج (Slug)",
+      sku: "كود المنتج (SKU)",
+      price: "سعر المنتج الأساسي",
+      category: "فئة / قسم المنتج",
+      mainImage: "صورة الغلاف الرئيسية (مطلوبة)",
+      variants: "الألوان والمقاسات (يجب إضافة لون ومقاس واحد على الأقل مع مخزون)",
+      description: "وصف المنتج",
+    };
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 max-w-4xl font-sans">
+    const onFormError = (formErrors: any) => {
+      console.warn("Validation errors:", formErrors);
+      
+      const errorKeys = Object.keys(formErrors);
+      if (errorKeys.length === 0) return;
+
+      const errorMessages = errorKeys.map((key) => {
+        const label = fieldLabels[key] || key;
+        const msg = formErrors[key]?.message || "بيانات ناقصة أو غير صحيحة";
+        return `• ${label}: ${msg}`;
+      });
+
+      // Show top toast with exact details
+      toast.error(
+        <div className="space-y-1 text-right font-sans">
+          <p className="font-bold text-xs">يرجى استكمال البيانات الناقصة التالية:</p>
+          <ul className="text-[11px] list-none space-y-0.5 opacity-90">
+            {errorMessages.slice(0, 4).map((msg, i) => (
+              <li key={i}>{msg}</li>
+            ))}
+          </ul>
+        </div>,
+        { duration: 6000 }
+      );
+
+      // Scroll smoothly to the first invalid input
+      const firstKey = errorKeys[0];
+      const el = document.querySelector(`[name="${firstKey}"]`) || document.querySelector(`#field-${firstKey}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        (el as HTMLElement).focus?.();
+      }
+    };
+
+    const hasErrors = Object.keys(errors).length > 0;
+
+    return (
+      <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-10 max-w-4xl font-sans">
+        
+        {/* Top Error Alert Banner if there are validation issues */}
+        {hasErrors && (
+          <div className="bg-red-50 dark:bg-red-950/40 border-2 border-red-500/50 rounded-2xl p-5 text-red-700 dark:text-red-300 animate-in fade-in slide-in-from-top-3 duration-300">
+            <div className="flex items-center gap-2 mb-2 font-black text-xs uppercase tracking-wider text-red-600 dark:text-red-400">
+              <AlertCircle size={16} />
+              <span>تنبيه: يوجد حقول ناقصة تمنع حفظ المنتج:</span>
+            </div>
+            <ul className="space-y-1 text-xs font-semibold mr-6 list-disc">
+              {Object.keys(errors).map((key) => (
+                <li key={key}>
+                  <strong className="text-red-900 dark:text-red-200">{fieldLabels[key] || key}:</strong>{" "}
+                  <span>{errors[key as keyof typeof errors]?.message || "يرجى تعبئة هذا الحقل"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       
       {/* 1. Basic Info Panel */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
