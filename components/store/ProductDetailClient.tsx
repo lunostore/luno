@@ -349,13 +349,11 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="space-y-3">
-            <motion.div
+            <div
               onClick={handleNextImage}
               className={`aspect-square relative overflow-hidden rounded-2xl bg-background border border-zinc-200/50 dark:border-zinc-800/40 select-none ${
                 galleryImages.length > 1 ? "cursor-pointer group" : ""
               }`}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
             >
               <AnimatePresence mode="wait">
                 <motion.div
@@ -411,7 +409,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
                   </button>
                 </>
               )}
-            </motion.div>
+            </div>
 
             {galleryImages.length > 1 && (
               <div className="flex gap-2.5 overflow-x-auto pb-1">
@@ -438,12 +436,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
             )}
           </div>
 
-          <motion.div
-            className="flex flex-col"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-2">
               {product.bestSeller && (
                 <Badge variant="default">Best Seller</Badge>
@@ -459,10 +452,12 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
               )}
             </div>
 
-            <p className="text-xs text-gray-500 font-medium mb-1">{product.brand}</p>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
-              {product.name}
-            </h1>
+            <div>
+              <p className="text-xs text-gray-500 font-medium mb-1">{product.brand}</p>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
+                {product.name}
+              </h1>
+            </div>
 
             <div className="flex items-center gap-3 mb-4">
               <span className="text-2xl font-bold">
@@ -607,7 +602,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
                 {sizeStock} items available in stock
               </p>
             )}
-          </motion.div>
+          </div>
         </div>
       </div>
 

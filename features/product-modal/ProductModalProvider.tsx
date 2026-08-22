@@ -116,11 +116,14 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
             {activeProductId && (
               <motion.div
                 key={activeProductId}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="fixed inset-0 z-[9999] bg-white dark:bg-zinc-950 overflow-y-auto"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{
+                  duration: 0.45,
+                  ease: [0.32, 0.72, 0, 1],
+                }}
+                className="fixed inset-0 z-[9999] bg-white dark:bg-zinc-950 overflow-y-auto will-change-transform shadow-2xl"
               >
                 <ProductDetailClient
                   overrideSlug={activeProductId}

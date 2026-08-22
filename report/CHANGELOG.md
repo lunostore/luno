@@ -4,6 +4,33 @@ This document lists all modifications, fixes, and improvements applied to the **
 
 ---
 
+## 📅 August 2026
+
+### 🎬 Intro Screen Curtain Slide-Up Animation
+* **Curtain Reveal Motion**: Upgraded intro exit transition to a fluid vertical curtain lift (`y: "-100%"`) with a luxury ease curve `[0.76, 0, 0.24, 1]` across `LUNOCleanIntro.tsx`, `NXTCleanIntro.tsx`, `IntroAppleMinimal.tsx`, and `LUNOIntro.tsx`.
+* **Parallax Interior Element Fade**: Added subtle parallax upward glide to the LUNO typography during the lift.
+* **Synchronized Lifecycle**: Hooked `onComplete` to `AnimatePresence (onExitComplete)` to ensure seamless storefront presentation.
+
+### 📦 3D Product Card & Floating Motion
+* **Dome Arc & Spring Hover**: Re-engineered card bottom shelf and arc to match the reference convex curve with spring hover motion and full dark/light theme awareness.
+* **Unclipped Collar & Oversized Display**: Removed container clipping and increased image coverage to 92% of the card area.
+
+### 🎛️ Admin Image Scale & Offset Controls
+* Added real-time sliders for image scaling (70% - 150%) and vertical offset (-50px to +50px) with live mini preview in `ProductForm.tsx`.
+
+### ⚡ Client-Side WebP Compression & Cloudinary Direct Upload
+* Prevented Firestore 1MB document size limit issues by auto-compressing uploaded images to lightweight WebP (50KB-80KB).
+* Bypassed browser CORS restrictions via server route `/api/upload`.
+
+### ⭐ Dedicated Customer Reviews Route
+* Extracted reviews into a standalone page at `app/(store)/reviews/page.tsx` and cleaned up the homepage.
+
+### 🛍️ Direct Checkout Flow & Geometry Enhancements
+* Centered the LUNO brand logo in the product modal and streamlined direct checkout.
+* Expanded the wishlist button hitbox to 44x44px with event isolation and interactive toasts.
+
+---
+
 ## 📅 July 2026
 
 ### 🛠️ Vercel Build Optimization & Prerender Fixes
