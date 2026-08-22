@@ -189,23 +189,27 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* ── BOTTOM CONTENT SECTION (WITH SLIDING SVG CURVE & RISING BLACK SHELF) ── */}
-        <div className="bottom-0 px-6 py-6 relative block rounded-b-[25px] pt-[37%] -mt-[37%] overflow-hidden">
-          {/* Animated Rising Bottom Background Shelf */}
-          <div className="absolute left-0 bottom-0 w-full h-0 group-hover:h-[56%] rounded-b-[25px] bg-[#000000] dark:bg-white -z-10 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] pointer-events-none" />
-
-          {/* Animated SVG Curve */}
-          <svg
-            className="absolute -bottom-[40%] group-hover:bottom-[55%] left-0 w-full pointer-events-none fill-[#000000] dark:fill-white stroke-none -z-10 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)]"
-            viewBox="0 0 300 200"
-            preserveAspectRatio="none"
-            style={{ height: "200px" }}
+        <div className="bottom-0 px-6 pb-6 pt-12 -mt-12 relative rounded-b-[25px] overflow-hidden z-10">
+          {/* Animated Rising Black Background Shelf + Convex SVG Dome */}
+          <div
+            className={`absolute inset-x-0 bottom-0 pointer-events-none z-0 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+              isHovered ? "h-full opacity-100" : "h-0 opacity-0"
+            }`}
           >
-            <path
-              ref={svgPathRef}
-              d={isHovered ? svgPath.hoverPath || "M0 100 L0 200 L300 200 L300 100 Q150 0 0 100" : svgPath.defaultPath || "M0 100 L0 200 L300 200 L300 100 Q150 100 0 100"}
-              style={{ transition: "d 0.3s cubic-bezier(0.76, 0, 0.24, 1)" }}
-            />
-          </svg>
+            {/* The Solid Black Shelf */}
+            <div className="absolute inset-0 bg-[#000000] dark:bg-white rounded-b-[25px]" />
+
+            {/* The Convex Dome SVG Curve crowning the top */}
+            <div className="absolute -top-[34px] left-0 right-0 w-full h-[36px] pointer-events-none overflow-visible">
+              <svg
+                viewBox="0 0 100 28"
+                preserveAspectRatio="none"
+                className="w-full h-full fill-[#000000] dark:fill-white stroke-none"
+              >
+                <path d="M 0,28 Q 50,0 100,28 Z" />
+              </svg>
+            </div>
+          </div>
 
           {/* Title & Price Row */}
           <div className="flex justify-between items-baseline gap-2 relative z-10">
@@ -218,7 +222,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* Description */}
-          <span className="text-black dark:text-zinc-400 group-hover:text-white dark:group-hover:text-zinc-800 my-3 block text-sm line-clamp-2 leading-relaxed transition-colors duration-300 delay-100">
+          <span className="text-black dark:text-zinc-400 group-hover:text-white dark:group-hover:text-zinc-800 my-3 block text-sm line-clamp-2 leading-relaxed transition-colors duration-300 delay-100 relative z-10">
             {product.description || "High-density premium fabric with signature cut and tailored fit."}
           </span>
 
