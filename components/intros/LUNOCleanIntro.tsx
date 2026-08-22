@@ -17,10 +17,10 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    // 0.65s dome rise + 1.65s intro display duration = 2.3s total before curtain lift
+    // 0.65s dome rise + 1.65s display = 2.3s total
     const timer = setTimeout(() => {
       setShow(false);
-    }, 2350);
+    }, 2300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -33,43 +33,37 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
     <AnimatePresence onExitComplete={() => onCompleteRef.current()}>
       {show && (
         <motion.div
-          key="luno-minimal-light-intro"
+          key="luno-clean-dome-intro"
           onClick={handleSkip}
-          className="fixed inset-0 z-[99999] overflow-hidden select-none cursor-pointer"
-          initial={{ y: 0 }}
+          initial={{ y: "115%" }}
+          animate={{ y: "0%" }}
           exit={{
             y: "-100%",
             transition: {
               duration: 0.85,
-              ease: [0.76, 0, 0.24, 1], // Cinematic luxury curtain lift
+              ease: [0.76, 0, 0.24, 1], // Luxury curtain lift
             },
           }}
+          transition={{
+            duration: 0.65,
+            ease: [0.32, 0.72, 0, 1], // Smooth fast dome entrance
+          }}
+          onAnimationComplete={() => setDomeCompleted(true)}
+          className="fixed inset-0 z-[99999] bg-black text-white flex items-center justify-center select-none cursor-pointer overflow-visible"
         >
-          {/* ── 1. RISING CONVEX DOME BLACK CURTAIN (يبدأ من تحت بقوس محدب ويصعد ليغطي الشاشة بالأسود) ── */}
-          <motion.div
-            initial={{ y: "115%" }}
-            animate={{ y: "-18%" }}
-            transition={{
-              duration: 0.65,
-              ease: [0.32, 0.72, 0, 1], // Fast and smooth curve acceleration
-            }}
-            onAnimationComplete={() => setDomeCompleted(true)}
-            className="absolute inset-x-0 -bottom-10 h-[145vh] bg-black z-0 pointer-events-none"
-          >
-            {/* Top Leading Convex Dome Arc Curve (القوس الأسود المحدب للأعلى) */}
-            <div className="absolute -top-[16vh] sm:-top-[22vh] left-0 right-0 h-[16vh] sm:h-[22vh] overflow-visible pointer-events-none">
-              <svg
-                className="w-full h-full text-black fill-current"
-                viewBox="0 0 100 28"
-                preserveAspectRatio="none"
-              >
-                {/* Wide, smooth convex dome curve */}
-                <path d="M 0,28 Q 50,0 100,28 Z" />
-              </svg>
-            </div>
-          </motion.div>
+          {/* ── CONVEX DOME ARC ATTACHED TO TOP OF BLACK CURTAIN ── */}
+          <div className="absolute bottom-full left-0 right-0 h-[22vh] sm:h-[30vh] overflow-visible pointer-events-none">
+            <svg
+              className="w-full h-full text-black fill-current"
+              viewBox="0 0 100 28"
+              preserveAspectRatio="none"
+            >
+              {/* Wide smooth convex dome curve leading upwards */}
+              <path d="M 0,28 Q 50,0 100,28 Z" />
+            </svg>
+          </div>
 
-          {/* ── 2. MAIN INTRO CONTENT (Appears once black dome covers screen) ── */}
+          {/* ── MAIN INTRO CONTENT ── */}
           <div className="relative z-10 w-full h-full flex items-center justify-center">
             {domeCompleted && (
               <motion.div
