@@ -188,31 +188,26 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
 
-        {/* ── BOTTOM CONTENT SECTION (WITH SLIDING SVG CURVE & RISING BLACK SHELF) ── */}
-        <div className="bottom-0 px-6 pb-6 pt-12 -mt-12 relative rounded-b-[25px] overflow-hidden z-10">
-          {/* Animated Rising Black Background Shelf + Convex SVG Dome */}
+        {/* ── BOTTOM CONTENT SECTION (WITH SLIDING CONVEX DOME ARCH & RISING BLACK SHELF) ── */}
+        <div className="bottom-0 px-6 pb-6 pt-12 relative rounded-b-[25px] overflow-hidden z-10 mt-auto">
+          {/* Animated Rising Black Background with Convex Dome Arc on Top */}
           <div
-            className={`absolute inset-x-0 bottom-0 pointer-events-none z-0 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
-              isHovered ? "h-full opacity-100" : "h-0 opacity-0"
+            className={`absolute inset-x-0 bottom-0 h-full pointer-events-none z-0 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+              isHovered ? "translate-y-0 opacity-100" : "translate-y-[102%] opacity-0"
             }`}
           >
-            {/* The Solid Black Shelf */}
-            <div className="absolute inset-0 bg-[#000000] dark:bg-white rounded-b-[25px]" />
-
-            {/* The Convex Dome SVG Curve crowning the top */}
-            <div className="absolute -top-[34px] left-0 right-0 w-full h-[36px] pointer-events-none overflow-visible">
-              <svg
-                viewBox="0 0 100 28"
-                preserveAspectRatio="none"
-                className="w-full h-full fill-[#000000] dark:fill-white stroke-none"
-              >
-                <path d="M 0,28 Q 50,0 100,28 Z" />
-              </svg>
-            </div>
+            <svg
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              className="w-full h-full fill-black dark:fill-white stroke-none"
+            >
+              {/* Prominent convex dome arch at top: peaks at Y=0, sides at Y=20 */}
+              <path d="M 0,20 Q 50,0 100,20 L 100,100 L 0,100 Z" />
+            </svg>
           </div>
 
           {/* Title & Price Row */}
-          <div className="flex justify-between items-baseline gap-2 relative z-10">
+          <div className="flex justify-between items-baseline gap-2 relative z-10 pt-2">
             <p className="text-2xl text-black dark:text-white group-hover:text-white dark:group-hover:text-black font-semibold max-w-[70%] text-ellipsis whitespace-nowrap overflow-hidden transition-colors duration-300 delay-100">
               {product.name}
             </p>
