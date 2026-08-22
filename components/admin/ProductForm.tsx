@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, X, Upload, Trash2, Palette, AlertCircle } from "lucide-react";
+import { Plus, X, Upload, Trash2, Palette, AlertCircle, Heart, ShoppingCart, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { createProduct, updateProduct, extractProductImages, getSiteSettings } from "@/lib/firebase/firestore";
 import { generateSlug, generateSKU } from "@/lib/utils";
@@ -114,6 +115,10 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
         },
   });
 
+  const watchedName = watch("name");
+  const watchedPrice = watch("price");
+  const watchedSalePrice = watch("salePrice");
+  const watchedDescription = watch("description");
   const watchedVariants = watch("variants") || [];
   const watchedMainImage = watch("mainImage");
   const watchedHoverImage = watch("hoverImage");
@@ -122,6 +127,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
   const watchedSizeChartId = watch("sizeChartId");
   const watchedSizeChartUrl = watch("sizeChartUrl");
 
+  const [adminCardHovered, setAdminCardHovered] = useState(false);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -711,32 +717,146 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          {/* Live Mini Card Preview */}
-          <div className="w-full aspect-[4/4.2] max-w-[190px] mx-auto bg-zinc-50 rounded-2xl border border-zinc-200 p-2 relative flex flex-col justify-between overflow-hidden shadow-inner">
-            <div className="relative w-full h-full flex items-center justify-center">
-              {watchedMainImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={watchedMainImage}
-                  alt="Preview Card"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Live Exact Product Card Preview */}
+          <div className="w-full max-w-[280px] sm:max-w-[300px] mx-auto flex flex-col items-center gap-3">
+            <div className="w-full flex items-center justify-between px-2">
+              <span className="text-[11px] font-bold text-zinc-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-amber-500" />
+                <span>معاينة الكارت الحقيقي على الموقع:</span>
+              </span>
+              <span className="text-[10px] font-mono text-zinc-400">
+                {watchedImageScale}%
+              </span>
+            </div>
+
+            {/* ── REAL PRODUCT CARD REPLICA ── */}
+            <div
+              onMouseEnter={() => setAdminCardHovered(true)}
+              onMouseLeave={() => setAdminCardHovered(false)}
+              className="group/admincard relative w-full rounded-[20px] sm:rounded-[25px] border border-[#cdcdcd] hover:border-[#292929] transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white cursor-pointer overflow-visible flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+            >
+              {/* TOP IMAGE CONTAINER */}
+              <div className="relative w-full pb-[72%] sm:pb-[78%] flex justify-center overflow-visible">
+                <div
+                  className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover/admincard:-top-[16%] group-hover/admincard:scale-110"
                   style={{
-                    transform: `scale(${watchedImageScale / 100}) translateY(${watchedImageOffsetY}px)`,
-                    transition: "transform 0.15s ease-out",
+                    transform: adminCardHovered
+                      ? `translateY(${watchedImageOffsetY}px) scale(${1.1 * (watchedImageScale / 100)})`
+                      : `translateY(${watchedImageOffsetY}px) scale(${1 * (watchedImageScale / 100)})`,
                   }}
-                  className="object-contain w-[88%] h-[88%]"
-                />
-              ) : (
-                <span className="text-[10px] text-zinc-300 font-bold">معاينة الحجم</span>
-              )}
+                >
+                  {/* Ambient Floor Shadow */}
+                  <div className="absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black rounded-[50%] filter blur-[18px] sm:blur-[22px] opacity-35 -z-10 transition-opacity duration-300" />
+
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    {/* Primary Image */}
+                    {watchedMainImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={watchedMainImage}
+                        alt="Primary Preview"
+                        className={`object-contain w-full h-full drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                          watchedHoverImage && adminCardHovered ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                        }`}
+                      />
+                    ) : (
+                      <span className="text-[11px] text-zinc-300 font-bold">ارفع صورة الغلاف</span>
+                    )}
+
+                    {/* Hover Image */}
+                    {watchedHoverImage && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={watchedHoverImage}
+                        alt="Hover Preview"
+                        className={`absolute inset-0 object-contain w-full h-full drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                          adminCardHovered ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                        }`}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTTOM CONTENT SECTION WITH CONVEX DOME ARCH */}
+              <div className="bottom-0 px-3 sm:px-4 pb-3 sm:pb-4 pt-6 sm:pt-8 relative rounded-b-[18px] sm:rounded-b-[25px] overflow-hidden z-10 mt-auto">
+                {/* Animated Rising Black Background with Convex Dome Arc */}
+                <div
+                  className={`absolute inset-x-0 bottom-0 h-full pointer-events-none z-0 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                    adminCardHovered ? "translate-y-0 opacity-100" : "translate-y-[102%] opacity-0"
+                  }`}
+                >
+                  <svg
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    className="w-full h-full fill-black stroke-none"
+                  >
+                    <path d="M 0,20 Q 50,0 100,20 L 100,100 L 0,100 Z" />
+                  </svg>
+                </div>
+
+                {/* Title & Price Row */}
+                <div className="flex justify-between items-center gap-1.5 relative z-10 h-[24px] sm:h-[28px]">
+                  <p className="text-sm sm:text-base font-bold text-black group-hover/admincard:text-white max-w-[65%] truncate transition-colors duration-300 delay-100">
+                    {watchedName || "اسم المنتج"}
+                  </p>
+                  <span className="text-xs sm:text-sm font-bold uppercase text-black group-hover/admincard:text-white whitespace-nowrap transition-colors duration-300 delay-100">
+                    EGP {watchedSalePrice || watchedPrice || 950}
+                  </span>
+                </div>
+
+                {/* Description */}
+                <div className="h-[16px] sm:h-[18px] my-1 flex items-center relative z-10">
+                  <span className="text-zinc-600 group-hover/admincard:text-zinc-300 text-[11px] sm:text-xs truncate leading-none transition-colors duration-300 delay-100">
+                    {watchedDescription || "خامة قطنية فاخرة بتصميم وقصة مريحة"}
+                  </span>
+                </div>
+
+                {/* Buttons Row */}
+                <div className="flex justify-between items-center gap-2 relative z-10 mt-1">
+                  {/* Wishlist Button */}
+                  <div className="group/btn relative overflow-hidden flex items-center justify-center w-8 sm:w-10 h-8 sm:h-10 rounded-[9px] sm:rounded-[12px] border border-[#292929] bg-[#f9f9f9] transition-all duration-300 flex-shrink-0">
+                    <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10">
+                      <Heart size={16} />
+                    </p>
+                    <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
+                      <p className="absolute w-full flex justify-center items-center text-white text-center z-10">
+                        <Heart size={16} className="fill-white text-white" />
+                      </p>
+                      <div className="bg-black w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+                    </div>
+                  </div>
+
+                  {/* Add to Cart Button */}
+                  <div className="group/btn relative overflow-hidden flex-1 h-8 sm:h-10 rounded-[9px] sm:rounded-[12px] border border-[#292929] bg-[#f9f9f9] transition-all duration-300 flex items-center justify-center">
+                    <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-[11px] sm:text-xs">
+                      <span className="flex items-center gap-1">
+                        <span>Add to cart</span>
+                        <ShoppingCart size={14} />
+                      </span>
+                    </p>
+                    <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
+                      <p className="absolute w-full flex justify-center items-center text-white text-center z-10 font-bold text-[11px] sm:text-xs">
+                        <span className="flex items-center gap-1">
+                          <span>Add to cart</span>
+                          <ShoppingCart size={14} />
+                        </span>
+                      </p>
+                      <div className="bg-black w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="bg-black text-white text-[8px] font-black py-1 px-2 rounded-lg text-center opacity-90">
-              معاينة الكارت ({watchedImageScale}%)
-            </div>
+
+            <p className="text-[10px] text-zinc-400 text-center font-medium">
+              💡 مرر الماوس فوق الكارت لمعاينة تأثير الهوفر والشيلف الأسود الصاعد
+            </p>
           </div>
 
           {/* Sliders Area */}
-          <div className="md:col-span-2 space-y-5">
+          <div className="lg:col-span-2 space-y-5">
             {/* Scale Slider */}
             <div className="space-y-2 bg-zinc-50/70 p-4 rounded-xl border border-zinc-100">
               <div className="flex items-center justify-between text-xs font-bold text-zinc-800">

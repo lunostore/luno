@@ -55,8 +55,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   }, []);
 
   const primaryImage = product.mainImage || "/placeholder.jpg";
-  const hoverImage = product.hoverImage || product.images?.[0] || primaryImage;
-  const currentImage = isHovered ? hoverImage : primaryImage;
+  const hasHoverImage = Boolean(product.hoverImage && product.hoverImage !== primaryImage);
+  const hoverImage = product.hoverImage || primaryImage;
 
   const handleAddToCart = (e: MouseEvent) => {
     e.preventDefault();
@@ -174,16 +174,33 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <div className="absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black dark:bg-white/40 rounded-[50%] filter blur-[18px] sm:blur-[22px] opacity-35 -z-10 transition-opacity duration-300" />
 
             <div className="relative w-full h-full flex items-center justify-center">
+              {/* Primary Main Image (صورة الغلاف الرئيسية) */}
               <Image
                 ref={imgRef}
-                src={currentImage}
+                src={primaryImage}
                 alt={product.name}
                 fill
                 priority={index < 4}
                 quality={95}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className="object-contain object-center drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)]"
+                className={`object-contain object-center drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                  hasHoverImage && isHovered ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                }`}
               />
+
+              {/* Hover Image (صورة الهوفر الثانوية التي تظهر بسلاسة عند تمرير الماوس) */}
+              {hasHoverImage && (
+                <Image
+                  src={hoverImage}
+                  alt={`${product.name} - hover`}
+                  fill
+                  quality={95}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className={`object-contain object-center drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                    isHovered ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                  }`}
+                />
+              )}
             </div>
           </div>
         </div>
