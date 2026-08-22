@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, MouseEvent } from "react";
+import { useState, useRef, useEffect, MouseEvent } from "react";
 import Image from "next/image";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Heart, ShoppingCart, Check } from "lucide-react";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useProductModal } from "@/features/product-modal/ProductModalProvider";
@@ -25,56 +25,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const [isHovered, setIsHovered] = useState(false);
   const [isAddedBriefly, setIsAddedBriefly] = useState(false);
+  const [cardWidth, setCardWidth] = useState(330);
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  // 3D Tilt interactive coordinates
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  // Smooth springs for fluid physics
-  const smoothX = useSpring(mouseX, { stiffness: 220, damping: 20 });
-  const smoothY = useSpring(mouseY, { stiffness: 220, damping: 20 });
-
-  // Floating cursor follower ("عرض")
-  const cursorX = useMotionValue(100);
-  const cursorY = useMotionValue(100);
-  const smoothCursorX = useSpring(cursorX, { stiffness: 320, damping: 28 });
-  const smoothCursorY = useSpring(cursorY, { stiffness: 320, damping: 28 });
-
-  // 3D Tilt rotations
-  const rotateX = useTransform(smoothY, [-0.5, 0.5], [8, -8]);
-  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-8, 8]);
+  // ResizeObserver to dynamically update SVG Curve width to match exact card width
+  useEffect(() => {
+    if (!cardRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setCardWidth(Math.floor(entry.contentRect.width));
+      }
+    });
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const primaryImage = product.mainImage || "/placeholder.jpg";
   const hoverImage = product.hoverImage || product.images?.[0] || primaryImage;
   const currentImage = isHovered ? hoverImage : primaryImage;
-
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-
-    if (imageContainerRef.current) {
-      const imgRect = imageContainerRef.current.getBoundingClientRect();
-      cursorX.set(e.clientX - imgRect.left);
-      cursorY.set(e.clientY - imgRect.top);
-    }
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    mouseX.set(0);
-    mouseY.set(0);
-  };
 
   const handleAddToCart = (e: MouseEvent) => {
     e.stopPropagation();
@@ -107,10 +76,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const customScale = product.imageScale ? product.imageScale / 100 : 1;
   const customOffsetY = product.imageOffsetY || 0;
-  const baseScale = 1.12 * customScale;
-  const hoverScale = 1.25 * customScale;
-  const baseY = customOffsetY;
-  const hoverY = -55 + customOffsetY;
+
+  // Exact Dynamic SVG curve path equation from Shopflex
+  const curveY = isHovered ? 98.8 : 100;
+  const curvePath = `M0 100 L0 200 L${cardWidth} 200 L${cardWidth} 100 Q${cardWidth / 2} ${curveY} 0 100`;
 
   return (
     <motion.article
@@ -122,211 +91,153 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         delay: (index % 4) * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="relative h-full select-none pt-12"
-      style={{ perspective: 1200 }}
+      className="relative h-full select-none"
     >
-      <motion.div
+      <div
         ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         onClick={() => openProduct(product.id)}
-        style={{
-          rotateX,
-          rotateY,
-          transformStyle: "preserve-3d",
-        }}
-        className="group relative flex flex-col justify-between h-full bg-white dark:bg-[#121214] rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-zinc-800 cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.16)] transition-all duration-500 overflow-visible"
+        className="group relative w-full max-w-[340px] mx-auto h-[528px] rounded-[25px] border border-[#CDCDCD] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-500 transition-all duration-300 overflow-visible flex flex-col bg-white dark:bg-[#121214] cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.14)]"
       >
-        {/* ── 3D FLOATING PRODUCT VISUAL AREA (POPS OUT OVER TOP) ── */}
-        <div
-          ref={imageContainerRef}
-          className="relative w-full aspect-[1/1.05] sm:aspect-[1/1.08] flex items-center justify-center p-1 sm:p-2 overflow-visible z-30"
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          {/* 3D Soft Floor Shadow Under the Shirt */}
-          <motion.div
-            animate={{
-              scale: isHovered ? 1.35 * customScale : 1.05 * customScale,
-              opacity: isHovered ? 0.55 : 0.25,
-              y: isHovered ? 20 + customOffsetY : customOffsetY,
-            }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[85%] h-9 rounded-[100%] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.65)_0%,_rgba(0,0,0,0.15)_50%,_transparent_75%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.4)_0%,_rgba(255,255,255,0.08)_50%,_transparent_75%)] pointer-events-none filter blur-sm z-0"
-          />
-
-          {/* Garment Image: Custom scale and offset from admin */}
-          <motion.div
-            animate={{
-              y: isHovered ? hoverY : baseY,
-              scale: isHovered ? hoverScale : baseScale,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 240,
-              damping: 18,
-              mass: 0.8,
-            }}
+        {/* ── 1. PRODUCT IMAGE CONTAINER & HOVER POP-OUT ── */}
+        <div className="relative w-full pb-[100%] flex justify-center overflow-visible">
+          <div
+            className="absolute left-[22.5px] right-[22.5px] top-0 bottom-0 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] flex items-center justify-center z-10 pointer-events-none"
             style={{
-              transformStyle: "preserve-3d",
-              transform: isHovered ? "translateZ(60px)" : "translateZ(15px)",
+              top: isHovered ? `calc(-20% + ${customOffsetY}px)` : `${customOffsetY}px`,
+              transform: isHovered ? `scale(${1.1 * customScale})` : `scale(${1.0 * customScale})`,
             }}
-            className="relative w-[92%] h-[92%] flex items-center justify-center z-10 pointer-events-none"
           >
-            <Image
-              key={currentImage}
-              src={currentImage}
-              alt={product.name}
-              fill
-              priority={index < 4}
-              quality={95}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center drop-shadow-[0_18px_28px_rgba(0,0,0,0.22)] pointer-events-none transition-all duration-500"
-            />
-          </motion.div>
+            {/* Real Floor Soft Blur Shadow Under Garment */}
+            <div className="absolute w-[72%] h-[10%] bg-black dark:bg-white/30 rounded-[50%] filter blur-[22px] opacity-40 bottom-[10%] left-[14%] -z-10 pointer-events-none transition-opacity duration-300" />
 
-          {/* Magnetic Cursor Follower ("عرض") */}
-          <motion.div
-            style={{
-              left: smoothCursorX,
-              top: smoothCursorY,
-              transform: "translate(-50%, -50%) translateZ(75px)",
-              pointerEvents: "none",
-            }}
-            animate={{
-              opacity: isHovered ? 1 : 0,
-              scale: isHovered ? 1 : 0.2,
-            }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-40 hidden md:flex items-center justify-center w-14 h-14 rounded-full bg-white/95 dark:bg-zinc-900/95 text-zinc-950 dark:text-white text-xs font-black shadow-2xl border border-zinc-200 dark:border-zinc-700 pointer-events-none"
-          >
-            عرض
-          </motion.div>
+            <div className="relative w-[280px] h-[280px] flex items-center justify-center">
+              <Image
+                src={currentImage}
+                alt={product.name}
+                fill
+                priority={index < 4}
+                quality={95}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-contain object-center drop-shadow-[0_16px_24px_rgba(0,0,0,0.18)] transition-all duration-500"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* ── BOTTOM INFO SECTION (WITH RISING DOME & RECTANGLE ANIMATION) ── */}
-        <div className="relative z-20 mt-auto rounded-b-[28px] sm:rounded-b-[32px] overflow-visible">
-          {/* Animated Rising Backdrop Curtain with Big Dome Leading from Bottom Up */}
-          <motion.div
-            initial={false}
-            animate={{
-              y: isHovered ? 0 : 30,
-              scaleY: isHovered ? 1 : 0,
-              opacity: isHovered ? 1 : 0,
-            }}
-            style={{ transformOrigin: "bottom center" }}
-            transition={{
-              type: "spring",
-              stiffness: 240,
-              damping: 22,
-              mass: 0.7,
-            }}
-            className="absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white z-0 pointer-events-none rounded-b-[28px] sm:rounded-b-[32px] overflow-visible shadow-2xl"
+        {/* ── 2. BOTTOM CONTENT SECTION (TEXT & RISING SVG CURVE) ── */}
+        <div className="relative mt-auto p-6 flex flex-col z-10 overflow-hidden rounded-b-[25px] transition-all duration-300">
+          {/* Black Sheet Rising from Bottom */}
+          <div
+            className="absolute bottom-0 left-0 w-full bg-black dark:bg-white -z-10 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] pointer-events-none"
+            style={{ height: isHovered ? "56%" : "0%" }}
+          />
+
+          {/* Dynamic SVG Curve Leading the Rising Sheet */}
+          <svg
+            className="absolute left-0 w-full h-[150px] -z-10 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] pointer-events-none text-black dark:text-white fill-current"
+            style={{ bottom: isHovered ? "55%" : "-40%" }}
           >
-            {/* Wide, Smooth Convex Arc (مطابق تماماً للتصميم المرجعي) */}
-            <div className="absolute -top-12 sm:-top-14 left-0 right-0 h-12 sm:h-14 overflow-visible pointer-events-none">
-              <svg
-                className="w-full h-full text-black dark:text-white fill-current"
-                viewBox="0 0 100 28"
-                preserveAspectRatio="none"
-              >
-                {/* Smooth, continuous convex dome curve */}
-                <path d="M 0,28 Q 50,0 100,28 Z" />
-              </svg>
-            </div>
-          </motion.div>
+            <path d={curvePath} stroke="none" className="transition-all duration-300" />
+          </svg>
 
-          {/* Content Layer (Text & Action Buttons) */}
-          <div className="relative px-5 pb-5 pt-4 z-10 flex flex-col justify-between transition-colors duration-400">
-            {/* Product Title & Price */}
-            <div className="space-y-1.5 mb-4">
-              <div className="flex items-center justify-between gap-2">
-                <h3
-                  className={`font-black text-sm sm:text-base tracking-tight line-clamp-1 transition-colors duration-300 ${
-                    isHovered ? "text-white dark:text-black" : "text-zinc-900 dark:text-white"
-                  }`}
-                >
-                  {product.name}
-                </h3>
-                <span
-                  className={`font-black text-sm sm:text-base whitespace-nowrap transition-colors duration-300 ${
-                    isHovered ? "text-white dark:text-black" : "text-zinc-900 dark:text-white"
-                  }`}
-                >
-                  {formatPrice(displayPrice)}
-                </span>
-              </div>
+          {/* Product Title & Price */}
+          <div className="flex justify-between items-start gap-3">
+            <h3 className="text-xl sm:text-2xl font-bold text-black dark:text-white transition-colors duration-300 group-hover:text-white dark:group-hover:text-black max-w-[70%] truncate tracking-tight">
+              {product.name}
+            </h3>
+            <span className="text-lg sm:text-xl font-bold text-black dark:text-white transition-colors duration-300 group-hover:text-white dark:group-hover:text-black whitespace-nowrap">
+              {formatPrice(displayPrice)}
+            </span>
+          </div>
 
-              {/* Description */}
-              <p
-                className={`text-[11px] sm:text-xs line-clamp-2 leading-relaxed transition-colors duration-300 ${
-                  isHovered ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500 dark:text-zinc-400"
-                }`}
-              >
-                {product.description || product.subtitle || "Our premium collection in high-density cotton"}
-              </p>
-            </div>
+          {/* Description */}
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 my-2.5 line-clamp-2 transition-colors duration-300 group-hover:text-gray-300 dark:group-hover:text-zinc-700 leading-relaxed">
+            {product.description || "Our premium collection in high-density cotton"}
+          </p>
 
-            {/* Bottom Actions Row */}
-            <div className="flex items-center gap-2.5">
-              {/* Wishlist Button (Matching Reference) */}
-              <button
-                type="button"
-                onMouseDown={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleWishlist(product);
-                }}
-                className={`relative z-30 w-11 h-11 rounded-2xl transition-all duration-300 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 hover:scale-105 pointer-events-auto ${
-                  isHovered
-                    ? "bg-transparent text-white border border-zinc-700 hover:border-zinc-400 hover:bg-white/10 dark:text-black dark:border-zinc-300 dark:hover:border-black dark:hover:bg-black/5"
-                    : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                }`}
-                title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
-                aria-label={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
-              >
+          {/* ── 3. INTERACTIVE BUBBLE-EXPANDING BUTTONS ── */}
+          <div className="flex justify-between items-center gap-3 mt-2">
+            {/* Wishlist / Heart Button */}
+            <button
+              type="button"
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWishlist(product);
+              }}
+              className="group/btn relative overflow-hidden flex items-center justify-center w-11 h-11 border border-[#292929] dark:border-zinc-700 bg-[#F9F9F9] dark:bg-zinc-900 transition-all duration-300 rounded-[15px] hover:border-white active:scale-95 flex-shrink-0 cursor-pointer"
+              title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+            >
+              {/* Normal State Icon */}
+              <span className="relative top-0 flex items-center justify-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-translate-y-10">
                 <Heart
-                  size={18}
-                  className={`pointer-events-none transition-transform duration-200 ${
-                    isFavorite ? "fill-red-500 text-red-500 scale-110" : "currentColor"
-                  }`}
+                  size={19}
+                  className={`transition-colors ${isFavorite ? "fill-red-500 text-red-500" : ""}`}
                 />
-              </button>
+              </span>
 
-              {/* Add to Cart Button (Matching Reference Pill Shape) */}
-              <button
-                type="button"
-                onMouseDown={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={handleAddToCart}
-                className={`flex-1 h-11 px-5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm ${
-                  isHovered
-                    ? isAddedBriefly
-                      ? "bg-emerald-500 text-white"
-                      : "bg-white text-black hover:bg-zinc-100 dark:bg-black dark:text-white dark:hover:bg-zinc-800 shadow-md font-black"
-                    : isAddedBriefly
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-bold"
-                }`}
-              >
+              {/* Hover Bubble Container */}
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 z-10 pointer-events-none">
+                <span className="absolute text-white dark:text-black z-20 flex items-center justify-center">
+                  <Heart
+                    size={19}
+                    className={`transition-colors ${isFavorite ? "fill-red-500 text-red-500" : "fill-white text-white dark:fill-black dark:text-black"}`}
+                  />
+                </span>
+                {/* Expanding Bubble */}
+                <div className="absolute bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[15px]" />
+              </div>
+            </button>
+
+            {/* Add to Cart Button */}
+            <button
+              type="button"
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={handleAddToCart}
+              className="group/btn relative overflow-hidden flex-1 h-11 border border-[#292929] dark:border-zinc-700 bg-[#F9F9F9] dark:bg-zinc-900 transition-all duration-300 rounded-[15px] hover:border-white active:scale-95 flex items-center justify-center cursor-pointer"
+            >
+              {/* Normal State Content */}
+              <span className="relative top-0 flex items-center justify-center gap-2 text-xs sm:text-sm font-black text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-translate-y-10">
                 {isAddedBriefly ? (
                   <>
-                    <Check size={16} className="animate-bounce" />
+                    <Check size={16} className="text-emerald-600 animate-bounce" />
                     <span>تمت الإضافة!</span>
                   </>
                 ) : (
                   <>
                     <span>Add to cart</span>
-                    <ShoppingCart size={15} />
+                    <ShoppingCart size={16} />
                   </>
                 )}
-              </button>
-            </div>
+              </span>
+
+              {/* Hover Bubble Container */}
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 z-10 pointer-events-none">
+                <span className="absolute text-white dark:text-black z-20 flex items-center justify-center gap-2 text-xs sm:text-sm font-black">
+                  {isAddedBriefly ? (
+                    <>
+                      <Check size={16} className="text-emerald-400 animate-bounce" />
+                      <span>تمت الإضافة!</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Add to cart</span>
+                      <ShoppingCart size={16} />
+                    </>
+                  )}
+                </span>
+                {/* Expanding Bubble */}
+                <div className="absolute bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[15px]" />
+              </div>
+            </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.article>
   );
 }
