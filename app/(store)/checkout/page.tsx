@@ -18,7 +18,6 @@ import {
   CheckCircle2,
   ChevronRight,
   ArrowRight,
-  ChevronLeft,
 } from "lucide-react";
 import { useCart } from "@/features/cart/CartProvider";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
@@ -90,16 +89,17 @@ export default function CheckoutPage() {
           setValue("governorate", def.nameAr);
         }
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error("Error loading shipping rates:", err);
+      });
   }, [setValue]);
 
-  // Only redirect if cart has finished hydration and is truly empty
+  // Guard: redirect empty cart
   useEffect(() => {
-    if (isHydrated && items.length === 0) {
-      setIsRedirecting(true);
+    if (isHydrated && items.length === 0 && !orderSuccess) {
       router.replace("/");
     }
-  }, [isHydrated, items.length, router]);
+  }, [isHydrated, items.length, orderSuccess, router]);
 
   // Sync paymentMethod field with category/method state
   useEffect(() => {
@@ -115,6 +115,8 @@ export default function CheckoutPage() {
   );
   const currentShippingCost = activeRateObj?.price ?? 50;
   const finalOrderTotal = totalPrice + currentShippingCost;
+  const onlineNumberDisplay =
+    onlineMethod === "vodafone_cash" ? vodafoneNumber : instapayUsername;
 
   if (!mounted || !isHydrated || items.length === 0 || isRedirecting) {
     return (

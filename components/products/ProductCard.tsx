@@ -30,29 +30,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageWrapperRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const svgPathRef = useRef<SVGPathElement>(null);
-
-  const [svgPath, setSvgPath] = useState({
-    defaultPath: "",
-    hoverPath: "",
-  });
-
-  // Calculate exact SVG dome curve dimensions according to card width (matching Shopflex)
-  const updateSvgPaths = () => {
-    if (imageWrapperRef.current) {
-      const width = imageWrapperRef.current.clientWidth || 300;
-      setSvgPath({
-        defaultPath: `M0 100 L0 200 L${width} 200 L${width} 100 Q${width / 2} 100 0 100`,
-        hoverPath: `M0 100 L0 200 L${width} 200 L${width} 100 Q${width / 2} 0 0 100`,
-      });
-    }
-  };
-
-  useEffect(() => {
-    updateSvgPaths();
-    window.addEventListener("resize", updateSvgPaths);
-    return () => window.removeEventListener("resize", updateSvgPaths);
-  }, []);
 
   const primaryImage = product.mainImage || "/placeholder.jpg";
   const hasHoverImage = Boolean(product.hoverImage && product.hoverImage !== primaryImage);
