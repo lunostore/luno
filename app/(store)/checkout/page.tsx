@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +17,8 @@ import {
   ShieldCheck,
   CheckCircle2,
   ChevronRight,
+  ArrowRight,
+  ChevronLeft,
 } from "lucide-react";
 import { useCart } from "@/features/cart/CartProvider";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
@@ -75,17 +78,6 @@ export default function CheckoutPage() {
 
   const isEgyptianPhone = (val?: string) =>
     !!val && /^(\+20|0)?1[0-2,5]{1}[0-9]{8}$/.test(val.trim());
-
-  const isFormValid =
-    !!watchedName &&
-    watchedName.trim().length >= 2 &&
-    isEgyptianPhone(watchedPhone) &&
-    !!selectedGovernorate &&
-    !!watchedCity &&
-    watchedCity.trim().length >= 2 &&
-    !!watchedAddress &&
-    watchedAddress.trim().length >= 8 &&
-    (paymentCategory === "cash" || isEgyptianPhone(watchedTransferPhone));
 
   useEffect(() => {
     setMounted(true);
@@ -194,19 +186,26 @@ export default function CheckoutPage() {
     }
   };
 
-  const onlineNumberDisplay =
-    onlineMethod === "vodafone_cash" ? vodafoneNumber : instapayUsername;
-
   return (
     <div className="pt-20 min-h-screen font-sans" dir="rtl">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <motion.h1
-          className="text-3xl font-black tracking-tight mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          إتمام الطلب
-        </motion.h1>
+        {/* Header Section */}
+        <div className="mb-8">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all bg-gray-100 dark:bg-zinc-800/90 hover:bg-gray-200 dark:hover:bg-zinc-700 py-2 px-3.5 rounded-xl cursor-pointer mb-3 border border-gray-200/60 dark:border-zinc-700/60"
+            >
+              <ArrowRight size={16} />
+              <span>رجوع للمتجر</span>
+            </Link>
+            <motion.h1
+              className="text-3xl font-black tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              إتمام الطلب
+            </motion.h1>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
