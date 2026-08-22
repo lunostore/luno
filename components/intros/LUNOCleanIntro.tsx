@@ -9,6 +9,7 @@ interface LUNOCleanIntroProps {
 
 export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
   const [show, setShow] = useState(true);
+  const [domeCompleted, setDomeCompleted] = useState(false);
   const onCompleteRef = useRef(onComplete);
 
   useEffect(() => {
@@ -16,10 +17,10 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    // 1.7 seconds display duration then initiate curtain slide up
+    // 0.65s dome rise + 1.65s intro display duration = 2.3s total before curtain lift
     const timer = setTimeout(() => {
       setShow(false);
-    }, 1700);
+    }, 2350);
 
     return () => clearTimeout(timer);
   }, []);
@@ -34,79 +35,109 @@ export function LUNOCleanIntro({ onComplete }: LUNOCleanIntroProps) {
         <motion.div
           key="luno-minimal-light-intro"
           onClick={handleSkip}
-          className="fixed inset-0 z-[99999] bg-black text-white flex items-center justify-center overflow-hidden select-none cursor-pointer"
-          initial={{ y: 0, opacity: 1 }}
+          className="fixed inset-0 z-[99999] overflow-hidden select-none cursor-pointer"
+          initial={{ y: 0 }}
           exit={{
             y: "-100%",
             transition: {
               duration: 0.85,
-              ease: [0.76, 0, 0.24, 1], // Cinematic luxury ease curve
+              ease: [0.76, 0, 0.24, 1], // Cinematic luxury curtain lift
             },
           }}
         >
-          {/* Main Typography & Light Beam Container with subtle parallax exit */}
+          {/* ── 1. RISING CONVEX DOME BLACK CURTAIN (يبدأ من تحت بقوس محدب ويصعد ليغطي الشاشة بالأسود) ── */}
           <motion.div
-            exit={{
-              y: -50,
-              opacity: 0.8,
-              transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+            initial={{ y: "115%" }}
+            animate={{ y: "-18%" }}
+            transition={{
+              duration: 0.65,
+              ease: [0.32, 0.72, 0, 1], // Fast and smooth curve acceleration
             }}
-            className="relative flex flex-col items-center justify-center px-8 py-12 overflow-hidden"
+            onAnimationComplete={() => setDomeCompleted(true)}
+            className="absolute inset-x-0 -bottom-10 h-[145vh] bg-black z-0 pointer-events-none"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, filter: "blur(10px)" }}
-              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-              transition={{
-                duration: 0.6,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="relative flex flex-col items-center justify-center"
-            >
-              {/* Main Brand Text: "LUNO" */}
-              <h1 className="relative text-7xl sm:text-9xl md:text-[13rem] font-[950] tracking-[0.25em] text-white uppercase drop-shadow-[0_0_40px_rgba(255,255,255,0.7)] z-10 pl-[0.25em]">
-                LUNO
-              </h1>
-
-              {/* Light Beam / Shimmer Effect Passing across the text */}
-              <motion.div
-                className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-r from-transparent via-white/90 to-transparent mix-blend-overlay"
-                initial={{ x: "-120%" }}
-                animate={{ x: "120%" }}
-                transition={{
-                  duration: 1.2,
-                  delay: 0.15,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                  repeatDelay: 0.4,
-                }}
-              />
-
-              {/* Glowing Laser Light Bar Line Passing Left to Right */}
-              <motion.div
-                className="absolute top-0 bottom-0 w-[6px] bg-white shadow-[0_0_30px_12px_rgba(255,255,255,0.95)] z-30 pointer-events-none"
-                initial={{ x: -280, opacity: 0 }}
-                animate={{
-                  x: [280, -280],
-                  opacity: [0, 1, 1, 0],
-                }}
-                transition={{
-                  duration: 1.1,
-                  delay: 0.2,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.div>
+            {/* Top Leading Convex Dome Arc Curve (القوس الأسود المحدب للأعلى) */}
+            <div className="absolute -top-[16vh] sm:-top-[22vh] left-0 right-0 h-[16vh] sm:h-[22vh] overflow-visible pointer-events-none">
+              <svg
+                className="w-full h-full text-black fill-current"
+                viewBox="0 0 100 28"
+                preserveAspectRatio="none"
+              >
+                {/* Wide, smooth convex dome curve */}
+                <path d="M 0,28 Q 50,0 100,28 Z" />
+              </svg>
+            </div>
           </motion.div>
 
-          {/* Minimalist Accent Bottom Progress Line */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900">
-            <motion.div
-              className="h-full bg-white shadow-[0_0_12px_white]"
-              initial={{ scaleX: 0, originX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 1.7, ease: "easeInOut" }}
-            />
+          {/* ── 2. MAIN INTRO CONTENT (Appears once black dome covers screen) ── */}
+          <div className="relative z-10 w-full h-full flex items-center justify-center">
+            {domeCompleted && (
+              <motion.div
+                exit={{
+                  y: -50,
+                  opacity: 0.8,
+                  transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+                }}
+                className="relative flex flex-col items-center justify-center px-8 py-12 overflow-hidden"
+              >
+                <motion.div
+                  initial={{ scale: 0.92, opacity: 0, filter: "blur(12px)" }}
+                  animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+                  transition={{
+                    duration: 0.55,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="relative flex flex-col items-center justify-center"
+                >
+                  {/* Main Brand Text: "LUNO" */}
+                  <h1 className="relative text-7xl sm:text-9xl md:text-[13rem] font-[950] tracking-[0.25em] text-white uppercase drop-shadow-[0_0_45px_rgba(255,255,255,0.75)] z-10 pl-[0.25em]">
+                    LUNO
+                  </h1>
+
+                  {/* Light Beam / Shimmer Effect Passing across the text */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-r from-transparent via-white/90 to-transparent mix-blend-overlay"
+                    initial={{ x: "-120%" }}
+                    animate={{ x: "120%" }}
+                    transition={{
+                      duration: 1.1,
+                      delay: 0.1,
+                      ease: "easeInOut",
+                      repeat: Infinity,
+                      repeatDelay: 0.4,
+                    }}
+                  />
+
+                  {/* Glowing Laser Light Bar Line Passing Left to Right */}
+                  <motion.div
+                    className="absolute top-0 bottom-0 w-[6px] bg-white shadow-[0_0_30px_12px_rgba(255,255,255,0.95)] z-30 pointer-events-none"
+                    initial={{ x: -280, opacity: 0 }}
+                    animate={{
+                      x: [280, -280],
+                      opacity: [0, 1, 1, 0],
+                    }}
+                    transition={{
+                      duration: 1.0,
+                      delay: 0.15,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </motion.div>
+              </motion.div>
+            )}
           </div>
+
+          {/* Minimalist Accent Bottom Progress Line */}
+          {domeCompleted && (
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900 z-20">
+              <motion.div
+                className="h-full bg-white shadow-[0_0_12px_white]"
+                initial={{ scaleX: 0, originX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1.6, ease: "easeInOut" }}
+              />
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
