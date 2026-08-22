@@ -24,11 +24,11 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+    <section className="py-12 sm:py-20 md:py-28 px-2.5 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-12 px-1 sm:px-0">
         <div>
           <motion.p
-            className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2"
+            className="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-gray-400 mb-1 sm:mb-2"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -36,7 +36,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             {settings?.featuredSubtitle || "Curated for you"}
           </motion.p>
           <motion.h2
-            className="text-3xl md:text-4xl font-bold tracking-tight text-foreground"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
