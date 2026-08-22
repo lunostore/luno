@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, MouseEvent } from "react";
+import { useState, useRef, useEffect, MouseEvent } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Heart, ShoppingCart, Check } from "lucide-react";
@@ -24,16 +24,45 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const displayPrice = product.salePrice ?? product.price;
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [isAddedBriefly, setIsAddedBriefly] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const imageWrapperRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const svgPathRef = useRef<SVGPathElement>(null);
+
+  const [svgPath, setSvgPath] = useState({
+    defaultPath: "",
+    hoverPath: "",
+  });
+
+  // Calculate exact SVG dome curve dimensions according to card width (matching Shopflex)
+  const updateSvgPaths = () => {
+    if (imageWrapperRef.current) {
+      const width = imageWrapperRef.current.clientWidth || 300;
+      setSvgPath({
+        defaultPath: `M0 100 L0 200 L${width} 200 L${width} 100 Q${width / 2} 100 0 100`,
+        hoverPath: `M0 100 L0 200 L${width} 200 L${width} 100 Q${width / 2} 0 0 100`,
+      });
+    }
+  };
+
+  useEffect(() => {
+    updateSvgPaths();
+    window.addEventListener("resize", updateSvgPaths);
+    return () => window.removeEventListener("resize", updateSvgPaths);
+  }, []);
 
   const primaryImage = product.mainImage || "/placeholder.jpg";
   const hoverImage = product.hoverImage || product.images?.[0] || primaryImage;
   const currentImage = isHovered ? hoverImage : primaryImage;
 
   const handleAddToCart = (e: MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
+
+    if (isAdding) return;
 
     const targetVariant = product.variants?.[0];
     const availableSizes = targetVariant?.sizes || [];
@@ -56,103 +85,146 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           image: product.mainImage || "",
         };
 
-    addItem(product, 1, defaultSize, selectedColor);
-    setIsAddedBriefly(true);
-    setTimeout(() => setIsAddedBriefly(false), 1400);
+    // Shopflex Fly-to-Cart Animation
+    const imgEl = imgRef.current;
+    const cartBtn = document.getElementById("cartButton") || document.querySelector("header button");
+
+    if (imgEl && cartBtn) {
+      setIsAdding(true);
+      const imgRect = imgEl.getBoundingClientRect();
+      const cartRect = cartBtn.getBoundingClientRect();
+
+      const clone = imgEl.cloneNode(true) as HTMLImageElement;
+      Object.assign(clone.style, {
+        position: "fixed",
+        top: `${imgRect.top}px`,
+        left: `${imgRect.left}px`,
+        width: `${imgRect.width}px`,
+        height: `${imgRect.height}px`,
+        zIndex: "99999999",
+        opacity: "1",
+        pointerEvents: "none",
+        transition: "all 0.75s cubic-bezier(0.76, 0, 0.24, 1)",
+      });
+
+      document.body.appendChild(clone);
+
+      requestAnimationFrame(() => {
+        clone.style.top = `${cartRect.top - imgRect.height * 0.4}px`;
+        clone.style.left = `${cartRect.left - imgRect.width * 0.4}px`;
+        clone.style.transform = "scale(0.12)";
+        clone.style.opacity = "0.2";
+      });
+
+      setTimeout(() => {
+        if (clone.parentNode) {
+          clone.parentNode.removeChild(clone);
+        }
+        addItem(product, 1, defaultSize, selectedColor);
+        setIsAdding(false);
+        setIsAddedBriefly(true);
+        setTimeout(() => setIsAddedBriefly(false), 1200);
+      }, 750);
+    } else {
+      addItem(product, 1, defaultSize, selectedColor);
+      setIsAddedBriefly(true);
+      setTimeout(() => setIsAddedBriefly(false), 1200);
+    }
   };
 
   const customScale = product.imageScale ? product.imageScale / 100 : 1;
   const customOffsetY = product.imageOffsetY || 0;
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 30 }}
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
+      viewport={{ once: true, amount: 0.1 }}
       transition={{
-        duration: 0.55,
+        duration: 0.6,
         delay: (index % 4) * 0.08,
-        ease: [0.16, 1, 0.3, 1],
+        ease: [0.76, 0, 0.24, 1],
       }}
-      className="relative h-full select-none pt-10"
+      className="w-full relative pt-6 select-none"
     >
+      {/* ── EXACT SHOPFLEX CARD CONTAINER ── */}
       <div
         ref={cardRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => openProduct(product.id)}
-        className="group relative w-full max-w-[320px] mx-auto h-[440px] rounded-[25px] border border-[#CDCDCD] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-500 transition-all duration-300 overflow-visible flex flex-col justify-between bg-white dark:bg-[#121214] cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.14)]"
+        className="group relative w-full rounded-[25px] border border-[#cdcdcd] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-400 transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white dark:bg-[#121214] cursor-pointer overflow-visible"
+        data-cursor-size="80px"
+        data-cursor-text="Ver"
       >
-        {/* ── 1. PRODUCT IMAGE CONTAINER (NO CLIPPING, POPS OUT FREELY OVER TOP) ── */}
-        <div className="relative w-full flex-1 flex items-center justify-center p-2 overflow-visible z-20">
+        {/* ── TOP IMAGE CONTAINER (SQUARE PB-100% WITH FLOATING POP-OUT & FLOOR SHADOW) ── */}
+        <div
+          ref={imageWrapperRef}
+          className="relative w-full pb-[100%] flex justify-center overflow-visible"
+        >
           <div
-            className="relative w-full h-full flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] pointer-events-none"
+            className="absolute top-0 w-[calc(100%-45px)] h-full flex items-center justify-center pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-top-[20%] group-hover:scale-110"
             style={{
               transform: isHovered
-                ? `translateY(calc(-38px + ${customOffsetY}px)) scale(${1.18 * customScale})`
-                : `translateY(${customOffsetY}px) scale(${1.02 * customScale})`,
+                ? `translateY(${customOffsetY}px) scale(${1.1 * customScale})`
+                : `translateY(${customOffsetY}px) scale(${1 * customScale})`,
             }}
           >
-            {/* Real Soft Floor Shadow Under Garment */}
-            <div
-              className={`absolute w-[75%] h-[12%] bg-black dark:bg-white/30 rounded-[50%] filter blur-[18px] bottom-[2%] left-[12.5%] -z-10 pointer-events-none transition-all duration-500 ${
-                isHovered ? "opacity-45 scale-110 translate-y-3" : "opacity-30 scale-100"
-              }`}
-            />
+            {/* Ambient Floor Shadow under garment */}
+            <div className="absolute right-[15%] bottom-[10%] w-[70%] h-[9%] bg-black dark:bg-white/40 rounded-[50%] filter blur-[24px] opacity-40 -z-10 transition-opacity duration-300" />
 
-            <div className="relative w-[240px] h-[240px] flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center">
               <Image
+                ref={imgRef}
                 src={currentImage}
                 alt={product.name}
                 fill
                 priority={index < 4}
                 quality={95}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-contain object-center drop-shadow-[0_14px_20px_rgba(0,0,0,0.15)] pointer-events-none transition-all duration-500"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className="object-contain object-center drop-shadow-[0_10px_20px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)]"
               />
             </div>
           </div>
         </div>
 
-        {/* ── 2. BOTTOM CONTENT SECTION (TEXT & RISING CONVEX DOME SHEET) ── */}
-        <div className="relative mt-auto px-5 pb-5 pt-2 flex flex-col z-10 overflow-visible transition-colors duration-300 rounded-b-[25px]">
-          {/* Animated Rising Sheet with Prominent Convex Arc Dome on Top */}
-          <div
-            className={`absolute inset-x-0 bottom-0 top-0 bg-black dark:bg-white -z-10 pointer-events-none transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] rounded-b-[25px] ${
-              isHovered ? "translate-y-0 opacity-100" : "translate-y-[135%] opacity-0"
-            }`}
-          >
-            {/* Wide Convex Dome SVG Curve Leading the Rising Sheet */}
-            <div className="absolute bottom-full left-0 right-0 h-[44px] sm:h-[50px] overflow-visible pointer-events-none">
-              <svg
-                className="w-full h-full text-black dark:text-white fill-current"
-                viewBox="0 0 100 28"
-                preserveAspectRatio="none"
-              >
-                {/* Smooth panoramic convex dome arc curve */}
-                <path d="M 0,28 Q 50,0 100,28 Z" />
-              </svg>
-            </div>
-          </div>
+        {/* ── BOTTOM CONTENT SECTION (WITH SLIDING SVG CURVE & RISING BLACK SHELF) ── */}
+        <div className="bottom-0 px-6 py-6 relative block rounded-b-[25px] pt-[37%] -mt-[37%] overflow-hidden">
+          {/* Animated Rising Bottom Background Shelf */}
+          <div className="absolute left-0 bottom-0 w-full h-0 group-hover:h-[56%] rounded-b-[25px] bg-[#000000] dark:bg-white -z-10 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] pointer-events-none" />
 
-          {/* Product Title & Price */}
-          <div className="flex justify-between items-center gap-2 relative z-10 mb-1">
-            <h3 className="text-lg sm:text-xl font-black text-black dark:text-white transition-colors duration-300 group-hover:text-white dark:group-hover:text-black max-w-[68%] truncate tracking-tight">
+          {/* Animated SVG Curve */}
+          <svg
+            className="absolute -bottom-[40%] group-hover:bottom-[55%] left-0 w-full pointer-events-none fill-[#000000] dark:fill-white stroke-none -z-10 transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)]"
+            viewBox="0 0 300 200"
+            preserveAspectRatio="none"
+            style={{ height: "200px" }}
+          >
+            <path
+              ref={svgPathRef}
+              d={isHovered ? svgPath.hoverPath || "M0 100 L0 200 L300 200 L300 100 Q150 0 0 100" : svgPath.defaultPath || "M0 100 L0 200 L300 200 L300 100 Q150 100 0 100"}
+              style={{ transition: "d 0.3s cubic-bezier(0.76, 0, 0.24, 1)" }}
+            />
+          </svg>
+
+          {/* Title & Price Row */}
+          <div className="flex justify-between items-baseline gap-2 relative z-10">
+            <p className="text-2xl text-black dark:text-white group-hover:text-white dark:group-hover:text-black font-semibold max-w-[70%] text-ellipsis whitespace-nowrap overflow-hidden transition-colors duration-300 delay-100">
               {product.name}
-            </h3>
-            <span className="text-base sm:text-lg font-black text-black dark:text-white transition-colors duration-300 group-hover:text-white dark:group-hover:text-black whitespace-nowrap">
+            </p>
+            <span className="text-xl uppercase text-black dark:text-white group-hover:text-white dark:group-hover:text-black font-semibold whitespace-nowrap transition-colors duration-300 delay-100">
               {formatPrice(displayPrice)}
             </span>
           </div>
 
           {/* Description */}
-          <p className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-1 transition-colors duration-300 group-hover:text-gray-300 dark:group-hover:text-zinc-700 leading-normal relative z-10">
-            {product.description || "Our premium collection in high-density cotton"}
-          </p>
+          <span className="text-black dark:text-zinc-400 group-hover:text-white dark:group-hover:text-zinc-800 my-3 block text-sm line-clamp-2 leading-relaxed transition-colors duration-300 delay-100">
+            {product.description || "High-density premium fabric with signature cut and tailored fit."}
+          </span>
 
-          {/* ── 3. INTERACTIVE BUBBLE-EXPANDING BUTTONS ── */}
-          <div className="flex justify-between items-center gap-2.5 relative z-10">
-            {/* Wishlist / Heart Button */}
+          {/* ── BUTTONS ROW (EXACT SHOPFLEX PRIMARY BUTTONS WITH BUBBLE HOVER) ── */}
+          <div className="flex justify-between items-center gap-4 relative z-10">
+            {/* Wishlist Button */}
             <button
               type="button"
               onMouseDown={(e) => e.stopPropagation()}
@@ -162,29 +234,29 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 e.stopPropagation();
                 toggleWishlist(product);
               }}
-              className="group/btn relative overflow-hidden flex items-center justify-center w-10 h-10 border border-[#292929] dark:border-zinc-700 bg-[#F9F9F9] dark:bg-zinc-900 transition-all duration-300 rounded-[14px] hover:border-black dark:hover:border-white active:scale-90 flex-shrink-0 cursor-pointer"
+              data-cursor-size="0px"
+              className="group/btn relative overflow-hidden flex items-center justify-center p-[10px] w-12 h-12 rounded-[15px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex-shrink-0 cursor-pointer"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
-              {/* Normal State Icon */}
-              <span className="relative top-0 flex items-center justify-center text-[#292929] dark:text-zinc-200 transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-translate-y-10">
+              {/* Normal Icon */}
+              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10">
                 <Heart
-                  size={18}
+                  size={20}
                   className={`transition-colors ${isFavorite ? "fill-red-500 text-red-500" : ""}`}
                 />
-              </span>
+              </p>
 
-              {/* Hover Bubble Container */}
-              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 z-10 pointer-events-none">
-                <span className="absolute text-white dark:text-black z-20 flex items-center justify-center">
+              {/* Hover Expanding Bubble Overlay */}
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
+                <p className="absolute w-full flex justify-center items-center text-white dark:text-black text-center z-10">
                   <Heart
-                    size={18}
+                    size={20}
                     className={`transition-colors ${
                       isFavorite ? "fill-red-500 text-red-500" : "fill-white text-white dark:fill-black dark:text-black"
                     }`}
                   />
-                </span>
-                {/* Expanding Bubble */}
-                <div className="absolute bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[14px]" />
+                </p>
+                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[15px]" />
               </div>
             </button>
 
@@ -194,45 +266,46 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               onMouseDown={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={handleAddToCart}
-              className="group/btn relative overflow-hidden flex-1 h-10 border border-[#292929] dark:border-zinc-700 bg-[#F9F9F9] dark:bg-zinc-900 transition-all duration-300 rounded-[14px] hover:border-black dark:hover:border-white active:scale-95 flex items-center justify-center cursor-pointer"
+              data-cursor-size="0px"
+              className="group/btn relative overflow-hidden flex-1 h-12 rounded-[15px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex items-center justify-center cursor-pointer"
             >
-              {/* Normal State Content */}
-              <span className="relative top-0 flex items-center justify-center gap-1.5 text-xs font-black text-[#292929] dark:text-zinc-200 transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-translate-y-10">
+              {/* Normal Text Content */}
+              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-medium text-sm">
                 {isAddedBriefly ? (
-                  <>
-                    <Check size={15} className="text-emerald-600 animate-bounce" />
+                  <span className="flex items-center gap-2">
+                    <Check size={18} className="text-emerald-600 animate-bounce" />
                     <span>تمت الإضافة!</span>
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span className="flex items-center gap-2">
                     <span>Add to cart</span>
-                    <ShoppingCart size={15} />
-                  </>
+                    <ShoppingCart size={18} />
+                  </span>
                 )}
-              </span>
+              </p>
 
-              {/* Hover Bubble Container */}
-              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 z-10 pointer-events-none">
-                <span className="absolute text-white dark:text-black z-20 flex items-center justify-center gap-1.5 text-xs font-black">
+              {/* Hover Expanding Bubble Overlay */}
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
+                <p className="absolute w-full flex justify-center items-center text-white dark:text-black text-center z-10 font-medium text-sm">
                   {isAddedBriefly ? (
-                    <>
-                      <Check size={15} className="text-emerald-400 animate-bounce" />
+                    <span className="flex items-center gap-2">
+                      <Check size={18} className="text-emerald-400 animate-bounce" />
                       <span>تمت الإضافة!</span>
-                    </>
+                    </span>
                   ) : (
-                    <>
+                    <span className="flex items-center gap-2">
                       <span>Add to cart</span>
-                      <ShoppingCart size={15} />
-                    </>
+                      <ShoppingCart size={18} />
+                    </span>
                   )}
-                </span>
-                {/* Expanding Bubble */}
-                <div className="absolute bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[14px]" />
+                </p>
+                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[15px]" />
               </div>
             </button>
           </div>
         </div>
       </div>
-    </motion.article>
+    </motion.div>
   );
 }
+

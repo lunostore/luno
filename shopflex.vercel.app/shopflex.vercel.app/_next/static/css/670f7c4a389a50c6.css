@@ -1,0 +1,360 @@
+.InfiniteText_sliderContainer__s1_qD {
+    z-index: 5;
+    position: absolute
+}
+
+.InfiniteText_sliderContainer__s1_qD.InfiniteText_small__NszUX p {
+    font-size: clamp(4.0625rem, .6799rem + 5.423vw, 7.1875rem);
+    line-height: clamp(4.0625rem, .6799rem + 5.423vw, 7.1875rem)
+}
+
+.InfiniteText_sliderContainer__s1_qD.InfiniteText_hero__zhh5P {
+    top: calc(100vh - 17em)
+}
+
+.InfiniteText_sliderContainer__s1_qD.InfiniteText_bottom__4AHx2 {
+    bottom: 0
+}
+
+.InfiniteText_slider__iW_BM {
+    position: relative;
+    white-space: nowrap
+}
+
+.InfiniteText_slider__iW_BM p {
+    position: relative;
+    margin: 0;
+    color: #fff;
+    font-size: clamp(11.25rem, 7.8674rem + 5.423vw, 14.375rem);
+    line-height: clamp(13.125rem, 9.7424rem + 5.423vw, 16.25rem);
+    font-weight: 500;
+    text-transform: capitalize;
+    padding-right: 50px
+}
+
+.InfiniteText_slider__iW_BM p:nth-of-type(2) {
+    position: absolute;
+    left: 100%;
+    top: 0
+}
+
+.SectionTitle_title__t9ZH_ {
+    font-size: clamp(2.5rem, 1.1413rem + 2.1739vw, 3.75rem);
+    line-height: clamp(3rem, 1.6413rem + 2.1739vw, 4.25rem);
+    background: #f9f9f9;
+    padding-right: 1rem
+}
+
+.SectionTitle_left__2JZ3Y {
+    justify-content: start
+}
+
+.SectionTitle_center__8q5G2 {
+    justify-content: center
+}
+
+.SectionTitle_center__8q5G2 .SectionTitle_line__3UtJT {
+    background: linear-gradient(90deg, transparent, #d2d2d2 30%, #d2d2d2 70%, transparent)
+}
+
+.SectionTitle_center__8q5G2 h2 {
+    padding-left: 1rem
+}
+
+.SectionTitle_right__wDn_T {
+    justify-content: end
+}
+
+.SectionTitle_right__wDn_T h2 {
+    padding-left: 1rem;
+    padding-right: 0
+}
+
+.SectionTitle_line__3UtJT {
+    width: 100%;
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, #9e9e9e 22%, transparent 84%);
+    left: 0;
+    z-index: -1;
+    margin-top: .5rem
+}
+
+.Gallery_imageContainer__ZK1EK {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    opacity: 0;
+    padding: 5em;
+    overflow: hidden;
+    top: 0;
+    transform: translateY(10vh);
+    cursor: pointer;
+    transition-property: width, height, border-radius;
+    transition-timing-function: cubic-bezier(.76, 0, .24, 1);
+    transition-duration: .3s
+}
+
+.Gallery_imageContainer__ZK1EK:nth-of-type(2) {
+    top: -14vh
+}
+
+.Gallery_imageContainer__ZK1EK>div:first-of-type {
+    transform: translateY(100%);
+    opacity: 0;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(.76, 0, .24, 1);
+    transition-duration: .5s
+}
+
+.Gallery_imageContainer__ZK1EK:hover {
+    width: 150%;
+    height: 110%;
+    border-radius: 8px
+}
+
+.Gallery_imageContainer__ZK1EK:hover .Gallery_overlayBackground__ACBya {
+    opacity: 1
+}
+
+.Gallery_imageContainer__ZK1EK:hover>div:first-of-type {
+    transform: translateY(-35%);
+    opacity: 1;
+    transition-delay: .2s
+}
+
+.Gallery_imageContainer__ZK1EK:hover figcaption {
+    width: calc(100% - 10em);
+    height: calc(100% - 10em);
+    border-color: hsla(0, 0%, 100%, .169);
+    border-radius: 8px
+}
+
+.Gallery_imageContainer__ZK1EK:hover figcaption img {
+    height: calc(100% + 10em) !important
+}
+
+.Gallery_imageContainer__ZK1EK figcaption {
+    position: absolute;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    border: 1px solid transparent;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+    transition: all .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.Gallery_imageContainer__ZK1EK figcaption img {
+    height: 100% !important;
+    inset: auto !important;
+    transition: all .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.Gallery_overlayBackground__ACBya {
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    background: #000;
+    background: linear-gradient(0deg, rgba(0, 0, 0, .596) 22%, rgba(0, 0, 0, .049) 84%);
+    transition: all .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.InstagramCard_instagramCard__Gs3Wt {
+    width: 260px;
+    position: absolute;
+    padding: 1.5em 1.5em 5.5em;
+    border: 1px solid #363636;
+    border-radius: .5rem;
+    background-color: rgba(39, 39, 39, .32);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    z-index: 6;
+    left: 10vw;
+    transform: rotate(-10deg);
+    top: -80vh;
+    opacity: 0
+}
+
+.InstagramCard_instagramCard__Gs3Wt>.InstagramCard_videoContainer__Zmy0u {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: .5rem;
+    object-fit: cover;
+    overflow: hidden
+}
+
+.InstagramCard_instagramCard__Gs3Wt figcaption {
+    margin-top: 1rem;
+    display: flex;
+    gap: .5em;
+    flex-direction: column
+}
+
+.InstagramCard_instagramCard__Gs3Wt figcaption span {
+    font-size: 1.2rem
+}
+
+.InstagramCard_brandLogo__xX6yD {
+    position: absolute;
+    bottom: .6em;
+    right: .6em;
+    font-size: 32px !important;
+    color: #fff
+}
+
+.ProductCard_card__F5Ind {
+    position: relative;
+    border-radius: 25px;
+    border: 1px solid #cdcdcd;
+    transition: border-color .3s cubic-bezier(.76, 0, .24, 1);
+    opacity: 0;
+    transform: translateY(50px)
+}
+
+.ProductCard_card__F5Ind:hover {
+    border-color: #292929
+}
+
+.ProductCard_card__F5Ind:hover .ProductCard_imageContainer__6hAzS {
+    top: -20%;
+    transform: scale(1.1)
+}
+
+.ProductCard_card__F5Ind:hover .ProductCard_content__G_D8_:before {
+    height: 56%
+}
+
+.ProductCard_card__F5Ind:hover .ProductCard_content__G_D8_ p,
+.ProductCard_card__F5Ind:hover .ProductCard_content__G_D8_>div>span,
+.ProductCard_card__F5Ind:hover .ProductCard_description__21yMi {
+    color: #fff
+}
+
+.ProductCard_card__F5Ind:hover .ProductCard_svgCurve__ah3Qh {
+    bottom: 55%
+}
+
+.ProductCard_description__21yMi {
+    transition-delay: .1s;
+    transition: color .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.ProductCard_content__G_D8_ {
+    display: block;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    padding-top: 37%;
+    overflow: hidden;
+    margin-top: -37%
+}
+
+.ProductCard_content__G_D8_ p,
+.ProductCard_content__G_D8_>div>span {
+    transition-delay: .1s;
+    transition: color .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.ProductCard_content__G_D8_:before {
+    z-index: -1;
+    content: "";
+    width: 100%;
+    position: absolute;
+    left: 0;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    bottom: 0;
+    background: #000;
+    height: 0;
+    transition: all .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.ProductCard_imageContainer__6hAzS {
+    width: calc(100% - 45px);
+    height: 100%;
+    position: absolute;
+    top: 0;
+    transition: all .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.ProductCard_imageContainer__6hAzS:before {
+    content: "";
+    width: 70%;
+    height: 9%;
+    position: absolute;
+    background: #000;
+    border-radius: 50%;
+    filter: blur(24px);
+    opacity: .4;
+    z-index: -1;
+    right: 15%;
+    bottom: 10%
+}
+
+.ProductCard_svgCurve__ah3Qh {
+    position: absolute;
+    bottom: -40%;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    fill: #000;
+    stroke: none;
+    z-index: -1;
+    transition: all .3s cubic-bezier(.76, 0, .24, 1)
+}
+
+.ProductCard_progress__CcFhS {
+    position: absolute;
+    width: 0;
+    height: calc(100% + 20px) !important;
+    border-radius: 0 !important;
+    background-color: #fff !important;
+    left: -10px !important;
+    top: -10px !important;
+    z-index: auto;
+    animation: ProductCard_progressAnimation__ZVEVl 1s cubic-bezier(.22, .61, .36, 1) forwards
+}
+
+@keyframes ProductCard_progressAnimation__ZVEVl {
+    0% {
+        width: 0
+    }
+    to {
+        width: calc(100% + 20px)
+    }
+}
+
+.ProductCard_buyText__9y714 {
+    display: flex;
+    position: relative;
+    animation: ProductCard_textAppear___ypbv .3s ease forwards;
+    top: 50px
+}
+
+@keyframes ProductCard_textAppear___ypbv {
+    0% {
+        top: 50px
+    }
+    to {
+        top: 0
+    }
+}
+
+.ProductCard_addText__ny4Ao {
+    position: relative;
+    z-index: 10;
+    color: #fff;
+    mix-blend-mode: difference
+}
