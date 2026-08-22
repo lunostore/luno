@@ -78,6 +78,17 @@ export default function CheckoutPage() {
   const isEgyptianPhone = (val?: string) =>
     !!val && /^(\+20|0)?1[0-2,5]{1}[0-9]{8}$/.test(val.trim());
 
+  const isFormValid =
+    !!watchedName &&
+    watchedName.trim().length >= 2 &&
+    isEgyptianPhone(watchedPhone) &&
+    !!selectedGovernorate &&
+    !!watchedCity &&
+    watchedCity.trim().length >= 2 &&
+    !!watchedAddress &&
+    watchedAddress.trim().length >= 8 &&
+    (paymentCategory === "cash" || isEgyptianPhone(watchedTransferPhone));
+
   useEffect(() => {
     setMounted(true);
     // Load shipping rates
@@ -177,6 +188,7 @@ export default function CheckoutPage() {
       const orderId = await createOrder(orderPayload);
 
       setOrderSuccess(true);
+      setIsRedirecting(true);
       clearCart();
       setTimeout(() => {
         router.push(`/order-success?orderId=${orderId}`);
