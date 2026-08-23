@@ -112,13 +112,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Info (Split into 2 Columns: Right & Left) */}
+          {/* Info (Split into 2 Columns: Right & Left with compact gap) */}
           <div className="md:col-span-5">
             <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
               Info
             </h4>
-            <div className="grid grid-cols-2 gap-x-6 sm:gap-x-10 gap-y-3 text-sm text-zinc-600 dark:text-zinc-400">
-              <ul className="space-y-3">
+            <div className="flex flex-row items-start gap-8 sm:gap-12 text-sm text-zinc-600 dark:text-zinc-400">
+              <ul className="space-y-3 min-w-[140px]">
                 {[
                   { href: "/reviews", label: "آراء العملاء (Reviews)" },
                   { href: "/about", label: "About Us" },
@@ -127,14 +127,14 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="hover:text-zinc-950 dark:hover:text-white transition-colors"
+                      className="hover:text-zinc-950 dark:hover:text-white transition-colors whitespace-nowrap"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-              <ul className="space-y-3">
+              <ul className="space-y-3 min-w-[140px]">
                 {[
                   { href: "/shipping-policy", label: "Shipping & Returns" },
                   { href: "/privacy", label: "Privacy Policy" },
@@ -143,7 +143,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="hover:text-zinc-950 dark:hover:text-white transition-colors"
+                      className="hover:text-zinc-950 dark:hover:text-white transition-colors whitespace-nowrap"
                     >
                       {link.label}
                     </Link>
