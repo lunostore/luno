@@ -317,6 +317,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   )}
                 </p>
                 <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+              </div>
+            </button>
           </div>
         </div>
       </div>
