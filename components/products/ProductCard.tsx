@@ -127,7 +127,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         delay: (index % 4) * 0.05,
         ease: [0.76, 0, 0.24, 1],
       }}
-      className="w-full h-full relative pt-2 sm:pt-4 select-none flex flex-col"
+      className="w-full h-full relative pt-6 sm:pt-8 select-none flex flex-col"
     >
       {/* ── EXACT SHOPFLEX CARD CONTAINER ── */}
       <div
@@ -148,15 +148,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none"
             style={{
               transform: isHovered
-                ? `translateY(calc(-28px + ${customOffsetY}px)) scale(${1.12 * customScale})`
-                : `translateY(${customOffsetY}px) scale(${1 * customScale})`,
+                ? `translateY(calc(-46px + ${customOffsetY}px)) scale(${1.18 * customScale})`
+                : `translateY(calc(-6px + ${customOffsetY}px)) scale(${1.02 * customScale})`,
               transition: "transform 0.4s cubic-bezier(0.76, 0, 0.24, 1)",
             }}
           >
             {/* Ambient Floor Shadow under garment */}
             <div
               className={`absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black dark:bg-white/40 rounded-[50%] filter blur-[18px] sm:blur-[22px] -z-10 pointer-events-none transition-all duration-400 ${
-                isHovered ? "opacity-45 scale-110 translate-y-2" : "opacity-30 scale-100"
+                isHovered ? "opacity-50 scale-120 translate-y-3" : "opacity-30 scale-100"
               }`}
             />
 

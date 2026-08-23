@@ -738,15 +738,20 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               {/* TOP IMAGE CONTAINER */}
               <div className="relative w-full pb-[72%] sm:pb-[78%] flex justify-center overflow-visible">
                 <div
-                  className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover/admincard:-top-[16%] group-hover/admincard:scale-110"
+                  className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none"
                   style={{
                     transform: adminCardHovered
-                      ? `translateY(${watchedImageOffsetY}px) scale(${1.1 * (watchedImageScale / 100)})`
-                      : `translateY(${watchedImageOffsetY}px) scale(${1 * (watchedImageScale / 100)})`,
+                      ? `translateY(calc(-46px + ${watchedImageOffsetY}px)) scale(${1.18 * (watchedImageScale / 100)})`
+                      : `translateY(calc(-6px + ${watchedImageOffsetY}px)) scale(${1.02 * (watchedImageScale / 100)})`,
+                    transition: "transform 0.4s cubic-bezier(0.76, 0, 0.24, 1)",
                   }}
                 >
                   {/* Ambient Floor Shadow */}
-                  <div className="absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black rounded-[50%] filter blur-[18px] sm:blur-[22px] opacity-35 -z-10 transition-opacity duration-300" />
+                  <div
+                    className={`absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black rounded-[50%] filter blur-[18px] sm:blur-[22px] -z-10 pointer-events-none transition-all duration-400 ${
+                      adminCardHovered ? "opacity-50 scale-120 translate-y-3" : "opacity-30 scale-100"
+                    }`}
+                  />
 
                   <div className="relative w-full h-full flex items-center justify-center">
                     {/* Primary Image */}
