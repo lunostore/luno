@@ -20,7 +20,7 @@ const navLinks = [
 ];
 
 export function Header() {
-  const { scrolled } = useScroll(40);
+  const { scrolled } = useScroll(75, 20);
   const { totalItems, toggleCart } = useCart();
   const { theme, toggleTheme } = useTheme();
   const { wishlist, toggleWishlistDrawer } = useWishlist();
@@ -38,11 +38,11 @@ export function Header() {
           "sticky top-0 left-0 right-0 z-40 transition-all duration-300 backdrop-blur-md",
           scrolled
             ? "bg-white/90 dark:bg-black/90 border-b border-gray-200/60 dark:border-zinc-800/60 shadow-md py-1"
-            : "bg-white/70 dark:bg-black/70 border-b border-transparent py-2 sm:py-3"
+            : "bg-white/70 dark:bg-black/70 border-b border-transparent py-2 sm:py-2.5"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={cn("flex items-center justify-between transition-all duration-300", scrolled ? "h-14 sm:h-16 md:h-18" : "h-18 sm:h-22 md:h-24")}>
+          <div className={cn("flex items-center justify-between transition-all duration-300", scrolled ? "h-16 sm:h-18" : "h-20 sm:h-22")}>
             {/* Left Section: 2 Icons (Theme & Wishlist) + Desktop Nav */}
             <div className="flex items-center gap-2 sm:gap-4 z-20">
               {/* Theme Toggle */}
@@ -112,7 +112,7 @@ export function Header() {
                   whileTap={{ scale: 0.95 }}
                   className="relative flex items-center justify-center py-1 transition-all duration-300 select-none"
                 >
-                  <Logo3D size={scrolled ? 140 : 180} />
+                  <Logo3D size={scrolled ? 150 : 175} />
                 </motion.div>
               </Link>
             </div>
