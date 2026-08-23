@@ -323,43 +323,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
       </div>
     </motion.div>
-              {/* Normal Text Content */}
-              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-[11px] sm:text-xs md:text-sm">
-                {isAddedBriefly ? (
-                  <span className="flex items-center gap-1">
-                    <Check size={14} className="text-emerald-600 animate-bounce" />
-                    <span>تمت الإضافة!</span>
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 sm:gap-1.5">
-                    <span>Add to cart</span>
-                    <ShoppingCart size={14} />
-                  </span>
-                )}
-              </p>
-
-              {/* Hover Expanding Bubble Overlay */}
-              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
-                <p className="absolute w-full flex justify-center items-center text-white dark:text-black text-center z-10 font-bold text-[11px] sm:text-xs md:text-sm">
-                  {isAddedBriefly ? (
-                    <span className="flex items-center gap-1">
-                      <Check size={14} className="text-emerald-400 animate-bounce" />
-                      <span>تمت الإضافة!</span>
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 sm:gap-1.5">
-                      <span>Add to cart</span>
-                      <ShoppingCart size={14} />
-                    </span>
-                  )}
-                </p>
-                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
   );
 }
 

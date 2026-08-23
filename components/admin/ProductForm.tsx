@@ -733,12 +733,12 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
             <div
               onMouseEnter={() => setAdminCardHovered(true)}
               onMouseLeave={() => setAdminCardHovered(false)}
-              className="group/admincard relative w-full rounded-[20px] sm:rounded-[25px] border border-[#cdcdcd] hover:border-[#292929] transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white cursor-pointer overflow-visible flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+              className="group/admincard relative w-full rounded-[22px] border border-[#cdcdcd] hover:border-[#292929] transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white cursor-pointer overflow-visible flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
             >
               {/* TOP IMAGE CONTAINER */}
-              <div className="relative w-full pb-[72%] sm:pb-[78%] flex justify-center overflow-visible">
+              <div className="relative w-full pb-[78%] flex justify-center overflow-visible">
                 <div
-                  className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none"
+                  className="absolute top-0 w-[88%] h-full flex items-center justify-center pointer-events-none"
                   style={{
                     transform: adminCardHovered
                       ? `translateY(calc(-46px + ${watchedImageOffsetY}px)) scale(${1.18 * (watchedImageScale / 100)})`
@@ -748,7 +748,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                 >
                   {/* Ambient Floor Shadow */}
                   <div
-                    className={`absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black rounded-[50%] filter blur-[18px] sm:blur-[22px] -z-10 pointer-events-none transition-all duration-400 ${
+                    className={`absolute right-[10%] bottom-[6%] w-[80%] h-[12%] bg-black rounded-[50%] filter blur-[20px] -z-10 pointer-events-none transition-all duration-400 ${
                       adminCardHovered ? "opacity-50 scale-120 translate-y-3" : "opacity-30 scale-100"
                     }`}
                   />
@@ -784,7 +784,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
               </div>
 
               {/* BOTTOM CONTENT SECTION WITH CONVEX DOME ARCH */}
-              <div className="bottom-0 px-3 sm:px-4 pb-3 sm:pb-4 pt-6 sm:pt-8 relative rounded-b-[18px] sm:rounded-b-[25px] overflow-hidden z-10 mt-auto">
+              <div className="bottom-0 px-4 pb-4 pt-7 relative rounded-b-[22px] overflow-hidden z-10 mt-auto">
                 {/* Animated Rising Black Background with Convex Dome Arc */}
                 <div
                   className={`absolute inset-x-0 bottom-0 h-full pointer-events-none z-0 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
@@ -801,26 +801,26 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                 </div>
 
                 {/* Title & Price Row */}
-                <div className="flex justify-between items-center gap-1.5 relative z-10 h-[24px] sm:h-[28px]">
-                  <p className="text-sm sm:text-base font-bold text-black group-hover/admincard:text-white max-w-[65%] truncate transition-colors duration-300 delay-100">
+                <div className="flex justify-between items-center gap-2 relative z-10 h-[28px]">
+                  <p className="text-base font-bold text-black group-hover/admincard:text-white max-w-[65%] truncate transition-colors duration-300 delay-100">
                     {watchedName || "اسم المنتج"}
                   </p>
-                  <span className="text-xs sm:text-sm font-bold uppercase text-black group-hover/admincard:text-white whitespace-nowrap transition-colors duration-300 delay-100">
+                  <span className="text-sm md:text-base font-bold uppercase text-black group-hover/admincard:text-white whitespace-nowrap transition-colors duration-300 delay-100">
                     EGP {watchedSalePrice || watchedPrice || 950}
                   </span>
                 </div>
 
                 {/* Description */}
-                <div className="h-[16px] sm:h-[18px] my-1 flex items-center relative z-10">
-                  <span className="text-zinc-600 group-hover/admincard:text-zinc-300 text-[11px] sm:text-xs truncate leading-none transition-colors duration-300 delay-100">
+                <div className="h-[18px] my-1 flex items-center relative z-10">
+                  <span className="text-zinc-600 group-hover/admincard:text-zinc-300 text-xs truncate leading-none transition-colors duration-300 delay-100">
                     {watchedDescription || "خامة قطنية فاخرة بتصميم وقصة مريحة"}
                   </span>
                 </div>
 
                 {/* Buttons Row */}
-                <div className="flex justify-between items-center gap-2 relative z-10 mt-1">
+                <div className="flex justify-between items-center gap-2.5 relative z-10 mt-1">
                   {/* Wishlist Button */}
-                  <div className="group/btn relative overflow-hidden flex items-center justify-center w-8 sm:w-10 h-8 sm:h-10 rounded-[9px] sm:rounded-[12px] border border-[#292929] bg-[#f9f9f9] transition-all duration-300 flex-shrink-0">
+                  <div className="group/btn relative overflow-hidden flex items-center justify-center w-11 h-11 rounded-[12px] border border-[#292929] bg-[#f9f9f9] transition-all duration-300 flex-shrink-0">
                     <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10">
                       <Heart size={16} />
                     </p>
@@ -828,26 +828,26 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                       <p className="absolute w-full flex justify-center items-center text-white text-center z-10">
                         <Heart size={16} className="fill-white text-white" />
                       </p>
-                      <div className="bg-black w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+                      <div className="bg-black w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[12px]" />
                     </div>
                   </div>
 
                   {/* Add to Cart Button */}
-                  <div className="group/btn relative overflow-hidden flex-1 h-8 sm:h-10 rounded-[9px] sm:rounded-[12px] border border-[#292929] bg-[#f9f9f9] transition-all duration-300 flex items-center justify-center">
-                    <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-[11px] sm:text-xs">
-                      <span className="flex items-center gap-1">
+                  <div className="group/btn relative overflow-hidden flex-1 h-11 rounded-[12px] border border-[#292929] bg-[#f9f9f9] transition-all duration-300 flex items-center justify-center">
+                    <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-xs md:text-sm">
+                      <span className="flex items-center gap-1.5">
                         <span>Add to cart</span>
                         <ShoppingCart size={14} />
                       </span>
                     </p>
                     <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
-                      <p className="absolute w-full flex justify-center items-center text-white text-center z-10 font-bold text-[11px] sm:text-xs">
-                        <span className="flex items-center gap-1">
+                      <p className="absolute w-full flex justify-center items-center text-white text-center z-10 font-bold text-xs md:text-sm">
+                        <span className="flex items-center gap-1.5">
                           <span>Add to cart</span>
                           <ShoppingCart size={14} />
                         </span>
                       </p>
-                      <div className="bg-black w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+                      <div className="bg-black w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[12px]" />
                     </div>
                   </div>
                 </div>
