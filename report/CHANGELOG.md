@@ -8,8 +8,11 @@ This document lists all modifications, fixes, and improvements applied to the **
 
 ### 🛍️ 3D Shopflex Product Card Replication & Mobile Performance (23 Aug 2026)
 * **Pixel-Perfect Shopflex 3D Card**: Implemented high-rise floating pop-out (`translateY: -46px`, `scale: 1.18x`) with dynamic floor shadow, rising black shelf with convex dome arch SVG (`M 0,20 Q 50,0 100,20 L 100,100 L 0,100 Z`), and expanding bubble pill buttons.
+* **100% Mobile & PC Geometry Unification**: Unified aspect ratio (`pb-[78%]`), image width (`w-[88%]`), padding (`px-4 pb-4 pt-7`), and button metrics (`w-11 h-11`) so admin scale/offset adjustments match 1:1 across all screens.
+* **Custom Product Reordering System**: Built interactive Reorder Mode in Admin Products page with rank badges (`#1`, `#2`...), direct shift buttons (Top, Up, Down, Bottom), quick presets (Newest, High/Low Price, A-Z), and instant Firestore batch saving.
+* **Realtime Storefront Sort Order Sync**: Implemented `sortProductsByCustomOrder` across `getProducts` and `subscribeToProducts` to automatically display products on the homepage and shop in the custom order.
+* **Footer Links Restructuring & Mobile Centering**: Divided INFO links into two compact columns (Right & Left) and centered footer content on mobile.
 * **Instant Cross-Fade & Fly-to-Cart Animation**: Smooth cross-fade between main image and hover image; animated clone flying to cart on button click.
-* **Equal Height Grid & Mobile Width Optimization**: Standardized card container aspect ratio (`pb-[72%] sm:pb-[78%]`), title and description heights with truncation, and adjusted grid gaps on mobile.
 * **Admin Live Preview Replica**: Replaced generic admin preview with an exact interactive replica reflecting live field changes, scale/offset sliders, and hover effects.
 * **Checkout Store Navigation Button**: Added a dedicated "رجوع للمتجر" (Back to Store) exit button in the checkout header.
 * **Hardware-Accelerated Mobile Responsiveness**: Converted transitions to 250-300ms GPU-accelerated transforms with radial gradient floor shadows for 60/120Hz smooth touch interactions.
