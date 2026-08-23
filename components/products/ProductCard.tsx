@@ -127,25 +127,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         delay: (index % 4) * 0.05,
         ease: [0.76, 0, 0.24, 1],
       }}
-      className="w-full h-full relative pt-6 sm:pt-8 select-none flex flex-col"
+      className="w-full h-full relative pt-8 select-none flex flex-col"
     >
-      {/* ── EXACT SHOPFLEX CARD CONTAINER ── */}
+      {/* ── EXACT SHOPFLEX CARD CONTAINER (100% IDENTICAL ON MOBILE & PC) ── */}
       <div
         ref={cardRef}
         onClick={handleCardClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative w-full h-full rounded-[18px] sm:rounded-[25px] border border-[#cdcdcd] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-400 transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white dark:bg-[#121214] cursor-pointer overflow-visible flex flex-col justify-between"
+        className="group relative w-full h-full rounded-[22px] border border-[#cdcdcd] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-400 transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white dark:bg-[#121214] cursor-pointer overflow-visible flex flex-col justify-between"
         data-cursor-size="80px"
         data-cursor-text="Ver"
       >
-        {/* ── TOP IMAGE CONTAINER (FLOATING POP-OUT & FLOOR SHADOW) ── */}
+        {/* ── TOP IMAGE CONTAINER (UNIFIED 78% RATIO & 88% WIDTH) ── */}
         <div
           ref={imageWrapperRef}
-          className="relative w-full pb-[72%] sm:pb-[78%] flex justify-center overflow-visible"
+          className="relative w-full pb-[78%] flex justify-center overflow-visible"
         >
           <div
-            className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none"
+            className="absolute top-0 w-[88%] h-full flex items-center justify-center pointer-events-none"
             style={{
               transform: isHovered
                 ? `translateY(calc(-46px + ${customOffsetY}px)) scale(${1.18 * customScale})`
@@ -155,7 +155,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           >
             {/* Ambient Floor Shadow under garment */}
             <div
-              className={`absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black dark:bg-white/40 rounded-[50%] filter blur-[18px] sm:blur-[22px] -z-10 pointer-events-none transition-all duration-400 ${
+              className={`absolute right-[10%] bottom-[6%] w-[80%] h-[12%] bg-black dark:bg-white/40 rounded-[50%] filter blur-[20px] -z-10 pointer-events-none transition-all duration-400 ${
                 isHovered ? "opacity-50 scale-120 translate-y-3" : "opacity-30 scale-100"
               }`}
             />
@@ -192,8 +192,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
 
-        {/* ── BOTTOM CONTENT SECTION (SLIDING CONVEX DOME ARCH & RISING BLACK SHELF) ── */}
-        <div className="bottom-0 px-3 sm:px-4 md:px-5 pb-3 sm:pb-4 pt-6 sm:pt-8 relative rounded-b-[18px] sm:rounded-b-[25px] overflow-hidden z-10 mt-auto">
+        {/* ── BOTTOM CONTENT SECTION (UNIFIED PROPORTIONS) ── */}
+        <div className="bottom-0 px-4 pb-4 pt-7 relative rounded-b-[22px] overflow-hidden z-10 mt-auto">
           {/* Animated Rising Black Background with Convex Dome Arc on Top */}
           <div
             className={`absolute inset-x-0 bottom-0 h-full pointer-events-none z-0 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
@@ -211,16 +211,16 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* Title & Price Row */}
-          <div className="flex justify-between items-center gap-1.5 relative z-10 h-[24px] sm:h-[28px]">
+          <div className="flex justify-between items-center gap-2 relative z-10 h-[28px]">
             <p
-              className={`text-sm sm:text-base md:text-lg font-bold max-w-[65%] truncate transition-colors duration-300 delay-75 ${
+              className={`text-base font-bold max-w-[65%] truncate transition-colors duration-300 delay-75 ${
                 isHovered ? "text-white dark:text-black" : "text-black dark:text-white"
               }`}
             >
               {product.name}
             </p>
             <span
-              className={`text-xs sm:text-sm md:text-base uppercase font-bold whitespace-nowrap transition-colors duration-300 delay-75 ${
+              className={`text-sm md:text-base uppercase font-bold whitespace-nowrap transition-colors duration-300 delay-75 ${
                 isHovered ? "text-white dark:text-black" : "text-black dark:text-white"
               }`}
             >
@@ -229,9 +229,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* Description */}
-          <div className="h-[16px] sm:h-[18px] my-1 flex items-center relative z-10">
+          <div className="h-[18px] my-1 flex items-center relative z-10">
             <span
-              className={`text-[11px] sm:text-xs truncate leading-none transition-colors duration-300 delay-75 ${
+              className={`text-xs truncate leading-none transition-colors duration-300 delay-75 ${
                 isHovered ? "text-zinc-200 dark:text-zinc-800" : "text-black dark:text-zinc-400"
               }`}
             >
@@ -239,8 +239,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </span>
           </div>
 
-          {/* ── BUTTONS ROW (INTERACTIVE BUBBLE BUTTONS) ── */}
-          <div className="flex justify-between items-center gap-2 sm:gap-3 relative z-10 mt-1">
+          {/* ── BUTTONS ROW (100% UNIFIED SIZES) ── */}
+          <div className="flex justify-between items-center gap-2.5 relative z-10 mt-1">
             {/* Wishlist Button */}
             <button
               type="button"
@@ -252,7 +252,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 toggleWishlist(product);
               }}
               data-cursor-size="0px"
-              className="group/btn relative overflow-hidden flex items-center justify-center w-8 sm:w-10 md:w-11 h-8 sm:h-10 md:h-11 rounded-[9px] sm:rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex-shrink-0 cursor-pointer"
+              className="group/btn relative overflow-hidden flex items-center justify-center w-11 h-11 rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex-shrink-0 cursor-pointer"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
               {/* Normal Icon */}
@@ -273,7 +273,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     }`}
                   />
                 </p>
-                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[12px]" />
               </div>
             </button>
 
@@ -284,8 +284,45 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               onPointerDown={(e) => e.stopPropagation()}
               onClick={handleAddToCart}
               data-cursor-size="0px"
-              className="group/btn relative overflow-hidden flex-1 h-8 sm:h-10 md:h-11 rounded-[9px] sm:rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex items-center justify-center cursor-pointer"
+              className="group/btn relative overflow-hidden flex-1 h-11 rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex items-center justify-center cursor-pointer"
             >
+              {/* Normal Text Content */}
+              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-xs md:text-sm">
+                {isAddedBriefly ? (
+                  <span className="flex items-center gap-1">
+                    <Check size={14} className="text-emerald-600 animate-bounce" />
+                    <span>تمت الإضافة!</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 sm:gap-1.5">
+                    <span>Add to cart</span>
+                    <ShoppingCart size={14} />
+                  </span>
+                )}
+              </p>
+
+              {/* Hover Expanding Bubble Overlay */}
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
+                <p className="absolute w-full flex justify-center items-center text-white dark:text-black text-center z-10 font-bold text-xs md:text-sm">
+                  {isAddedBriefly ? (
+                    <span className="flex items-center gap-1">
+                      <Check size={14} className="text-emerald-400 animate-bounce" />
+                      <span>تمت الإضافة!</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 sm:gap-1.5">
+                      <span>Add to cart</span>
+                      <ShoppingCart size={14} />
+                    </span>
+                  )}
+                </p>
+                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[12px]" />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
               {/* Normal Text Content */}
               <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-[11px] sm:text-xs md:text-sm">
                 {isAddedBriefly ? (

@@ -6,6 +6,15 @@ This document lists all modifications, fixes, and improvements applied to the **
 
 ## 📅 August 2026
 
+### 🛍️ 3D Shopflex Product Card Replication & Mobile Performance (23 Aug 2026)
+* **Pixel-Perfect Shopflex 3D Card**: Implemented high-rise floating pop-out (`translateY: -46px`, `scale: 1.18x`) with dynamic floor shadow, rising black shelf with convex dome arch SVG (`M 0,20 Q 50,0 100,20 L 100,100 L 0,100 Z`), and expanding bubble pill buttons.
+* **Instant Cross-Fade & Fly-to-Cart Animation**: Smooth cross-fade between main image and hover image; animated clone flying to cart on button click.
+* **Equal Height Grid & Mobile Width Optimization**: Standardized card container aspect ratio (`pb-[72%] sm:pb-[78%]`), title and description heights with truncation, and adjusted grid gaps on mobile.
+* **Admin Live Preview Replica**: Replaced generic admin preview with an exact interactive replica reflecting live field changes, scale/offset sliders, and hover effects.
+* **Checkout Store Navigation Button**: Added a dedicated "رجوع للمتجر" (Back to Store) exit button in the checkout header.
+* **Hardware-Accelerated Mobile Responsiveness**: Converted transitions to 250-300ms GPU-accelerated transforms with radial gradient floor shadows for 60/120Hz smooth touch interactions.
+* **Vercel Build Zero-Error Fixes**: Resolved `onlineNumberDisplay` and `isFormValid` typing references and cleaned up all unused React imports.
+
 ### 🎬 Intro Screen Curtain Slide-Up Animation
 * **Curtain Reveal Motion**: Upgraded intro exit transition to a fluid vertical curtain lift (`y: "-100%"`) with a luxury ease curve `[0.76, 0, 0.24, 1]` across `LUNOCleanIntro.tsx`, `NXTCleanIntro.tsx`, `IntroAppleMinimal.tsx`, and `LUNOIntro.tsx`.
 * **Parallax Interior Element Fade**: Added subtle parallax upward glide to the LUNO typography during the lift.
