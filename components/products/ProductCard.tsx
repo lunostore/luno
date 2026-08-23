@@ -112,39 +112,53 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const customScale = product.imageScale ? product.imageScale / 100 : 1;
   const customOffsetY = product.imageOffsetY || 0;
 
+  const handleCardClick = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    openProduct(product.id);
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 25 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.05 }}
       transition={{
-        duration: 0.35,
-        delay: (index % 4) * 0.04,
-        ease: "easeOut",
+        duration: 0.4,
+        delay: (index % 4) * 0.05,
+        ease: [0.76, 0, 0.24, 1],
       }}
       className="w-full h-full relative pt-2 sm:pt-4 select-none flex flex-col"
     >
-      {/* ── EXACT SHOPFLEX CARD CONTAINER (HARDWARE ACCELERATED) ── */}
+      {/* ── EXACT SHOPFLEX CARD CONTAINER ── */}
       <div
         ref={cardRef}
-        onClick={() => openProduct(product.id)}
-        className="group relative w-full h-full rounded-[18px] sm:rounded-[25px] border border-[#cdcdcd] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-400 transition-[border-color,box-shadow] duration-250 ease-out bg-white dark:bg-[#121214] cursor-pointer overflow-visible flex flex-col justify-between"
+        onClick={handleCardClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="group relative w-full h-full rounded-[18px] sm:rounded-[25px] border border-[#cdcdcd] dark:border-zinc-800 hover:border-[#292929] dark:hover:border-zinc-400 transition-[border-color] duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] bg-white dark:bg-[#121214] cursor-pointer overflow-visible flex flex-col justify-between"
         data-cursor-size="80px"
         data-cursor-text="Ver"
       >
-        {/* ── TOP IMAGE CONTAINER (SNAPPY 60FPS FLOATING POP-OUT) ── */}
+        {/* ── TOP IMAGE CONTAINER (FLOATING POP-OUT & FLOOR SHADOW) ── */}
         <div
           ref={imageWrapperRef}
           className="relative w-full pb-[72%] sm:pb-[78%] flex justify-center overflow-visible"
         >
           <div
-            className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:-translate-y-3 sm:group-hover:-translate-y-4 group-hover:scale-105"
+            className="absolute top-0 w-[calc(100%-28px)] sm:w-[calc(100%-36px)] h-full flex items-center justify-center pointer-events-none"
             style={{
-              transform: `translateY(${customOffsetY}px) scale(${customScale})`,
+              transform: isHovered
+                ? `translateY(calc(-28px + ${customOffsetY}px)) scale(${1.12 * customScale})`
+                : `translateY(${customOffsetY}px) scale(${1 * customScale})`,
+              transition: "transform 0.4s cubic-bezier(0.76, 0, 0.24, 1)",
             }}
           >
-            {/* Ultra-smooth GPU-accelerated Floor Shadow */}
-            <div className="absolute right-[10%] bottom-[4%] w-[80%] h-[16%] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.35)_0%,transparent_72%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.25)_0%,transparent_72%)] pointer-events-none transform-gpu transition-transform duration-300 group-hover:scale-110 -z-10" />
+            {/* Ambient Floor Shadow under garment */}
+            <div
+              className={`absolute right-[12%] bottom-[6%] w-[76%] h-[12%] bg-black dark:bg-white/40 rounded-[50%] filter blur-[18px] sm:blur-[22px] -z-10 pointer-events-none transition-all duration-400 ${
+                isHovered ? "opacity-45 scale-110 translate-y-2" : "opacity-30 scale-100"
+              }`}
+            />
 
             <div className="relative w-full h-full flex items-center justify-center">
               {/* Primary Main Image (صورة الغلاف الرئيسية) */}
@@ -154,33 +168,37 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 alt={product.name}
                 fill
                 priority={index < 4}
-                quality={90}
+                quality={95}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className={`object-contain object-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.1)] pointer-events-none transform-gpu transition-all duration-300 ease-out ${
-                  hasHoverImage ? "opacity-100 group-hover:opacity-0 group-hover:scale-95" : "opacity-100"
+                className={`object-contain object-center drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                  hasHoverImage && isHovered ? "opacity-0 scale-95" : "opacity-100 scale-100"
                 }`}
               />
 
-              {/* Hover Image (صورة الهوفر الثانوية فائقة الخفة والسرعة) */}
+              {/* Hover Image (صورة الهوفر الثانوية) */}
               {hasHoverImage && (
                 <Image
                   src={hoverImage}
                   alt={`${product.name} - hover`}
                   fill
-                  quality={90}
+                  quality={95}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-contain object-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.1)] pointer-events-none transform-gpu transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100"
+                  className={`object-contain object-center drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] pointer-events-none transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+                    isHovered ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                  }`}
                 />
               )}
             </div>
           </div>
         </div>
 
-        {/* ── BOTTOM CONTENT SECTION (GPU-ACCELERATED FAST RISING ARCH) ── */}
+        {/* ── BOTTOM CONTENT SECTION (SLIDING CONVEX DOME ARCH & RISING BLACK SHELF) ── */}
         <div className="bottom-0 px-3 sm:px-4 md:px-5 pb-3 sm:pb-4 pt-6 sm:pt-8 relative rounded-b-[18px] sm:rounded-b-[25px] overflow-hidden z-10 mt-auto">
           {/* Animated Rising Black Background with Convex Dome Arc on Top */}
           <div
-            className="absolute inset-x-0 bottom-0 h-full pointer-events-none z-0 transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] translate-y-[102%] group-hover:translate-y-0 opacity-0 group-hover:opacity-100"
+            className={`absolute inset-x-0 bottom-0 h-full pointer-events-none z-0 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+              isHovered ? "translate-y-0 opacity-100" : "translate-y-[102%] opacity-0"
+            }`}
           >
             <svg
               viewBox="0 0 100 100"
@@ -192,24 +210,36 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </svg>
           </div>
 
-          {/* Title & Price Row (Fixed uniform height) */}
+          {/* Title & Price Row */}
           <div className="flex justify-between items-center gap-1.5 relative z-10 h-[24px] sm:h-[28px]">
-            <p className="text-sm sm:text-base md:text-lg text-black dark:text-white group-hover:text-white dark:group-hover:text-black font-bold max-w-[65%] truncate transition-colors duration-250">
+            <p
+              className={`text-sm sm:text-base md:text-lg font-bold max-w-[65%] truncate transition-colors duration-300 delay-75 ${
+                isHovered ? "text-white dark:text-black" : "text-black dark:text-white"
+              }`}
+            >
               {product.name}
             </p>
-            <span className="text-xs sm:text-sm md:text-base uppercase text-black dark:text-white group-hover:text-white dark:group-hover:text-black font-bold whitespace-nowrap transition-colors duration-250">
+            <span
+              className={`text-xs sm:text-sm md:text-base uppercase font-bold whitespace-nowrap transition-colors duration-300 delay-75 ${
+                isHovered ? "text-white dark:text-black" : "text-black dark:text-white"
+              }`}
+            >
               {formatPrice(displayPrice)}
             </span>
           </div>
 
-          {/* Description (Fixed uniform 1-line height across all cards) */}
+          {/* Description */}
           <div className="h-[16px] sm:h-[18px] my-1 flex items-center relative z-10">
-            <span className="text-black dark:text-zinc-400 group-hover:text-white dark:group-hover:text-zinc-800 text-[11px] sm:text-xs truncate leading-none transition-colors duration-250">
+            <span
+              className={`text-[11px] sm:text-xs truncate leading-none transition-colors duration-300 delay-75 ${
+                isHovered ? "text-zinc-200 dark:text-zinc-800" : "text-black dark:text-zinc-400"
+              }`}
+            >
               {product.description || "خامة قطنية فاخرة بتصميم وقصة مريحة"}
             </span>
           </div>
 
-          {/* ── BUTTONS ROW (FAST & SNAPPY GPU ACCELERATED) ── */}
+          {/* ── BUTTONS ROW (INTERACTIVE BUBBLE BUTTONS) ── */}
           <div className="flex justify-between items-center gap-2 sm:gap-3 relative z-10 mt-1">
             {/* Wishlist Button */}
             <button
@@ -222,11 +252,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 toggleWishlist(product);
               }}
               data-cursor-size="0px"
-              className="group/btn relative overflow-hidden flex items-center justify-center w-8 sm:w-10 md:w-11 h-8 sm:h-10 md:h-11 rounded-[9px] sm:rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-colors duration-250 flex-shrink-0 cursor-pointer"
+              className="group/btn relative overflow-hidden flex items-center justify-center w-8 sm:w-10 md:w-11 h-8 sm:h-10 md:h-11 rounded-[9px] sm:rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex-shrink-0 cursor-pointer"
               title={isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
             >
               {/* Normal Icon */}
-              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transform-gpu transition-transform duration-250 ease-out group-hover/btn:-translate-y-8">
+              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10">
                 <Heart
                   size={16}
                   className={`transition-colors ${isFavorite ? "fill-red-500 text-red-500" : ""}`}
@@ -234,7 +264,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </p>
 
               {/* Hover Expanding Bubble Overlay */}
-              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transform-gpu transition-all duration-250 ease-out group-hover/btn:top-0 pointer-events-none">
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
                 <p className="absolute w-full flex justify-center items-center text-white dark:text-black text-center z-10">
                   <Heart
                     size={16}
@@ -243,7 +273,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     }`}
                   />
                 </p>
-                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transform-gpu transition-all duration-250 ease-out group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
+                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
               </div>
             </button>
 
@@ -254,10 +284,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               onPointerDown={(e) => e.stopPropagation()}
               onClick={handleAddToCart}
               data-cursor-size="0px"
-              className="group/btn relative overflow-hidden flex-1 h-8 sm:h-10 md:h-11 rounded-[9px] sm:rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-colors duration-250 flex items-center justify-center cursor-pointer"
+              className="group/btn relative overflow-hidden flex-1 h-8 sm:h-10 md:h-11 rounded-[9px] sm:rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex items-center justify-center cursor-pointer"
             >
               {/* Normal Text Content */}
-              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transform-gpu transition-transform duration-250 ease-out group-hover/btn:-translate-y-8 font-bold text-[11px] sm:text-xs md:text-sm">
+              <p className="relative top-0 w-full text-center flex justify-center items-center text-[#292929] dark:text-zinc-200 transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:-top-10 font-bold text-[11px] sm:text-xs md:text-sm">
                 {isAddedBriefly ? (
                   <span className="flex items-center gap-1">
                     <Check size={14} className="text-emerald-600 animate-bounce" />
@@ -272,7 +302,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </p>
 
               {/* Hover Expanding Bubble Overlay */}
-              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transform-gpu transition-all duration-250 ease-out group-hover/btn:top-0 pointer-events-none">
+              <div className="absolute top-[110%] left-0 w-full h-full flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:top-0 pointer-events-none">
                 <p className="absolute w-full flex justify-center items-center text-white dark:text-black text-center z-10 font-bold text-[11px] sm:text-xs md:text-sm">
                   {isAddedBriefly ? (
                     <span className="flex items-center gap-1">
@@ -286,9 +316,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     </span>
                   )}
                 </p>
-                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transform-gpu transition-all duration-250 ease-out group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
-              </div>
-            </button>
+                <div className="bg-black dark:bg-white w-[60%] h-full rounded-[50%] transition-all duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover/btn:w-full group-hover/btn:rounded-[9px] sm:group-hover/btn:rounded-[12px]" />
           </div>
         </div>
       </div>
