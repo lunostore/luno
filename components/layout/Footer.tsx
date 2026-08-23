@@ -59,9 +59,9 @@ export function Footer() {
   return (
     <footer className="bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-900 transition-colors duration-300 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.svg"
@@ -92,7 +92,7 @@ export function Footer() {
           </div>
 
           {/* Shop */}
-          <div>
+          <div className="md:col-span-2">
             <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
               Shop
             </h4>
@@ -112,30 +112,45 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Info */}
-          <div>
+          {/* Info (Split into 2 Columns: Right & Left) */}
+          <div className="md:col-span-5">
             <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
               Info
             </h4>
-            <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
-              {[
-                { href: "/reviews", label: "آراء العملاء (Reviews)" },
-                { href: "/about", label: "About Us" },
-                { href: "/contact", label: "Contact Us" },
-                { href: "/shipping-policy", label: "Shipping & Returns" },
-                { href: "/privacy", label: "Privacy Policy" },
-                { href: "/terms", label: "Terms of Service" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="hover:text-zinc-950 dark:hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="grid grid-cols-2 gap-x-6 sm:gap-x-10 gap-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+              <ul className="space-y-3">
+                {[
+                  { href: "/reviews", label: "آراء العملاء (Reviews)" },
+                  { href: "/about", label: "About Us" },
+                  { href: "/contact", label: "Contact Us" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="hover:text-zinc-950 dark:hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <ul className="space-y-3">
+                {[
+                  { href: "/shipping-policy", label: "Shipping & Returns" },
+                  { href: "/privacy", label: "Privacy Policy" },
+                  { href: "/terms", label: "Terms of Service" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="hover:text-zinc-950 dark:hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
