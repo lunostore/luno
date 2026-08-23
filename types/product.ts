@@ -30,6 +30,7 @@ export interface Product {
   featured: boolean;
   bestSeller: boolean;
   isNew?: boolean;     // شارة NEW للمنتجات الجديدة
+  sortOrder?: number;  // ترتيب ظهور المنتج المخصص في المتجر (0 يظهر أولاً)
   sizeChartType?: string; // دعم توافقي قديم
   sizeChartId?: string;   // معرف جدول المقاسات المخصص
   sizeChartUrl?: string;  // رابط صورة جدول المقاسات المخصص

@@ -36,6 +36,7 @@ export const productSchema = z.object({
   featured: z.boolean().default(false),
   bestSeller: z.boolean().default(false),
   isNew: z.boolean().default(false),
+  sortOrder: z.coerce.number().optional().default(0),
   sizeChartType: z.string().optional(),
   sizeChartId: z.string().optional(),
   sizeChartUrl: z.string().optional(),

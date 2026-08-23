@@ -61,6 +61,17 @@ export function getTimestampMs(t: any): number {
 
 // ─── Products ──────────────────────────────────────────
 
+export function sortProductsByCustomOrder(products: Product[]): Product[] {
+  return [...products].sort((a, b) => {
+    const orderA = typeof a.sortOrder === "number" ? a.sortOrder : 999999;
+    const orderB = typeof b.sortOrder === "number" ? b.sortOrder : 999999;
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    return getTimestampMs(b.createdAt) - getTimestampMs(a.createdAt);
+  });
+}
+
 export async function getProducts(filters?: {
   featured?: boolean;
   bestSeller?: boolean;
@@ -76,7 +87,8 @@ export async function getProducts(filters?: {
 
   const q = query(collection(db, "products"), ...constraints);
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Product);
+  const raw = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Product);
+  return sortProductsByCustomOrder(raw);
 }
 
 export function subscribeToProducts(
@@ -101,12 +113,22 @@ export function subscribeToProducts(
     q,
     (snapshot) => {
       const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Product);
-      callback(products);
+      callback(sortProductsByCustomOrder(products));
     },
     (error) => {
       console.error("Realtime products subscription error:", error);
     }
   );
+}
+
+export async function updateProductSortOrders(orderedProductIds: string[]): Promise<void> {
+  if (!orderedProductIds || orderedProductIds.length === 0) return;
+  const batch = writeBatch(db);
+  orderedProductIds.forEach((id, index) => {
+    const ref = doc(db, "products", id);
+    batch.update(ref, { sortOrder: index });
+  });
+  await batch.commit();
 }
 
 export async function getProductBySlug(slugParam: string): Promise<Product | null> {

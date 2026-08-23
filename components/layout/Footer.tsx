@@ -59,20 +59,20 @@ export function Footer() {
   return (
     <footer className="bg-zinc-100 dark:bg-black text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-900 transition-colors duration-300 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 text-center md:text-left">
           {/* Brand */}
-          <div className="md:col-span-5">
+          <div className="md:col-span-5 flex flex-col items-center md:items-start">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.svg"
               alt="Luno Store Brand Logo"
               className="h-8 w-auto object-contain dark:invert"
             />
-            <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed max-w-sm">
+            <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed max-w-sm text-center md:text-left">
               {settings?.footerDescription ||
                 "Premium fashion for modern people. Elevate your style with our curated collections of high-quality clothing and accessories."}
             </p>
-            <div className="flex gap-4 mt-6">
+            <div className="flex justify-center md:justify-start gap-4 mt-6">
               {socialLinks.map(({ icon: Icon, label, href, bgClass }) => (
                 <motion.a
                   key={label}
@@ -92,7 +92,7 @@ export function Footer() {
           </div>
 
           {/* Shop */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 flex flex-col items-center md:items-start">
             <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
               Shop
             </h4>
@@ -112,44 +112,46 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Info (Split into 2 Columns: Right & Left with compact gap) */}
-          <div className="md:col-span-5">
-            <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white">
-              Info
-            </h4>
-            <div className="flex flex-row items-start gap-8 sm:gap-12 text-sm text-zinc-600 dark:text-zinc-400">
-              <ul className="space-y-3 min-w-[140px]">
-                {[
-                  { href: "/reviews", label: "آراء العملاء (Reviews)" },
-                  { href: "/about", label: "About Us" },
-                  { href: "/contact", label: "Contact Us" },
-                ].map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="hover:text-zinc-950 dark:hover:text-white transition-colors whitespace-nowrap"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <ul className="space-y-3 min-w-[140px]">
-                {[
-                  { href: "/shipping-policy", label: "Shipping & Returns" },
-                  { href: "/privacy", label: "Privacy Policy" },
-                  { href: "/terms", label: "Terms of Service" },
-                ].map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="hover:text-zinc-950 dark:hover:text-white transition-colors whitespace-nowrap"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          {/* Info (Centered 2-Column Block) */}
+          <div className="md:col-span-5 flex flex-col items-center md:items-start">
+            <div className="w-fit mx-auto md:mx-0">
+              <h4 className="font-bold text-sm tracking-widest uppercase mb-4 text-zinc-950 dark:text-white text-center md:text-left">
+                Info
+              </h4>
+              <div className="flex flex-row items-start justify-center gap-8 sm:gap-12 text-sm text-zinc-600 dark:text-zinc-400">
+                <ul className="space-y-3 min-w-[130px] text-left">
+                  {[
+                    { href: "/reviews", label: "آراء العملاء (Reviews)" },
+                    { href: "/about", label: "About Us" },
+                    { href: "/contact", label: "Contact Us" },
+                  ].map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="hover:text-zinc-950 dark:hover:text-white transition-colors whitespace-nowrap"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <ul className="space-y-3 min-w-[130px] text-left">
+                  {[
+                    { href: "/shipping-policy", label: "Shipping & Returns" },
+                    { href: "/privacy", label: "Privacy Policy" },
+                    { href: "/terms", label: "Terms of Service" },
+                  ].map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="hover:text-zinc-950 dark:hover:text-white transition-colors whitespace-nowrap"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
