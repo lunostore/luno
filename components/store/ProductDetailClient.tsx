@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Minus, Plus, ChevronLeft, ChevronRight, Heart, X, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { subscribeToProducts, getProductById, getProductBySlug } from "@/lib/firebase/firestore";
+import * as gtag from "@/lib/analytics/gtag";
 import { useCart } from "@/features/cart/CartProvider";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useTheme } from "@/features/theme/ThemeProvider";
@@ -121,6 +122,14 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
 
       if (matched) {
         applyProduct(matched);
+        // GA4: fire view_item once product data is resolved
+        gtag.viewItem({
+          item_id: matched.id,
+          item_name: matched.name,
+          item_category: matched.category || "ملابس",
+          price: matched.salePrice ?? matched.price ?? 0,
+          quantity: 1,
+        });
       }
       setLoading(false);
     });
@@ -234,6 +243,15 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
     }
     setAdding(true);
     addItem(product, quantity, finalSize, finalColor);
+    // GA4: add_to_cart
+    gtag.addToCart({
+      item_id: product.id,
+      item_name: product.name,
+      item_category: product.category || "ملابس",
+      item_variant: `${finalSize} / ${finalColor.name}`,
+      price: product.salePrice ?? product.price ?? 0,
+      quantity,
+    });
     await new Promise((r) => setTimeout(r, 400));
     setAdding(false);
     toast.success(`تمت إضافة ${product.name} إلى السلة بنجاح!`);
@@ -585,7 +603,19 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
 
               <button
                 type="button"
-                onClick={() => toggleWishlist(product)}
+                onClick={() => {
+                  toggleWishlist(product);
+                  // GA4: add_to_wishlist (only when adding, not removing)
+                  if (!inWishlist) {
+                    gtag.addToWishlist({
+                      item_id: product.id,
+                      item_name: product.name,
+                      item_category: product.category || "ملابس",
+                      price: product.salePrice ?? product.price ?? 0,
+                      quantity: 1,
+                    });
+                  }
+                }}
                 className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
                   inWishlist
                     ? "bg-red-50 text-red-500 border-red-200"

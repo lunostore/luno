@@ -9,6 +9,7 @@ import { useProductModal } from "@/features/product-modal/ProductModalProvider";
 import { useCart } from "@/features/cart/CartProvider";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/product";
+import * as gtag from "@/lib/analytics/gtag";
 
 interface ProductCardProps {
   product: Product;
@@ -98,12 +99,30 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           clone.parentNode.removeChild(clone);
         }
         addItem(product, 1, defaultSize, selectedColor);
+        // GA4: add_to_cart from card (fly animation path)
+        gtag.addToCart({
+          item_id: product.id,
+          item_name: product.name,
+          item_category: product.category || "ملابس",
+          item_variant: `${defaultSize} / ${selectedColor.name}`,
+          price: product.salePrice ?? product.price ?? 0,
+          quantity: 1,
+        });
         setIsAdding(false);
         setIsAddedBriefly(true);
         setTimeout(() => setIsAddedBriefly(false), 1200);
       }, 750);
     } else {
       addItem(product, 1, defaultSize, selectedColor);
+      // GA4: add_to_cart from card (direct path)
+      gtag.addToCart({
+        item_id: product.id,
+        item_name: product.name,
+        item_category: product.category || "ملابس",
+        item_variant: `${defaultSize} / ${selectedColor.name}`,
+        price: product.salePrice ?? product.price ?? 0,
+        quantity: 1,
+      });
       setIsAddedBriefly(true);
       setTimeout(() => setIsAddedBriefly(false), 1200);
     }
@@ -250,6 +269,16 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 e.preventDefault();
                 e.stopPropagation();
                 toggleWishlist(product);
+                // GA4: add_to_wishlist (only when adding)
+                if (!isFavorite) {
+                  gtag.addToWishlist({
+                    item_id: product.id,
+                    item_name: product.name,
+                    item_category: product.category || "ملابس",
+                    price: product.salePrice ?? product.price ?? 0,
+                    quantity: 1,
+                  });
+                }
               }}
               data-cursor-size="0px"
               className="group/btn relative overflow-hidden flex items-center justify-center w-11 h-11 rounded-[12px] border border-[#292929] dark:border-zinc-700 bg-[#f9f9f9] dark:bg-zinc-900 transition-all duration-300 flex-shrink-0 cursor-pointer"

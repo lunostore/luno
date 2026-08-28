@@ -29,6 +29,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import type { PaymentMethod, OrderItem, CreateOrderInput } from "@/types/order";
 import { TruckSubmitButton } from "@/components/checkout/TruckSubmitButton";
 import type { GovernorateRate } from "@/constants/governorates";
+import * as gtag from "@/lib/analytics/gtag";
 
 type PaymentCategory = "cash" | "online";
 type OnlineMethod = "vodafone_cash" | "instapay";
@@ -112,6 +113,21 @@ export default function CheckoutPage() {
     }
   }, [isHydrated, items.length, orderSuccess, router]);
 
+  // GA4: begin_checkout — fire once when page is ready with cart items
+  useEffect(() => {
+    if (!isHydrated || items.length === 0) return;
+    const ga4Items: gtag.GA4Item[] = items.map((item) => ({
+      item_id: item.product.id,
+      item_name: item.product.name,
+      item_category: item.product.category || "ملابس",
+      item_variant: `${item.selectedSize || "قياسي"} / ${item.selectedColor?.name || "افتراضي"}`,
+      price: item.product.salePrice ?? item.product.price ?? 0,
+      quantity: item.quantity,
+    }));
+    gtag.beginCheckout(ga4Items, totalPrice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated]);
+
   // Sync paymentMethod field with category/method state
   useEffect(() => {
     if (paymentCategory === "cash") {
@@ -186,6 +202,20 @@ export default function CheckoutPage() {
       }
 
       const orderId = await createOrder(orderPayload);
+
+      // GA4: purchase
+      gtag.purchase({
+        transaction_id: orderId,
+        value: finalOrderTotal,
+        shipping: currentShippingCost,
+        items: orderItems.map((oi) => ({
+          item_id: oi.productId,
+          item_name: oi.productName,
+          item_variant: `${oi.selectedSize || "قياسي"} / ${oi.selectedColor?.name || "افتراضي"}`,
+          price: oi.price,
+          quantity: oi.quantity,
+        })),
+      });
 
       setOrderSuccess(true);
       setIsRedirecting(true);
