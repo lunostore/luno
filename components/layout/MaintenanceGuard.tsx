@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, MessageCircle, Instagram, Sparkles, Key, Lock, X } from "lucide-react";
+import { Clock, MessageCircle, Instagram, Key, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
 import { updateSiteSettings } from "@/lib/firebase/firestore";
@@ -244,7 +244,6 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
             animate={{ scale: [1, 1.04, 1] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Sparkles size={13} className="text-emerald-400" />
             وضع الصيانة والتحديثات
           </motion.span>
         </div>

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   Send,
-  Sparkles,
   ShoppingBag,
   ExternalLink,
   Bot,
@@ -424,7 +423,6 @@ export function LUNOChatWidget() {
               ) : (
                 <Bot size={26} className="text-[#D4B886] group-hover:scale-110 transition-transform duration-300" />
               )}
-              <Sparkles size={12} className="absolute -top-1 -right-1 text-amber-300 animate-pulse pointer-events-none" />
               <span className="absolute bottom-0.5 left-0.5 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-zinc-950 shadow-md" />
             </div>
           )}

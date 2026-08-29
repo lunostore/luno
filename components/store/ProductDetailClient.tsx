@@ -636,28 +636,6 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
         </div>
       </div>
 
-      {/* Sticky Mobile Add to Cart Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 p-3 flex items-center gap-3 shadow-2xl">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-black truncate text-zinc-900 dark:text-white">{product.name}</p>
-          <p className="text-xs font-extrabold text-amber-500">{formatPrice(displayPrice)}</p>
-        </div>
-        <button
-          onClick={handleAddToCart}
-          disabled={adding || sizeStock === 0}
-          className="px-5 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 disabled:opacity-50"
-        >
-          {adding ? (
-            <Spinner size="sm" className="border-white dark:border-black border-t-transparent" />
-          ) : (
-            <>
-              <ShoppingBag size={14} />
-              <span>إضافة للسلة</span>
-            </>
-          )}
-        </button>
-      </div>
-
       <AnimatePresence>
         {showSizeGuide && (
           <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">

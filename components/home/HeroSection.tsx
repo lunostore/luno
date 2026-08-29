@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShoppingBag, Sparkles } from "lucide-react";
+import { ArrowRight, ShoppingBag } from "lucide-react";
 import { useTheme } from "@/features/theme/ThemeProvider";
 import { getSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
 
@@ -97,43 +97,15 @@ export function HeroSection() {
 
       {/* Main Hero Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center py-12">
-        {/* Top Luxury Pill Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-bold tracking-widest uppercase mb-6 shadow-sm"
-        >
-          <Sparkles size={14} className="text-amber-500" />
-          <span>LUNO STORE • NEW ERA</span>
-        </motion.div>
-
-        {/* Hero Main Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter uppercase text-zinc-950 dark:text-white drop-shadow-sm leading-none"
-        >
-          LUNO STORE
-        </motion.h1>
-
-        {/* Hero Tagline Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="mt-6 text-sm sm:text-base md:text-lg font-bold tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-400 max-w-2xl drop-shadow-sm"
-        >
-          {settings?.heroTagline || "LUNO IS YOURS • MODERN STREETWEAR & LUXURY FASHION"}
-        </motion.p>
+        {/* Clean empty space for background visual */}
+        <div className="h-24 sm:h-32 md:h-40" />
 
         {/* 21st.dev Metallic Dark Gold Halo Shimmer SHOP NOW Button */}
         <motion.div
           initial={{ opacity: 0, y: 25, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="relative group mt-10"
+          transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="relative group mt-auto"
         >
           {/* Ambient Warm Golden Halo Glow Flare (Behind Button) */}
           <div className="absolute -inset-2 bg-gradient-to-r from-amber-600/30 via-yellow-500/50 to-amber-600/30 rounded-full blur-xl opacity-60 group-hover:opacity-100 group-hover:blur-2xl transition-all duration-500 pointer-events-none" />

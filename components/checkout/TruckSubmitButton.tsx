@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Truck, Check, Sparkles } from "lucide-react";
+import { Truck, Check } from "lucide-react";
 
 interface TruckSubmitButtonProps {
   isSubmitting?: boolean;
@@ -83,7 +83,6 @@ export function TruckSubmitButton({
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-amber-400 font-extrabold text-xs tracking-widest"
           >
-            <Sparkles size={14} className="animate-spin" />
             <span>DELIVERING ORDER...</span>
           </motion.div>
         ) : (

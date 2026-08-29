@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, X, Upload, Trash2, Palette, AlertCircle, Heart, ShoppingCart, Sparkles } from "lucide-react";
+import { Plus, X, Upload, Trash2, Palette, AlertCircle, Heart, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { createProduct, updateProduct, extractProductImages, getSiteSettings } from "@/lib/firebase/firestore";
 import { generateSlug, generateSKU } from "@/lib/utils";
@@ -721,7 +721,6 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           <div className="w-full max-w-[280px] sm:max-w-[300px] mx-auto flex flex-col items-center gap-3">
             <div className="w-full flex items-center justify-between px-2">
               <span className="text-[11px] font-bold text-zinc-800 flex items-center gap-1.5">
-                <Sparkles size={14} className="text-amber-500" />
                 <span>معاينة الكارت الحقيقي على الموقع:</span>
               </span>
               <span className="text-[10px] font-mono text-zinc-400">

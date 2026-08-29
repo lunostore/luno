@@ -9,7 +9,6 @@ import {
   X,
   MessageSquare,
   ShieldCheck,
-  Sparkles,
   Award,
   Quote,
   CheckCircle2,
@@ -157,7 +156,6 @@ export function CustomerReviewsSection() {
           <div className="space-y-3">
             {/* Luxury Top Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 dark:border-amber-400/20 text-amber-600 dark:text-amber-400 text-xs font-black tracking-wide">
-              <Sparkles size={14} className="text-amber-500 fill-amber-500" />
               <span>تجارب حقيقية • REAL EXPERIENCES</span>
             </div>
 
@@ -259,7 +257,6 @@ export function CustomerReviewsSection() {
               whileTap={{ scale: 0.96 }}
               className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 text-zinc-950 rounded-2xl text-xs sm:text-sm font-black transition-all shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 cursor-pointer"
             >
-              <Sparkles size={16} />
               <span>✍️ أضف أول تقييم لك الآن</span>
             </motion.button>
           </motion.div>
@@ -551,10 +548,7 @@ export function CustomerReviewsSection() {
                     {submitting ? (
                       <Spinner size="sm" className="border-zinc-950" />
                     ) : (
-                      <>
-                        <Sparkles size={16} />
-                        <span>إرسال التقييم الآن ✨</span>
-                      </>
+                      <span>إرسال التقييم الآن</span>
                     )}
                   </button>
                 </form>

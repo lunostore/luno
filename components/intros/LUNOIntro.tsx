@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface LUNOIntroProps {
   onComplete: () => void;
@@ -211,7 +211,6 @@ export function LUNOIntro({ onComplete }: LUNOIntroProps) {
 
           {/* ── TOP CORNER BADGE ── */}
           <div className="absolute top-8 left-8 z-20 flex items-center gap-2 text-white/50 text-[10px] font-mono tracking-widest uppercase">
-            <Sparkles size={12} className="text-amber-400" />
             <span>LUNO STORE • OFFICIAL EXPERIENCE</span>
           </div>
 
