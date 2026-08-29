@@ -943,6 +943,24 @@ export async function trackVisitorSession(data: {
     // Atomic write using setDoc with merge: true
     // Does NOT require getDoc read permissions, so unauthenticated visitors are tracked 100% reliably!
     await setDoc(sessionRef, sessionPayload, { merge: true });
+
+    // ── Auto-cleanup: delete sessions older than 30 days (runs ~1% of calls to spread load) ──
+    if (Math.random() < 0.01) {
+      try {
+        const cutoffMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const cutoffDate = new Date(cutoffMs).toISOString().slice(0, 10);
+        const oldQ = query(
+          collection(db, "visitor_sessions"),
+          where("dateKey", "<", cutoffDate),
+          limit(50)
+        );
+        const oldSnap = await getDocs(oldQ);
+        const deletePromises = oldSnap.docs.map((d) => deleteDoc(d.ref));
+        await Promise.all(deletePromises);
+      } catch {
+        // Silent — cleanup failure should never break tracking
+      }
+    }
   } catch (err) {
     console.error("Error tracking visitor session:", err);
   }
@@ -951,8 +969,8 @@ export async function trackVisitorSession(data: {
 export function subscribeToVisitorSessions(
   callback: (summary: VisitorAnalyticsSummary) => void
 ): () => void {
-  // Query without Firestore orderBy to avoid missing field drop or index constraints
-  const q = query(collection(db, "visitor_sessions"), limit(200));
+  // Load up to 2000 sessions — sorted & cleaned in JS memory
+  const q = query(collection(db, "visitor_sessions"), limit(2000));
 
   return onSnapshot(
     q,
