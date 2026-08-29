@@ -614,13 +614,22 @@ ${itemsList}
                       </div>
                       {selectedOrder.transferPhone && (
                         <div className="mt-1.5 flex items-center gap-1.5 text-xs text-purple-700 bg-purple-50 dark:bg-purple-950/40 px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-800 w-fit">
-                          <span className="font-semibold">رقم التحويل:</span>
+                          <span className="font-semibold">
+                            {selectedOrder.paymentMethod === "instapay"
+                              ? "حساب / يوزر انستاباي:"
+                              : "رقم التحويل:"}
+                          </span>
                           <span className="font-mono font-black select-all">{selectedOrder.transferPhone}</span>
                           <button
                             type="button"
-                            onClick={() => handleCopyText(selectedOrder.transferPhone!, "رقم التحويل")}
+                            onClick={() =>
+                              handleCopyText(
+                                selectedOrder.transferPhone!,
+                                selectedOrder.paymentMethod === "instapay" ? "حساب انستاباي" : "رقم التحويل"
+                              )
+                            }
                             className="p-0.5 rounded text-purple-600 hover:text-purple-900 transition-colors"
-                            title="نسخ رقم التحويل"
+                            title="نسخ"
                           >
                             <Copy size={11} />
                           </button>

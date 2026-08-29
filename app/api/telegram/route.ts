@@ -114,7 +114,7 @@ ${itemsText}
 
 💵 <b>المبلغ المطلوب تحصيله:</b> <b>${order.total} ج.م</b> (شامل الشحن)
 💳 <b>طريقة الدفع:</b> ${paymentLabel}
-${order.transferPhone ? `📱 <b>رقم التحويل:</b> <code>${order.transferPhone}</code>\n` : ""}📝 <b>الملاحظات:</b> ${order.notes || "لا يوجد"}
+${order.transferPhone ? `📱 <b>${order.paymentMethod === "instapay" ? "حساب/يوزر انستاباي" : "رقم محفظة التحويل"}:</b> <code>${order.transferPhone}</code>\n` : ""}📝 <b>الملاحظات:</b> ${order.notes || "لا يوجد"}
 ━━━━━━━━━━━━━━━━━━
 ⏰ <i>تاريخ الطلب: ${new Date().toLocaleString("ar-EG")}</i>`;
 

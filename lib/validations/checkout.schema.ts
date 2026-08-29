@@ -27,17 +27,23 @@ export const checkoutSchema = z
     transferScreenshot: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    // If online payment, transfer phone is required
-    if (
-      (data.paymentMethod === "vodafone_cash" ||
-        data.paymentMethod === "instapay") &&
-      !data.transferPhone
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "أدخل رقم الهاتف الذي حوّلت منه",
-        path: ["transferPhone"],
-      });
+    // If online payment, transfer sender information is required
+    if (data.paymentMethod === "vodafone_cash") {
+      if (!data.transferPhone || !data.transferPhone.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "أدخل رقم فودافون كاش الذي حوّلت منه",
+          path: ["transferPhone"],
+        });
+      }
+    } else if (data.paymentMethod === "instapay") {
+      if (!data.transferPhone || data.transferPhone.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "أدخل اسم الحساب أو اليوزر أو الرقم الذي حوّلت منه على انستاباي",
+          path: ["transferPhone"],
+        });
+      }
     }
   });
 

@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   ChevronRight,
   ArrowRight,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useCart } from "@/features/cart/CartProvider";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
@@ -57,6 +59,7 @@ export default function CheckoutPage() {
   const vodafoneCashEnabled = siteSettings?.vodafoneCashEnabled !== false;
   const instapayEnabled = siteSettings?.instapayEnabled !== false;
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [copiedOnline, setCopiedOnline] = useState(false);
 
   const {
     register,
@@ -88,7 +91,18 @@ export default function CheckoutPage() {
     watchedCity.trim().length >= 2 &&
     !!watchedAddress &&
     watchedAddress.trim().length >= 8 &&
-    (paymentCategory === "cash" || isEgyptianPhone(watchedTransferPhone));
+    (paymentCategory === "cash" ||
+      (onlineMethod === "vodafone_cash"
+        ? isEgyptianPhone(watchedTransferPhone)
+        : !!watchedTransferPhone && watchedTransferPhone.trim().length >= 2));
+
+  const handleCopyOnline = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedOnline(true);
+    toast.success("تم النسخ بنجاح!");
+    setTimeout(() => setCopiedOnline(false), 2000);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -469,22 +483,50 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Transfer instructions */}
-                      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 space-y-1.5">
+                      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 space-y-2">
                         <p className="text-xs font-black text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                           <ChevronRight size={14} />
-                          خطوات الدفع:
+                          خطوات الدفع عبر {onlineMethod === "instapay" ? "انستاباي (InstaPay)" : "فودافون كاش"}:
                         </p>
-                        <ol className="text-xs text-amber-800 dark:text-amber-400 space-y-1 list-decimal list-inside font-medium">
-                          <li>حوّل المبلغ ({formatPrice(finalOrderTotal)}) على: <span className="font-black font-mono">{onlineNumberDisplay}</span></li>
-                          <li>اكتب رقم هاتفك الذي حوّلت منه بالأسفل</li>
+                        <ol className="text-xs text-amber-800 dark:text-amber-400 space-y-2 list-decimal list-inside font-medium">
+                          <li>
+                            حوّل المبلغ (<span className="font-bold font-mono">{formatPrice(finalOrderTotal)}</span>) على {onlineMethod === "instapay" ? "حساب / يوزر انستاباي:" : "رقم فودافون كاش:"}
+                            <div className="inline-flex items-center gap-2 mt-1 mr-2 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700">
+                              <span className="font-black font-mono text-zinc-900 dark:text-white select-all">
+                                {onlineNumberDisplay}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyOnline(onlineNumberDisplay)}
+                                className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 flex items-center gap-1 bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded transition-all"
+                                title="نسخ"
+                              >
+                                {copiedOnline ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                                <span>{copiedOnline ? "تم النسخ" : "نسخ"}</span>
+                              </button>
+                            </div>
+                          </li>
+                          <li>
+                            {onlineMethod === "instapay"
+                              ? "اكتب اسم الحساب أو اليوزر أو الرقم اللي حوّلت منه بالأسفل للتأكيد"
+                              : "اكتب رقم فودافون كاش الذي حوّلت منه بالأسفل للتأكيد"}
+                          </li>
                         </ol>
                       </div>
 
-                      {/* Transfer phone number */}
+                      {/* Transfer sender input (phone for VF Cash, account/username/phone for InstaPay) */}
                       <Input
                         id="transferPhone"
-                        label="رقم الهاتف اللي حوّلت منه *"
-                        placeholder="01012345678"
+                        label={
+                          onlineMethod === "instapay"
+                            ? "اسم حسابك / يوزرك أو الرقم اللي حوّلت منه على انستاباي *"
+                            : "رقم فودافون كاش اللي حوّلت منه *"
+                        }
+                        placeholder={
+                          onlineMethod === "instapay"
+                            ? "مثال: ahmed@instapay أو اسم الحساب أو رقم الموبايل"
+                            : "01012345678"
+                        }
                         error={errors.transferPhone?.message}
                         {...register("transferPhone")}
                       />
