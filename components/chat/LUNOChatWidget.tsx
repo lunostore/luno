@@ -477,41 +477,69 @@ export function LUNOChatWidget() {
               </button>
             </div>
 
-            {/* Messages Container */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-zinc-800">
-              {messages.map((msg) => {
-                const isUser = msg.role === "user";
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex flex-col ${isUser ? "items-start" : "items-end"}`}
-                  >
-                    <div
-                      className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed font-sans shadow-md ${
-                        isUser
-                          ? "bg-[#D4B886] text-zinc-950 rounded-br-none font-bold"
-                          : "bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-bl-none whitespace-pre-line"
-                      }`}
+            {/* Messages Container with Sleek Brand Watermark & Ambient Gradient */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-zinc-800 relative bg-gradient-to-b from-zinc-950 via-[#09090b] to-black">
+              {/* Subtle Luxury Ambient Glow Flares */}
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+
+              {/* Minimal Luxury Diagonal Micro-Grid Pattern */}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-[0.035]"
+                style={{
+                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)`,
+                  backgroundSize: "24px 24px",
+                }}
+              />
+
+              {/* Centered LUNO Brand Vector Watermark */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.06] dark:opacity-[0.05]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo.svg"
+                  alt="LUNO Watermark"
+                  className="w-48 h-auto object-contain invert"
+                />
+                <span className="text-[10px] tracking-[0.4em] uppercase text-white font-mono mt-3">
+                  LUXURY STREETWEAR
+                </span>
+              </div>
+
+              <div className="relative z-10 space-y-3.5">
+                {messages.map((msg) => {
+                  const isUser = msg.role === "user";
+                  return (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex flex-col ${isUser ? "items-start" : "items-end"}`}
                     >
-                      {isUser ? msg.content : renderFormattedMessage(msg.content)}
-                    </div>
-                    <span className="text-[9px] text-zinc-500 mt-1 px-1 font-mono">
-                      {msg.timestamp}
-                    </span>
+                      <div
+                        className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed font-sans shadow-lg ${
+                          isUser
+                            ? "bg-[#D4B886] text-zinc-950 rounded-br-none font-bold shadow-amber-500/10"
+                            : "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/90 text-zinc-200 rounded-bl-none whitespace-pre-line shadow-black/40"
+                        }`}
+                      >
+                        {isUser ? msg.content : renderFormattedMessage(msg.content)}
+                      </div>
+                      <span className="text-[9px] text-zinc-400 mt-1 px-1 font-mono">
+                        {msg.timestamp}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+
+                {isLoading && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-zinc-300 text-xs py-2 px-1">
+                    <RefreshCw size={13} className="animate-spin text-amber-400" />
+                    <span>جاري التفكير وكتابة الرد...</span>
                   </motion.div>
-                );
-              })}
+                )}
 
-              {isLoading && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-zinc-400 text-xs py-2 px-1">
-                  <RefreshCw size={13} className="animate-spin text-amber-400" />
-                  <span>جاري التفكير وكتابة الرد...</span>
-                </motion.div>
-              )}
-
-              <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Input Bar */}
