@@ -478,34 +478,37 @@ export function LUNOChatWidget() {
             </div>
 
             {/* Messages Container with Sleek Brand Watermark & Ambient Gradient */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-zinc-800 relative bg-gradient-to-b from-zinc-950 via-[#09090b] to-black">
-              {/* Subtle Luxury Ambient Glow Flares */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-zinc-800 relative bg-gradient-to-b from-zinc-950 via-[#09090b] to-black">
+              {/* Background Decor Layer (Strictly contained with overflow-hidden) */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Subtle Luxury Ambient Glow Flares */}
+                <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
+                <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl" />
 
-              {/* Minimal Luxury Diagonal Micro-Grid Pattern */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-[0.035]"
-                style={{
-                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)`,
-                  backgroundSize: "24px 24px",
-                }}
-              />
-
-              {/* Centered LUNO Brand Vector Watermark */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.06] dark:opacity-[0.05]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/logo.svg"
-                  alt="LUNO Watermark"
-                  className="w-48 h-auto object-contain invert"
+                {/* Minimal Luxury Diagonal Micro-Grid Pattern */}
+                <div
+                  className="absolute inset-0 opacity-[0.035]"
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)`,
+                    backgroundSize: "24px 24px",
+                  }}
                 />
-                <span className="text-[10px] tracking-[0.4em] uppercase text-white font-mono mt-3">
-                  LUXURY STREETWEAR
-                </span>
+
+                {/* Centered LUNO Brand Vector Watermark */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center select-none opacity-[0.06] dark:opacity-[0.05]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/logo.svg"
+                    alt="LUNO Watermark"
+                    className="w-48 h-auto object-contain invert"
+                  />
+                  <span className="text-[10px] tracking-[0.4em] uppercase text-white font-mono mt-3">
+                    LUXURY STREETWEAR
+                  </span>
+                </div>
               </div>
 
-              <div className="relative z-10 space-y-3.5">
+              <div className="relative z-10 space-y-3.5 max-w-full">
                 {messages.map((msg) => {
                   const isUser = msg.role === "user";
                   return (
@@ -516,7 +519,7 @@ export function LUNOChatWidget() {
                       className={`flex flex-col ${isUser ? "items-start" : "items-end"}`}
                     >
                       <div
-                        className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed font-sans shadow-lg ${
+                        className={`max-w-[90%] break-words rounded-2xl px-4 py-3 text-xs leading-relaxed font-sans shadow-lg ${
                           isUser
                             ? "bg-[#D4B886] text-zinc-950 rounded-br-none font-bold shadow-amber-500/10"
                             : "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/90 text-zinc-200 rounded-bl-none whitespace-pre-line shadow-black/40"
