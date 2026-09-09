@@ -1070,7 +1070,7 @@ export function subscribeToVisitorSessions(
         // Determine fallback stage if not explicitly recorded in historical docs
         let maxStage: FunnelStage = data.maxStage || "browse";
         let maxStageLabel = data.maxStageLabel || "تصفح عام";
-        let maxStagePath = data.maxStagePath || curPage;
+        const maxStagePath = data.maxStagePath || curPage;
         let maxStageRank = typeof data.maxStageRank === "number" ? data.maxStageRank : 1;
 
         if (!data.maxStage) {

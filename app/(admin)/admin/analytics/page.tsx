@@ -186,19 +186,18 @@ export default function AdminAnalyticsPage() {
   };
 
   // Filter sessions by Date Range
-  const allSessions = data?.sessions || [];
-
   const sessionsInDateRange = useMemo(() => {
-    if (!startDate && !endDate) return allSessions;
+    const rawSessions = data?.sessions || [];
+    if (!startDate && !endDate) return rawSessions;
 
-    return allSessions.filter((s) => {
+    return rawSessions.filter((s) => {
       const dKey = s.dateKey;
       if (!dKey) return true;
       if (startDate && dKey < startDate) return false;
       if (endDate && dKey > endDate) return false;
       return true;
     });
-  }, [allSessions, startDate, endDate]);
+  }, [data?.sessions, startDate, endDate]);
 
   // Filtered Sessions for Table Display
   const filteredSessions = useMemo(() => {
@@ -1017,7 +1016,7 @@ export default function AdminAnalyticsPage() {
                   {(!data?.campaigns || data.campaigns.length === 0) ? (
                     <tr>
                       <td colSpan={8} className="text-center py-12 text-zinc-400 font-medium">
-                        لا توجد زيارات مسجلة من حملات إعلانية بعد. انقر على "توليد رابط إعلان جديد" بالأعلى لإنشاء أول رابط حملة لمنتجك!
+                        لا توجد زيارات مسجلة من حملات إعلانية بعد. انقر على &quot;توليد رابط إعلان جديد&quot; بالأعلى لإنشاء أول رابط حملة لمنتجك!
                       </td>
                     </tr>
                   ) : (

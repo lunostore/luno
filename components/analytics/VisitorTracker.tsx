@@ -65,7 +65,7 @@ function detectBrowser(): string {
   if (ua.includes("Twitter")) return "Twitter / X";
 
   // 2. Specialized & Brand Mobile/Desktop Browsers
-  if ((navigator as any).brave !== undefined || ua.includes("Brave")) return "Brave";
+  if ("brave" in navigator || ua.includes("Brave")) return "Brave";
   if (ua.includes("SamsungBrowser")) return "Samsung Internet";
   if (ua.includes("UCBrowser") || ua.includes("UCWEB")) return "UC Browser";
   if (ua.includes("YaBrowser")) return "Yandex Browser";

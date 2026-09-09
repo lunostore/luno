@@ -132,8 +132,9 @@ ${order.transferPhone ? `📱 <b>${order.paymentMethod === "instapay" ? "حسا�
       recipientsCount: chatIds.length,
       deliveredCount: successCount,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
     console.error("Telegram Notification Exception:", err);
-    return NextResponse.json({ error: err.message || "حدث خطأ غير متوقع" }, { status: 500 });
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

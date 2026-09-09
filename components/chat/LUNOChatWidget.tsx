@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -110,7 +111,13 @@ function InChatProductCard({
     <div className="my-2.5 p-3.5 bg-zinc-900/95 border border-amber-500/30 rounded-2xl shadow-xl flex flex-col gap-2.5 text-right font-sans">
       <div className="flex gap-3 items-center">
         <div className="w-16 h-16 rounded-xl overflow-hidden bg-black flex-shrink-0 border border-zinc-800 relative">
-          <img src={colorObj.image || product.mainImage} alt={product.name} className="w-full h-full object-cover" />
+          <Image
+            src={colorObj.image || product.mainImage || "/placeholder.jpg"}
+            alt={product.name}
+            fill
+            sizes="64px"
+            className="object-cover"
+          />
           {product.salePrice && product.salePrice < product.price && (
             <span className="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
               خصم

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,7 +18,6 @@ import {
   Save,
   CheckCircle2,
   Sparkles,
-  LayoutGrid,
   RotateCcw,
 } from "lucide-react";
 import {
@@ -45,7 +44,6 @@ export default function AdminProductsPage() {
   const [reorderedList, setReorderedList] = useState<Product[]>([]);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [hasUnsavedOrder, setHasUnsavedOrder] = useState(false);
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     setLoading(true);

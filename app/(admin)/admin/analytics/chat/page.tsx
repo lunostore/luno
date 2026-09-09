@@ -50,9 +50,14 @@ interface ChatSession {
 
 function toMs(t: unknown): number {
   if (!t) return 0;
-  const ts = t as any;
-  if (typeof ts.toMillis === "function") return ts.toMillis();
-  if (ts.seconds) return ts.seconds * 1000;
+  if (typeof t === "object" && t !== null) {
+    if ("toMillis" in t && typeof (t as { toMillis: () => number }).toMillis === "function") {
+      return (t as { toMillis: () => number }).toMillis();
+    }
+    if ("seconds" in t && typeof (t as { seconds: number }).seconds === "number") {
+      return (t as { seconds: number }).seconds * 1000;
+    }
+  }
   if (t instanceof Date) return t.getTime();
   if (typeof t === "number" && t > 0) return t;
   return 0;

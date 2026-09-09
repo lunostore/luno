@@ -27,9 +27,11 @@ import {
 /** Play a pleasant crisp audio chime synthesizer on new unread notifications */
 function playNotificationChime() {
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
 
     if (ctx.state === "suspended") {
       ctx.resume().catch(() => {});
@@ -106,9 +108,11 @@ export function AdminNotificationCenter() {
     // Unblock browser audio autoplay policy on first user click anywhere in admin
     const unblockAudio = () => {
       try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContext) {
-          const ctx = new AudioContext();
+        const AudioContextClass =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
           if (ctx.state === "suspended") ctx.resume().catch(() => {});
         }
       } catch {
@@ -141,9 +145,12 @@ export function AdminNotificationCenter() {
     }
   };
 
-  const formatRelativeTime = (timestamp: any) => {
+  const formatRelativeTime = (timestamp: unknown) => {
     if (!timestamp) return "الآن";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const date =
+      typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp
+        ? (timestamp as { toDate: () => Date }).toDate()
+        : new Date(timestamp as string | number | Date);
     const diffMs = Date.now() - date.getTime();
     const diffSec = Math.floor(diffMs / 1000);
     const diffMin = Math.floor(diffSec / 60);

@@ -819,6 +819,7 @@ ${itemsList}
                       <Sparkles size={11} /> إيصال التحويل
                     </h4>
                     <div className="border border-zinc-100 rounded-2xl overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={selectedOrder.transferScreenshot}
                         alt="إيصال التحويل"
