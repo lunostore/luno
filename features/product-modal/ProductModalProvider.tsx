@@ -42,6 +42,7 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
         "",
         `/products?id=${encodeURIComponent(productId)}`
       );
+      window.dispatchEvent(new Event("nxt_url_changed"));
     }
   }, []);
 
@@ -53,6 +54,7 @@ export function ProductModalProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined" && window.location.search.includes("id=")) {
       const cleanUrl = window.location.pathname.startsWith("/products") ? "/" : window.location.pathname;
       window.history.replaceState(null, "", cleanUrl);
+      window.dispatchEvent(new Event("nxt_url_changed"));
     }
   }, []);
 

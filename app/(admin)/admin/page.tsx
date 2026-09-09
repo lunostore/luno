@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Plus,
   Activity,
+  Megaphone,
 } from "lucide-react";
 import { getOrders, getProducts, subscribeToVisitorSessions } from "@/lib/firebase/firestore";
 import { formatPrice, formatDate } from "@/lib/utils";
@@ -37,11 +38,15 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [liveVisitors, setLiveVisitors] = useState<number>(0);
+  const [campaignsCount, setCampaignsCount] = useState<number>(0);
+  const [abandonedCheckoutCount, setAbandonedCheckoutCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubVisitors = subscribeToVisitorSessions((summary) => {
       setLiveVisitors(summary.liveCount);
+      setCampaignsCount(summary.campaigns.length);
+      setAbandonedCheckoutCount(summary.checkoutAbandonment.abandonedCount);
     });
 
     Promise.all([getOrders(), getProducts()])
@@ -109,7 +114,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Welcome header with action */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -134,6 +139,49 @@ export default function AdminDashboardPage() {
             إدارة المنتجات
           </Link>
         </div>
+      </div>
+
+      {/* Analytics & Campaigns Fast Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link
+          href="/admin/analytics"
+          className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl hover:border-amber-400 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm">
+              <Megaphone size={18} />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-amber-900 block">رادار الحملات الإعلانية</span>
+              <span className="text-[11px] text-amber-700 font-medium">
+                {campaignsCount > 0
+                  ? `${campaignsCount} حملة إعلانية نشطة تسجل نقرات على المنتجات`
+                  : "توليد روابط الحملات ومتابعة مبيعات الإعلانات"}
+              </span>
+            </div>
+          </div>
+          <ArrowRight size={16} className="text-amber-700 group-hover:-translate-x-1 transition-transform" />
+        </Link>
+
+        <Link
+          href="/admin/analytics"
+          className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/80 rounded-2xl hover:border-purple-400 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-sm">
+              <ShoppingCart size={18} />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-purple-900 block">التخلي عن الشيك أوت</span>
+              <span className="text-[11px] text-purple-700 font-medium">
+                {abandonedCheckoutCount > 0
+                  ? `${abandonedCheckoutCount} زائر وصلوا لصفحة الدفع ولم يكملوا الطلب`
+                  : "متابعة مسار الدفع ومعدلات إتمام الشراء"}
+              </span>
+            </div>
+          </div>
+          <ArrowRight size={16} className="text-purple-700 group-hover:-translate-x-1 transition-transform" />
+        </Link>
       </div>
 
       {/* Stats Grid */}

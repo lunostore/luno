@@ -36,6 +36,22 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
 
   const applyProduct = useCallback((matched: Product) => {
     setProduct(matched);
+
+    if (typeof window !== "undefined" && matched) {
+      try {
+        sessionStorage.setItem("nxt_max_stage_product_name", matched.name);
+        sessionStorage.setItem("nxt_max_stage_product_id", matched.id);
+        const isCamp = sessionStorage.getItem("nxt_is_campaign");
+        if (isCamp && !sessionStorage.getItem("nxt_campaign_product_name")) {
+          sessionStorage.setItem("nxt_campaign_product_name", matched.name);
+          sessionStorage.setItem("nxt_campaign_product_id", matched.id);
+        }
+        window.dispatchEvent(new Event("nxt_url_changed"));
+      } catch {
+        // Silent
+      }
+    }
+
     setSelectedColor((prev) => {
       if (prev) {
         const currentVar = matched.variants?.find((v) => v.colorHex === prev.hex || v.colorName === prev.name);

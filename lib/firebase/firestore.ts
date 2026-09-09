@@ -885,6 +885,8 @@ export async function clearAllSystemErrors(): Promise<void> {
 
 // ─── 8. تحليلات وزوار الموقع (Visitor Analytics) ──────────────────
 
+export type FunnelStage = "browse" | "product" | "cart" | "checkout" | "order_success";
+
 export interface VisitorSession {
   id: string;
   sessionId: string;
@@ -896,6 +898,42 @@ export interface VisitorSession {
   device: "Mobile" | "Desktop" | "Tablet";
   browser: string;
   pageViews: number;
+
+  // ─── أقصى مرحلة وصل إليها الزائر (Furthest Funnel Stage) ─────
+  maxStage: FunnelStage;
+  maxStageLabel: string;
+  maxStagePath: string;
+  maxStageRank: number; // 1: browse, 2: product, 3: cart, 4: checkout, 5: order_success
+  maxStageProductName?: string;
+
+  // ─── تتبع الحملات الإعلانية (Ad Campaign Tracking) ─────────────
+  campaignName?: string;
+  campaignSource?: string;
+  campaignMedium?: string;
+  campaignProductId?: string;
+  campaignProductName?: string;
+  isFromCampaign?: boolean;
+}
+
+export interface CampaignMetric {
+  campaignKey: string;
+  campaignName: string;
+  campaignSource: string;
+  campaignProductId?: string;
+  campaignProductName?: string;
+  totalVisits: number;
+  uniqueVisitors: number;
+  reachedCart: number;
+  reachedCheckout: number;
+  convertedOrders: number;
+  conversionRate: number; // percentage (0-100)
+}
+
+export interface CheckoutAbandonmentSummary {
+  totalReachedCheckout: number;
+  totalCompletedOrders: number;
+  abandonedCount: number;
+  abandonmentRate: number; // percentage (0-100)
 }
 
 export interface VisitorAnalyticsSummary {
@@ -908,6 +946,8 @@ export interface VisitorAnalyticsSummary {
   browserBreakdown: Record<string, number>;
   topPages: { path: string; count: number }[];
   dailyTrend: { date: string; label: string; count: number }[];
+  campaigns: CampaignMetric[];
+  checkoutAbandonment: CheckoutAbandonmentSummary;
 }
 
 export async function trackVisitorSession(data: {
@@ -917,6 +957,17 @@ export async function trackVisitorSession(data: {
   device: "Mobile" | "Desktop" | "Tablet";
   browser: string;
   isNewPageView?: boolean;
+  maxStage?: FunnelStage;
+  maxStageLabel?: string;
+  maxStagePath?: string;
+  maxStageRank?: number;
+  maxStageProductName?: string;
+  campaignName?: string;
+  campaignSource?: string;
+  campaignMedium?: string;
+  campaignProductId?: string;
+  campaignProductName?: string;
+  isFromCampaign?: boolean;
 }): Promise<void> {
   if (!data.sessionId) return;
   try {
@@ -938,6 +989,27 @@ export async function trackVisitorSession(data: {
 
     if (data.isNewPageView) {
       sessionPayload.pageViews = increment(1);
+    }
+
+    // ── Update Max Funnel Stage ──
+    if (data.maxStage) {
+      sessionPayload.maxStage = data.maxStage;
+      sessionPayload.maxStageLabel = data.maxStageLabel || "تصفح عام";
+      sessionPayload.maxStagePath = data.maxStagePath || data.currentPage || "/";
+      sessionPayload.maxStageRank = typeof data.maxStageRank === "number" ? data.maxStageRank : 1;
+      if (data.maxStageProductName) {
+        sessionPayload.maxStageProductName = data.maxStageProductName;
+      }
+    }
+
+    // ── Update Ad Campaign Attribution ──
+    if (data.isFromCampaign || data.campaignName) {
+      sessionPayload.isFromCampaign = true;
+      if (data.campaignName) sessionPayload.campaignName = data.campaignName;
+      if (data.campaignSource) sessionPayload.campaignSource = data.campaignSource;
+      if (data.campaignMedium) sessionPayload.campaignMedium = data.campaignMedium;
+      if (data.campaignProductId) sessionPayload.campaignProductId = data.campaignProductId;
+      if (data.campaignProductName) sessionPayload.campaignProductName = data.campaignProductName;
     }
 
     // Atomic write using setDoc with merge: true
@@ -993,6 +1065,35 @@ export function subscribeToVisitorSessions(
 
       const sessions: VisitorSession[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
+        const curPage = data.currentPage || "/";
+
+        // Determine fallback stage if not explicitly recorded in historical docs
+        let maxStage: FunnelStage = data.maxStage || "browse";
+        let maxStageLabel = data.maxStageLabel || "تصفح عام";
+        let maxStagePath = data.maxStagePath || curPage;
+        let maxStageRank = typeof data.maxStageRank === "number" ? data.maxStageRank : 1;
+
+        if (!data.maxStage) {
+          const lower = curPage.toLowerCase();
+          if (lower.includes("/order-success")) {
+            maxStage = "order_success";
+            maxStageLabel = "أتم الشراء بنجاح ✅";
+            maxStageRank = 5;
+          } else if (lower.includes("/checkout")) {
+            maxStage = "checkout";
+            maxStageLabel = "صفحة الدفع (Checkout 🛒💳)";
+            maxStageRank = 4;
+          } else if (lower.includes("/cart")) {
+            maxStage = "cart";
+            maxStageLabel = "سلة المشتريات (Cart)";
+            maxStageRank = 3;
+          } else if (lower.includes("/products")) {
+            maxStage = "product";
+            maxStageLabel = "مشاهدة منتج";
+            maxStageRank = 2;
+          }
+        }
+
         return {
           id: docSnap.id,
           sessionId: data.sessionId || docSnap.id,
@@ -1000,10 +1101,23 @@ export function subscribeToVisitorSessions(
           createdAt: data.createdAt,
           lastActive: data.lastActive,
           dateKey: data.dateKey || todayStr,
-          currentPage: data.currentPage || "/",
+          currentPage: curPage,
           device: data.device || "Desktop",
           browser: data.browser || "Unknown",
           pageViews: data.pageViews || 1,
+
+          maxStage,
+          maxStageLabel,
+          maxStagePath,
+          maxStageRank,
+          maxStageProductName: data.maxStageProductName || undefined,
+
+          campaignName: data.campaignName || undefined,
+          campaignSource: data.campaignSource || undefined,
+          campaignMedium: data.campaignMedium || undefined,
+          campaignProductId: data.campaignProductId || undefined,
+          campaignProductName: data.campaignProductName || undefined,
+          isFromCampaign: Boolean(data.isFromCampaign || data.campaignName),
         };
       });
 
@@ -1029,6 +1143,26 @@ export function subscribeToVisitorSessions(
         const k = d.toISOString().slice(0, 10);
         dailyCountMap[k] = 0;
       }
+
+      // Campaign aggregation map
+      const campaignMap: Record<
+        string,
+        {
+          campaignKey: string;
+          campaignName: string;
+          campaignSource: string;
+          campaignProductId?: string;
+          campaignProductName?: string;
+          totalVisits: number;
+          uniqueVisitorIds: Set<string>;
+          reachedCartCount: number;
+          reachedCheckoutCount: number;
+          convertedOrdersCount: number;
+        }
+      > = {};
+
+      let totalReachedCheckout = 0;
+      let totalCompletedOrders = 0;
 
       sessions.forEach((s) => {
         const docData = snapshot.docs.find((d) => d.id === s.id)?.data();
@@ -1066,6 +1200,46 @@ export function subscribeToVisitorSessions(
         } else {
           dailyCountMap[s.dateKey] = 1;
         }
+
+        // Funnel & Checkout Abandonment
+        if (s.maxStageRank >= 4) {
+          totalReachedCheckout++;
+        }
+        if (s.maxStageRank >= 5 || s.maxStage === "order_success") {
+          totalCompletedOrders++;
+        }
+
+        // Campaign tracking aggregation
+        if (s.isFromCampaign && s.campaignName) {
+          const cKey = `${s.campaignName}___${s.campaignSource || "other"}`;
+          if (!campaignMap[cKey]) {
+            campaignMap[cKey] = {
+              campaignKey: cKey,
+              campaignName: s.campaignName,
+              campaignSource: s.campaignSource || "غير محدد",
+              campaignProductId: s.campaignProductId,
+              campaignProductName: s.campaignProductName,
+              totalVisits: 0,
+              uniqueVisitorIds: new Set<string>(),
+              reachedCartCount: 0,
+              reachedCheckoutCount: 0,
+              convertedOrdersCount: 0,
+            };
+          }
+
+          const cEntry = campaignMap[cKey];
+          cEntry.totalVisits += 1;
+          if (s.visitorId) cEntry.uniqueVisitorIds.add(s.visitorId);
+          if (s.maxStageRank >= 3) cEntry.reachedCartCount += 1;
+          if (s.maxStageRank >= 4) cEntry.reachedCheckoutCount += 1;
+          if (s.maxStageRank >= 5) cEntry.convertedOrdersCount += 1;
+          if (!cEntry.campaignProductName && s.campaignProductName) {
+            cEntry.campaignProductName = s.campaignProductName;
+          }
+          if (!cEntry.campaignProductId && s.campaignProductId) {
+            cEntry.campaignProductId = s.campaignProductId;
+          }
+        }
       });
 
       const topPages = Object.entries(pageCountMap)
@@ -1083,6 +1257,30 @@ export function subscribeToVisitorSessions(
           return { date, label, count };
         });
 
+      // Format campaigns list
+      const campaigns: CampaignMetric[] = Object.values(campaignMap).map((c) => {
+        const unique = c.uniqueVisitorIds.size || 1;
+        const convRate = Math.round((c.convertedOrdersCount / unique) * 100);
+        return {
+          campaignKey: c.campaignKey,
+          campaignName: c.campaignName,
+          campaignSource: c.campaignSource,
+          campaignProductId: c.campaignProductId,
+          campaignProductName: c.campaignProductName,
+          totalVisits: c.totalVisits,
+          uniqueVisitors: unique,
+          reachedCart: c.reachedCartCount,
+          reachedCheckout: c.reachedCheckoutCount,
+          convertedOrders: c.convertedOrdersCount,
+          conversionRate: Math.min(convRate, 100),
+        };
+      });
+
+      campaigns.sort((a, b) => b.totalVisits - a.totalVisits);
+
+      const abandonedCount = Math.max(0, totalReachedCheckout - totalCompletedOrders);
+      const abandonmentRate = totalReachedCheckout > 0 ? Math.round((abandonedCount / totalReachedCheckout) * 100) : 0;
+
       callback({
         liveCount,
         todayCount,
@@ -1093,6 +1291,13 @@ export function subscribeToVisitorSessions(
         browserBreakdown: browserCount,
         topPages,
         dailyTrend,
+        campaigns,
+        checkoutAbandonment: {
+          totalReachedCheckout,
+          totalCompletedOrders,
+          abandonedCount,
+          abandonmentRate,
+        },
       });
     },
     (err) => {
@@ -1108,6 +1313,13 @@ export function subscribeToVisitorSessions(
         browserBreakdown: {},
         topPages: [],
         dailyTrend: [],
+        campaigns: [],
+        checkoutAbandonment: {
+          totalReachedCheckout: 0,
+          totalCompletedOrders: 0,
+          abandonedCount: 0,
+          abandonmentRate: 0,
+        },
       });
     }
   );

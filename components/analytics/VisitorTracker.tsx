@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { trackVisitorSession } from "@/lib/firebase/firestore";
+import { trackVisitorSession, type FunnelStage } from "@/lib/firebase/firestore";
 import * as gtag from "@/lib/analytics/gtag";
 
 function getOrGenerateId(key: string, prefix: string, storage: Storage): string {
@@ -104,6 +104,140 @@ function detectBrowser(): string {
   return "متصفح آخر";
 }
 
+function computeCurrentStage(pathname: string, search: string): {
+  stage: FunnelStage;
+  label: string;
+  rank: number;
+  productId?: string;
+} {
+  const p = (pathname || "/").toLowerCase();
+  const searchLower = (search || "").toLowerCase();
+  const params = new URLSearchParams(search || "");
+  const pId = params.get("id") || params.get("slug") || "";
+
+  if (p.includes("/order-success")) {
+    return { stage: "order_success", label: "أتم الشراء بنجاح ✅", rank: 5 };
+  }
+  if (p.includes("/checkout")) {
+    return { stage: "checkout", label: "صفحة الدفع (Checkout 🛒💳)", rank: 4 };
+  }
+  if (p.includes("/cart")) {
+    return { stage: "cart", label: "سلة المشتريات (Cart)", rank: 3 };
+  }
+  if (p.startsWith("/products") || pId || searchLower.includes("id=")) {
+    return { stage: "product", label: "مشاهدة منتج", rank: 2, productId: pId || undefined };
+  }
+  return { stage: "browse", label: "تصفح عام", rank: 1 };
+}
+
+function extractAndStoreCampaign(search: string): {
+  campaignName?: string;
+  campaignSource?: string;
+  campaignMedium?: string;
+  campaignProductId?: string;
+  isFromCampaign: boolean;
+} {
+  if (typeof window === "undefined") return { isFromCampaign: false };
+
+  try {
+    const params = new URLSearchParams(search || "");
+    const urlCampaign = params.get("utm_campaign") || params.get("campaign");
+    const urlSource = params.get("utm_source") || params.get("source");
+    const urlMedium = params.get("utm_medium") || params.get("medium");
+    const urlProdId = params.get("id") || params.get("slug") || "";
+
+    // If new campaign in URL, store it in sessionStorage
+    if (urlCampaign) {
+      sessionStorage.setItem("nxt_campaign_name", urlCampaign);
+      if (urlSource) sessionStorage.setItem("nxt_campaign_source", urlSource);
+      if (urlMedium) sessionStorage.setItem("nxt_campaign_medium", urlMedium);
+      if (urlProdId) sessionStorage.setItem("nxt_campaign_product_id", urlProdId);
+      sessionStorage.setItem("nxt_is_campaign", "1");
+    }
+
+    const savedCampaign = sessionStorage.getItem("nxt_campaign_name") || undefined;
+    const savedSource = sessionStorage.getItem("nxt_campaign_source") || undefined;
+    const savedMedium = sessionStorage.getItem("nxt_campaign_medium") || undefined;
+    const savedProdId = sessionStorage.getItem("nxt_campaign_product_id") || undefined;
+    const savedProdName = sessionStorage.getItem("nxt_campaign_product_name") || undefined;
+    const isCampaign = Boolean(savedCampaign || sessionStorage.getItem("nxt_is_campaign") === "1");
+
+    return {
+      campaignName: savedCampaign,
+      campaignSource: savedSource,
+      campaignMedium: savedMedium,
+      campaignProductId: savedProdId,
+      campaignProductName: savedProdName,
+      isFromCampaign: isCampaign,
+    };
+  } catch {
+    return { isFromCampaign: false };
+  }
+}
+
+function getAndPersistMaxStage(
+  current: { stage: FunnelStage; label: string; rank: number; productId?: string },
+  currentPath: string
+): {
+  maxStage: FunnelStage;
+  maxStageLabel: string;
+  maxStagePath: string;
+  maxStageRank: number;
+  maxStageProductName?: string;
+} {
+  if (typeof window === "undefined") {
+    return {
+      maxStage: current.stage,
+      maxStageLabel: current.label,
+      maxStagePath: currentPath,
+      maxStageRank: current.rank,
+      maxStageProductName: current.productId,
+    };
+  }
+
+  try {
+    const storedRankStr = sessionStorage.getItem("nxt_max_stage_rank");
+    const storedRank = storedRankStr ? parseInt(storedRankStr, 10) : 0;
+    const storedProductName = sessionStorage.getItem("nxt_max_stage_product_name") || undefined;
+
+    // Upgrade to higher stage (e.g. from browse to checkout, or checkout to order_success)
+    if (current.rank >= storedRank) {
+      sessionStorage.setItem("nxt_max_stage_rank", current.rank.toString());
+      sessionStorage.setItem("nxt_max_stage", current.stage);
+      sessionStorage.setItem("nxt_max_stage_label", current.label);
+      sessionStorage.setItem("nxt_max_stage_path", currentPath);
+      if (current.productId) {
+        sessionStorage.setItem("nxt_max_stage_product_id", current.productId);
+      }
+      return {
+        maxStage: current.stage,
+        maxStageLabel: current.label,
+        maxStagePath: currentPath,
+        maxStageRank: current.rank,
+        maxStageProductName: storedProductName || current.productId,
+      };
+    }
+
+    // Stored rank is strictly higher (e.g. visitor reached /checkout and then returned to home /)
+    // Keep the higher stage recorded!
+    return {
+      maxStage: (sessionStorage.getItem("nxt_max_stage") as FunnelStage) || current.stage,
+      maxStageLabel: sessionStorage.getItem("nxt_max_stage_label") || current.label,
+      maxStagePath: sessionStorage.getItem("nxt_max_stage_path") || currentPath,
+      maxStageRank: storedRank,
+      maxStageProductName: storedProductName || sessionStorage.getItem("nxt_max_stage_product_id") || undefined,
+    };
+  } catch {
+    return {
+      maxStage: current.stage,
+      maxStageLabel: current.label,
+      maxStagePath: currentPath,
+      maxStageRank: current.rank,
+      maxStageProductName: current.productId,
+    };
+  }
+}
+
 export function VisitorTracker() {
   const pathname = usePathname();
   const lastPathRef = useRef<string | null>(null);
@@ -118,19 +252,48 @@ export function VisitorTracker() {
     const device = detectDevice();
     const browser = detectBrowser();
 
-    const isNewPage = lastPathRef.current !== pathname;
-    lastPathRef.current = pathname;
+    const currentFullPath =
+      window.location.pathname + (window.location.search || "");
+    const isNewPage = lastPathRef.current !== currentFullPath;
+    lastPathRef.current = currentFullPath;
 
     const sendPing = (isNew: boolean = false) => {
       try {
+        const fullCurrentPath =
+          window.location.pathname + (window.location.search || "");
+        const currentSearch = window.location.search || "";
+
+        // Extract campaign attribution
+        const campaignData = extractAndStoreCampaign(currentSearch);
+
+        // Compute current stage and max stage
+        const stageInfo = computeCurrentStage(
+          window.location.pathname || "/",
+          currentSearch
+        );
+        const maxStageInfo = getAndPersistMaxStage(stageInfo, fullCurrentPath);
+
         trackVisitorSession({
           sessionId,
           visitorId,
-          currentPage: window.location.pathname || "/",
+          currentPage: fullCurrentPath || "/",
           device,
           browser,
           isNewPageView: isNew,
+
+          maxStage: maxStageInfo.maxStage,
+          maxStageLabel: maxStageInfo.maxStageLabel,
+          maxStagePath: maxStageInfo.maxStagePath,
+          maxStageRank: maxStageInfo.maxStageRank,
+          maxStageProductName: maxStageInfo.maxStageProductName,
+
+          campaignName: campaignData.campaignName,
+          campaignSource: campaignData.campaignSource,
+          campaignMedium: campaignData.campaignMedium,
+          campaignProductId: campaignData.campaignProductId,
+          isFromCampaign: campaignData.isFromCampaign,
         });
+
         // Send GA4 Google Analytics Pageview
         if (isNew) {
           gtag.pageview(window.location.pathname || "/");
@@ -150,8 +313,15 @@ export function VisitorTracker() {
       }
     };
 
+    // Track on popstate / custom URL changes (e.g. product modal opening)
+    const handleUrlChange = () => {
+      sendPing(true);
+    };
+
     window.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleVisibilityChange);
+    window.addEventListener("popstate", handleUrlChange);
+    window.addEventListener("nxt_url_changed", handleUrlChange);
 
     // Send periodic heartbeat every 20s to keep session active
     const interval = setInterval(() => {
@@ -163,6 +333,8 @@ export function VisitorTracker() {
     return () => {
       window.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleVisibilityChange);
+      window.removeEventListener("popstate", handleUrlChange);
+      window.removeEventListener("nxt_url_changed", handleUrlChange);
       clearInterval(interval);
     };
   }, [pathname]);
