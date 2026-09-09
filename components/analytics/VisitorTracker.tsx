@@ -135,6 +135,7 @@ function extractAndStoreCampaign(search: string): {
   campaignSource?: string;
   campaignMedium?: string;
   campaignProductId?: string;
+  campaignProductName?: string;
   isFromCampaign: boolean;
 } {
   if (typeof window === "undefined") return { isFromCampaign: false };
@@ -291,6 +292,7 @@ export function VisitorTracker() {
           campaignSource: campaignData.campaignSource,
           campaignMedium: campaignData.campaignMedium,
           campaignProductId: campaignData.campaignProductId,
+          campaignProductName: campaignData.campaignProductName,
           isFromCampaign: campaignData.isFromCampaign,
         });
 
