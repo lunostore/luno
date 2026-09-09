@@ -6,18 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   Activity,
-  Eye,
   Smartphone,
   Monitor,
   Tablet,
-  Globe,
   Clock,
   Search,
   RefreshCw,
   TrendingUp,
   Layers,
   Megaphone,
-  Link2,
   Copy,
   Check,
   Calendar,
@@ -26,17 +23,13 @@ import {
   CheckCircle2,
   ShoppingCart,
   ShoppingBag,
-  Filter,
   X,
   Plus,
-  ArrowUpRight,
 } from "lucide-react";
 import {
   subscribeToVisitorSessions,
   getProducts,
   type VisitorAnalyticsSummary,
-  type VisitorSession,
-  type CampaignMetric,
 } from "@/lib/firebase/firestore";
 import type { Product } from "@/types/product";
 import { Spinner } from "@/components/ui/Spinner";
@@ -184,7 +177,9 @@ export default function AdminAnalyticsPage() {
 
   const copyGeneratedUrl = () => {
     if (!generatedCampaignUrl) return;
-    navigator.clipboard.writeText(generatedCampaignUrl);
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(generatedCampaignUrl);
+    }
     setCopiedUrl(true);
     toast.success("تم نسخ رابط الحملة الإعلانية بنجاح!");
     setTimeout(() => setCopiedUrl(false), 2000);
