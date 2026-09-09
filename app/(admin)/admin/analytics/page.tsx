@@ -280,6 +280,52 @@ export default function AdminAnalyticsPage() {
     };
   }, [sessionsInDateRange]);
 
+  // Daily Trend computed for selected date range
+  const dailyTrendInRange = useMemo(() => {
+    if (!sessionsInDateRange || sessionsInDateRange.length === 0) {
+      return [];
+    }
+
+    const countMap: Record<string, number> = {};
+    sessionsInDateRange.forEach((s) => {
+      const k = s.dateKey;
+      if (k) {
+        countMap[k] = (countMap[k] || 0) + 1;
+      }
+    });
+
+    const sortedDates = Object.keys(countMap).sort();
+    if (sortedDates.length === 0) return [];
+
+    return sortedDates.map((date) => {
+      const dObj = new Date(date);
+      const isInvalid = isNaN(dObj.getTime());
+      const dayName = isInvalid
+        ? date
+        : dObj.toLocaleDateString("ar-EG", { weekday: "short" });
+      const dayNum = isInvalid
+        ? ""
+        : dObj.toLocaleDateString("ar-EG", { day: "numeric", month: "numeric" });
+      const fullDate = isInvalid
+        ? date
+        : dObj.toLocaleDateString("ar-EG", { dateStyle: "full" });
+
+      return {
+        date,
+        dayName,
+        dayNum,
+        label: `${dayName} ${dayNum}`.trim(),
+        fullDate,
+        count: countMap[date] || 0,
+      };
+    });
+  }, [sessionsInDateRange]);
+
+  const maxDailyCount = useMemo(() => {
+    if (!dailyTrendInRange || dailyTrendInRange.length === 0) return 1;
+    return Math.max(...dailyTrendInRange.map((d) => d.count), 1);
+  }, [dailyTrendInRange]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-96 space-y-4">
@@ -290,8 +336,6 @@ export default function AdminAnalyticsPage() {
       </div>
     );
   }
-
-  const maxDailyCount = Math.max(...(data?.dailyTrend.map((d) => d.count) || [1]), 1);
 
   return (
     <div className="space-y-8 pb-16" dir="rtl">
@@ -604,42 +648,77 @@ export default function AdminAnalyticsPage() {
       {activeTab === "overview" && (
         <div className="space-y-8">
           {/* Visual Analytics Charts & Device Split */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start min-w-0">
             {/* Daily Trend Chart (2 cols) */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="lg:col-span-2 min-w-0 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm space-y-6 overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-4">
                 <div>
                   <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
                     <TrendingUp size={18} className="text-zinc-700" />
                     حركة الزوار اليومية
                   </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">عدد الزوار المسجلين لكل يوم</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">عدد الزوار المسجلين لكل يوم في الفترة المحددة</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-lg">
+                    {dailyTrendInRange.length} {dailyTrendInRange.length === 1 ? "يوم" : "أيام"}
+                  </span>
+                  <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200/60 px-3 py-1 rounded-lg">
+                    {dateRangeStats.totalVisitors} زائر إجمالي
+                  </span>
                 </div>
               </div>
 
-              <div className="h-48 flex items-end justify-between gap-2 pt-6 pb-2 px-2 border-b border-zinc-100">
-                {data?.dailyTrend.map((item, idx) => {
-                  const heightPct = Math.max(Math.round((item.count / maxDailyCount) * 100), 8);
-                  return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                      <span className="text-[10px] font-bold text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {item.count}
-                      </span>
-                      <div
-                        style={{ height: `${heightPct}%` }}
-                        className="w-full max-w-[36px] bg-zinc-900 rounded-t-lg group-hover:bg-amber-500 transition-all duration-300 relative"
-                      ></div>
-                      <span className="text-[10px] font-medium text-zinc-500 truncate max-w-full">
-                        {item.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+              {dailyTrendInRange.length === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-zinc-400 space-y-2">
+                  <Calendar size={28} className="text-zinc-300" />
+                  <p className="text-xs font-medium">لا توجد زيارات مسجلة في هذا النطاق الزمني</p>
+                </div>
+              ) : (
+                <div className="w-full min-w-0 overflow-x-auto pb-2 pt-4">
+                  {/* Subtle Grid Lines & Bars */}
+                  <div className="relative h-48 min-w-[280px] w-full flex items-end justify-between gap-2 px-2 border-b border-zinc-200/70">
+                    <div className="absolute inset-x-0 top-0 border-b border-dashed border-zinc-100 pointer-events-none"></div>
+                    <div className="absolute inset-x-0 top-1/2 border-b border-dashed border-zinc-100 pointer-events-none"></div>
+
+                    {dailyTrendInRange.map((item, idx) => {
+                      const heightPct = Math.max(Math.round((item.count / maxDailyCount) * 100), 10);
+                      return (
+                        <div
+                          key={idx}
+                          title={`${item.fullDate}: ${item.count} زائر`}
+                          className="flex-1 min-w-[36px] max-w-[56px] flex flex-col items-center gap-1.5 group h-full justify-end relative z-10"
+                        >
+                          {/* Count Label */}
+                          <span className="text-[10px] font-bold text-zinc-700 bg-zinc-100 group-hover:bg-amber-500 group-hover:text-black px-1.5 py-0.5 rounded transition-all duration-200 whitespace-nowrap">
+                            {item.count}
+                          </span>
+
+                          {/* Bar */}
+                          <div
+                            style={{ height: `${heightPct}%` }}
+                            className="w-full bg-zinc-900 group-hover:bg-amber-500 rounded-t-md transition-all duration-300 shadow-sm"
+                          ></div>
+
+                          {/* Clean 2-line Date Label */}
+                          <div className="flex flex-col items-center leading-tight text-center">
+                            <span className="text-[10px] font-bold text-zinc-700 whitespace-nowrap">
+                              {item.dayName}
+                            </span>
+                            <span className="text-[9px] text-zinc-400 font-mono whitespace-nowrap">
+                              {item.dayNum}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Device Breakdown (1 col) */}
-            <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm space-y-6">
+            <div className="lg:col-span-1 min-w-0 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm space-y-6 overflow-hidden">
               <div>
                 <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
                   <Layers size={18} className="text-zinc-700" />
