@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff, Copy, Check, FileSpreadsheet, Printer, Truck, AlertTriangle, Package, Gift } from "lucide-react";
+import { Search, X, ChevronRight, Trash2, Download, MessageCircle, ImageOff, Copy, Check, FileSpreadsheet, Printer, Truck, AlertTriangle, Package, Gift } from "lucide-react";
 import { getOrders, updateOrderStatus, deleteOrder, setManualTrackingNumber } from "@/lib/firebase/firestore";
 import { formatPrice, formatDate, buildWhatsAppConfirmationMessage } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order";
@@ -505,8 +505,8 @@ ${itemsList}
                 {/* Customer Details with Quick Copy Buttons */}
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                      <Sparkles size={11} /> بيانات العميل والشحن
+                    <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
+                      بيانات العميل والشحن
                     </h4>
                     <button
                       type="button"
@@ -831,8 +831,8 @@ ${itemsList}
 
                 {selectedOrder.transferScreenshot && (
                   <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
-                      <Sparkles size={11} /> إيصال التحويل
+                    <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-3">
+                      إيصال التحويل
                     </h4>
                     <div className="border border-zinc-100 rounded-2xl overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -874,8 +874,7 @@ ${itemsList}
 
                 {/* Items */}
                 <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
-                    <Sparkles size={11} />
+                  <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-3">
                     المنتجات ({selectedOrder.items.reduce((sum, item) => sum + item.quantity, 0)})
                   </h4>
                   <div className="space-y-2.5">

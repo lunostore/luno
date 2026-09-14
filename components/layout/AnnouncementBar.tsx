@@ -11,7 +11,7 @@ export function AnnouncementBar() {
   if (!enabled || !text) return null;
 
   // نكرر النص 6 مرات لضمان حركة مستمرة بدون فراغات
-  const repeatedText = Array(6).fill(text).join("     ✦     ");
+  const repeatedText = Array(6).fill(text).join("     •     ");
 
   return (
     <div className="w-full bg-black dark:bg-white overflow-hidden select-none h-8 sm:h-9 flex items-center relative z-50">

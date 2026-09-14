@@ -1382,7 +1382,7 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                 </label>
                 <input
                   type="text"
-                  placeholder="مثلاً: 🔥 عرض خاص: اختار أي 2 تيشيرت بـ 800 ج.م فقط! ✦ لفترة محدودة"
+                  placeholder="مثلاً: 🔥 عرض خاص: اختار أي 2 تيشيرت بـ 800 ج.م فقط! (وفّر 60 ج.م تلقائياً)"
                   value={settings.bundleMessage || ""}
                   onChange={(e) => setSettings({ ...settings, bundleMessage: e.target.value })}
                   className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
@@ -1393,7 +1393,6 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
               {settings.bundleEnabled && (parseArabicNumber(settings.bundleDiscount) > 0) && (
                 <div className="bg-white rounded-2xl p-5 border border-emerald-200 space-y-2.5">
                   <div className="flex items-center gap-2 text-xs font-black text-emerald-700 mb-3">
-                    <Sparkles size={14} />
                     معاينة حية للعرض (يطبق تلقائياً في السلة وصفحة الدفع)
                   </div>
                   {[1, 2, 3, 4].map((multiplier) => {
@@ -1450,7 +1449,7 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                 </label>
                 <input
                   type="text"
-                  placeholder="مثلاً: 🔥 عرض خاص: اختار أي 2 تيشيرت بـ 800 ج.م فقط! ✦ لفترة محدودة"
+                  placeholder="مثلاً: 🔥 خصم 20% على جميع المنتجات لفترة محدودة! • شحن سريع لجميع المحافظات"
                   value={settings.announcementText || ""}
                   onChange={(e) => {
                     const text = e.target.value;
@@ -1468,21 +1467,20 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
               {settings.announcementEnabled && settings.announcementText && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-xs font-black text-zinc-700">
-                    <Sparkles size={14} />
                     معاينة حية
                   </div>
                   {/* Light Mode Preview */}
                   <div className="rounded-xl overflow-hidden border border-zinc-200">
                     <div className="text-[9px] font-bold text-zinc-400 px-3 py-1 bg-zinc-50">الوضع الفاتح (Light)</div>
                     <div className="bg-black text-white px-4 py-2 text-[11px] font-bold tracking-wide text-center overflow-hidden whitespace-nowrap">
-                      {settings.announcementText}     ✦     {settings.announcementText}
+                      {settings.announcementText}     •     {settings.announcementText}
                     </div>
                   </div>
                   {/* Dark Mode Preview */}
                   <div className="rounded-xl overflow-hidden border border-zinc-200">
                     <div className="text-[9px] font-bold text-zinc-400 px-3 py-1 bg-zinc-50">الوضع الداكن (Dark)</div>
                     <div className="bg-white text-black border-t border-zinc-200 px-4 py-2 text-[11px] font-bold tracking-wide text-center overflow-hidden whitespace-nowrap">
-                      {settings.announcementText}     ✦     {settings.announcementText}
+                      {settings.announcementText}     •     {settings.announcementText}
                     </div>
                   </div>
                 </div>

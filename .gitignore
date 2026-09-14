@@ -12,3 +12,4 @@ Thumbs.db
 automation/.env
 automation/service-account.json
 automation/storage/
+powershell.cmd

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { X, ShoppingBag, Minus, Plus, Trash2, ArrowRight, Gift, Sparkles } from "lucide-react";
+import { X, ShoppingBag, Minus, Plus, Trash2, ArrowRight, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/features/cart/CartProvider";
 import { useBundleDiscount } from "@/hooks/useBundleDiscount";
@@ -150,7 +150,6 @@ export function CartSidebar() {
                               onClick={handleBrowseMore}
                               className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
                             >
-                              <Sparkles size={11} />
                               تصفح المنتجات لاختيار القطعة الثانية
                             </button>
                           </div>
