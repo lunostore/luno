@@ -6,6 +6,24 @@ This document lists all modifications, fixes, and improvements applied to the **
 
 ## 📅 September 2026
 
+### 🎁 Dynamic Bundle Discounts, Smart Upsell Engine, Announcement Bar & System Hardening (14 Sep 2026)
+* **Dynamic Bundle Discounts Engine**: Developed an automated tier-based discount system (`completedBundles * discountPerBundle`) with compounding discounts (buying 2 items saves 60 EGP, 4 items saves 120 EGP, 6 items saves 180 EGP).
+* **Eastern Arabic Numerals Normalization**: Implemented `parseArabicNumber` helper handling Eastern Arabic numerals (`٠١٢٣٤٥٦٧٨٩`) in the admin settings dashboard, preventing `NaN` serialization failures when typing in Arabic.
+* **Smart Upsell & Celebration Banners**:
+  * Added top-mounted sticky notification in `CartSidebar.tsx` displaying the exact items needed to achieve the next discount threshold.
+  * Added animated celebration green tag showing real-time savings once the threshold is met, with strikethrough original prices.
+  * Added dynamic add-to-cart toast notifications in `ProductDetailClient.tsx` motivating shoppers to add one more piece to qualify.
+* **High-Contrast Admin Offers & Announcement Hub**: Created a dedicated control center in `/admin/settings?tab=offers` with 1-click toggle switches (`مفعّل 🟢` / `متوقف ⚪`), live preview calculations, and custom banner copy inputs.
+* **Hardware-Accelerated Announcement Marquee**: Integrated a smooth 60fps marquee announcement bar at the top of the storefront supporting instant Dark/Light mode switching with clean dot separators (`•`).
+* **UI Minimalist Polish & Star Removal**: Eliminated `Sparkles` and star (`✦`) icons across the cart upsell button, headings, and order management views for a clean, editorial aesthetic.
+* **Manifest 403 Console Error Elimination**: Removed `app/manifest.ts` to prevent browser `<link rel="manifest">` requests blocked by Vercel WAF/Firewall.
+* **Webpack Chunk & Error Tracker Optimization**:
+  * Removed `framer-motion` from `experimental.optimizePackageImports` in `next.config.ts` to eliminate `TypeError: e[o] is not a function`.
+  * Filtered out external in-app browser noises (`Script error. :0:0`, Facebook/Instagram WebView errors) in `ErrorTrackerProvider.tsx`.
+* **Full Order Pipeline Sync**: Connected bundle discounts to Firestore order documents, Excel report exports, printable PDF invoices, and WhatsApp order confirmation templates.
+
+---
+
 ### 🎯 Ad Campaign Radar, Funnel Telemetry, Date Range Filtering & Vercel Build Optimization (09 Sep 2026)
 * **Ad Campaign Radar & Attribution Tracking**: Built full-spectrum UTM tracking engine (`utm_campaign`, `utm_source`, `utm_medium`, `utm_content`) connecting external ads (TikTok, Instagram, Facebook, Snapchat, Google) directly to specific products, real click visits, and completed purchases.
 * **Instant Campaign URL Builder Modal**: Interactive popup in `/admin/analytics` enabling admin to pick any store product, define campaign names, select advertising platforms with 1-click buttons, and instantly copy or preview the tracking URL.
