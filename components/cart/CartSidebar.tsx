@@ -16,7 +16,7 @@ export function CartSidebar() {
   const { isOpen, closeCart, items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
   const { closeProduct } = useProductModal();
   const {
-    bundleEnabled,
+    bundleQty,
     totalDiscount,
     showUpsell,
     remainingForNext,
