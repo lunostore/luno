@@ -79,7 +79,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Luno Store Brand" }],
   creator: "Luno Store",
   publisher: "Luno Store",
-  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/logo.png", type: "image/png", sizes: "512x512" },

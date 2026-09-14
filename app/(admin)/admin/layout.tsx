@@ -32,6 +32,7 @@ import {
   Share2,
   ShieldAlert,
   Star,
+  Gift,
 } from "lucide-react";
 import { signOut } from "@/lib/firebase/auth";
 import { toast } from "sonner";
@@ -43,10 +44,10 @@ const navItems = [
   { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "التحليلات والزوار", icon: Activity },
   { href: "/admin/analytics/chat", label: "تحليلات الشات بوت", icon: Bot },
+  { href: "/admin/reviews", label: "تقييمات العملاء", icon: Star },
+  { href: "/admin/products", label: "المنتجات", icon: Package },
   { href: "/admin/orders", label: "الطلبات", icon: ShoppingCart },
   { href: "/admin/shipping", label: "أسعار الشحن", icon: Truck },
-  { href: "/admin/products", label: "المنتجات", icon: Package },
-  { href: "/admin/reviews", label: "آراء العملاء", icon: Star },
   { href: "/admin/messages", label: "الرسائل والشكاوى", icon: MessageSquare },
   { href: "/admin/errors", label: "أخطاء النظام", icon: AlertTriangle },
   { href: "/admin/customers", label: "العملاء", icon: Users },
@@ -56,6 +57,7 @@ const navItems = [
 
 const SETTINGS_SUBITEMS = [
   { tab: "maintenance", label: "الصيانة والتايمر", icon: ShieldAlert },
+  { tab: "offers", label: "العروض والإعلانات", icon: Gift },
   { tab: "media", label: "وسائط الهيرو والإنترو", icon: Sparkles },
   { tab: "sizeCharts", label: "جداول المقاسات المخصصة", icon: Ruler },
   { tab: "about", label: "صفحة من نحن", icon: Info },

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff, Copy, Check, FileSpreadsheet, Printer, Truck, AlertTriangle, Package } from "lucide-react";
+import { Search, X, ChevronRight, Sparkles, Trash2, Download, MessageCircle, ImageOff, Copy, Check, FileSpreadsheet, Printer, Truck, AlertTriangle, Package, Gift } from "lucide-react";
 import { getOrders, updateOrderStatus, deleteOrder, setManualTrackingNumber } from "@/lib/firebase/firestore";
 import { formatPrice, formatDate, buildWhatsAppConfirmationMessage } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order";
@@ -397,7 +397,13 @@ ${itemsList}
                       )}
                     </td>
                     <td className="px-6 py-4 text-xs font-black text-zinc-900">
-                      {formatPrice(order.total)}
+                      <div>{formatPrice(order.total)}</div>
+                      {order.bundleDiscount && order.bundleDiscount > 0 ? (
+                        <div className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
+                          <Gift size={10} />
+                          <span>خصم: -{formatPrice(order.bundleDiscount)}</span>
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-6 py-4 text-[10px] font-bold text-zinc-600">
                       {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
@@ -652,6 +658,16 @@ ${itemsList}
                       </div>
                     </div>
 
+                    {selectedOrder.bundleDiscount && selectedOrder.bundleDiscount > 0 ? (
+                      <div>
+                        <p className="text-zinc-400 font-medium text-[11px]">خصم العرض المطبق</p>
+                        <p className="font-extrabold text-emerald-600 font-mono mt-0.5 flex items-center gap-1">
+                          <Gift size={12} />
+                          - {selectedOrder.bundleDiscount} ج.م (عرض حزمة)
+                        </p>
+                      </div>
+                    ) : null}
+
                     <div className="sm:col-span-2 border-t border-zinc-50 pt-3">
                       <p className="text-zinc-400 font-medium text-[11px]">العنوان بالتفصيل</p>
                       <div className="flex items-start justify-between gap-2 mt-0.5">
@@ -897,8 +913,14 @@ ${itemsList}
 
                 {/* Footer */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-zinc-100">
-                  <div>
-                    <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">الإجمالي الكلي</p>
+                  <div className="space-y-1">
+                    {selectedOrder.bundleDiscount && selectedOrder.bundleDiscount > 0 ? (
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-bold">
+                        <Gift size={13} />
+                        <span>خصم العرض المطبق: -{formatPrice(selectedOrder.bundleDiscount)}</span>
+                      </div>
+                    ) : null}
+                    <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">الإجمالي الكلي (شامل الشحن)</p>
                     <p className="text-2xl font-black text-zinc-900 tracking-tight mt-0.5">
                       {formatPrice(selectedOrder.total)}
                     </p>

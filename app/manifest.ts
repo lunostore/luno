@@ -1,0 +1,27 @@
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "Luno Store | البراند المفضل للملابس والستريت وير العصرية",
+    short_name: "Luno Store",
+    description: "تسوق أحدث تشكيلات الملابس والستريت وير العصرية من براند Luno Store.",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#000000",
+    theme_color: "#000000",
+    icons: [
+      {
+        src: "/icon.svg",
+        sizes: "192x192 512x512",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: "/logo.svg",
+        sizes: "192x192 512x512",
+        type: "image/svg+xml",
+        purpose: "maskable",
+      },
+    ],
+  };
+}

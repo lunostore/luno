@@ -19,6 +19,7 @@ export function exportOrdersToExcel(orders: Order[], filename = "LUNO_Orders_Rep
     "المنطقة / الحي",
     "العنوان بالتفصيل",
     "تفاصيل المنتجات والكميات",
+    "خصم العرض (ج.م)",
     "المبلغ الإجمالي (ج.م)",
     "طريقة الدفع",
     "حالة الطلب",
@@ -53,6 +54,7 @@ export function exportOrdersToExcel(orders: Order[], filename = "LUNO_Orders_Rep
       `"${(order.city || "").replace(/"/g, '""')}"`,
       `"${(order.address || "").replace(/"/g, '""')}"`,
       `"${itemsSummary.replace(/"/g, '""')}"`,
+      order.bundleDiscount || 0,
       order.total,
       `"${paymentText.replace(/"/g, '""')}"`,
       `"${statusText.replace(/"/g, '""')}"`,
@@ -161,6 +163,17 @@ export function printOrdersPDF(orders: Order[]) {
             ${itemsList}
           </tbody>
         </table>
+
+        ${
+          order.bundleDiscount && order.bundleDiscount > 0
+            ? `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #ecfdf5; color: #065f46; padding: 8px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; font-weight: bold; border: 1px solid #a7f3d0;">
+          <span>🎁 خصم عرض الحزمة المطبق:</span>
+          <span style="font-family: monospace;">- ${order.bundleDiscount} ج.م</span>
+        </div>
+        `
+            : ""
+        }
 
         <!-- Order Total Banner -->
         <div style="display: flex; justify-content: space-between; align-items: center; background: #18181b; color: #fff; padding: 12px 16px; border-radius: 12px;">

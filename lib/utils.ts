@@ -77,6 +77,7 @@ export function buildWhatsAppConfirmationMessage(
     }>;
     subtotal?: number;
     shippingCost?: number;
+    bundleDiscount?: number;
     total: number;
   },
   storeName = "MYZ"
@@ -96,6 +97,7 @@ export function buildWhatsAppConfirmationMessage(
     .join(" - ");
 
   const subtotalText = order.subtotal ? formatPrice(order.subtotal) : formatPrice(order.total);
+  const discountLine = order.bundleDiscount ? `- خصم العرض: -${formatPrice(order.bundleDiscount)}\n` : "";
   const shippingText =
     order.shippingCost !== undefined ? formatPrice(order.shippingCost) : "حسب المحافظة";
   const totalText = formatPrice(order.total);
@@ -117,7 +119,7 @@ ${itemsText}
 
 الفاتورة:
 - مجموع المنتجات: ${subtotalText}
-- مصاريف الشحن: ${shippingText}
+${discountLine}- مصاريف الشحن: ${shippingText}
 - الاجمالي النهائي: ${totalText}
 -----------------------------------
 
