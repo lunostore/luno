@@ -31,6 +31,7 @@ import { DEFAULT_SHIPPING_POLICY_TEXT } from "@/constants/policies";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Spinner } from "@/components/ui/Spinner";
 import { deleteFromCloudinary } from "@/lib/cloudinary";
+import { parseArabicNumber } from "@/lib/utils";
 import type { CustomSizeChart } from "@/types/product";
 
 type SettingsTab =
@@ -1320,14 +1321,14 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                 <button
                   type="button"
                   onClick={() => setSettings({ ...settings, bundleEnabled: !settings.bundleEnabled })}
-                  className={`flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer ${
+                  className={`flex items-center justify-center gap-2.5 px-6 py-3 rounded-2xl font-black text-xs transition-all shadow-md cursor-pointer ${
                     settings.bundleEnabled
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
-                      : "bg-zinc-200 hover:bg-zinc-300 text-zinc-600"
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25 ring-2 ring-emerald-400"
+                      : "bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 shadow-sm"
                   }`}
                 >
                   <Power size={15} />
-                  {settings.bundleEnabled ? "العرض: مفعّل 🟢" : "العرض: موقف ⚪"}
+                  <span>{settings.bundleEnabled ? "العرض: مفعّل وشغال في المتجر 🟢" : "العرض: متوقف — اضغط هنا للتفعيل ⚪"}</span>
                 </button>
               </div>
 
@@ -1337,37 +1338,51 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                     عدد القطع المطلوبة للعرض (مثلاً: 2)
                   </label>
                   <input
-                    type="number"
-                    min="2"
-                    max="20"
-                    value={settings.bundleQuantity || 2}
-                    onChange={(e) => setSettings({ ...settings, bundleQuantity: Math.max(2, parseInt(e.target.value) || 2) })}
-                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="2"
+                    value={settings.bundleQuantity ?? 2}
+                    onChange={(e) => {
+                      const val = parseArabicNumber(e.target.value);
+                      setSettings({
+                        ...settings,
+                        bundleQuantity: Math.max(2, val || 2),
+                      });
+                    }}
+                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors bg-white font-mono"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-zinc-700">
-                    مبلغ الخصم لكل حزمة (ج.م)
+                    مبلغ الخصم لكل حزمة (ج.م) — <span className="text-emerald-600 font-bold">مثلاً: 60 أو 100</span>
                   </label>
                   <input
-                    type="number"
-                    min="0"
-                    step="5"
-                    value={settings.bundleDiscount || 0}
-                    onChange={(e) => setSettings({ ...settings, bundleDiscount: Math.max(0, parseInt(e.target.value) || 0) })}
-                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="60"
+                    value={settings.bundleDiscount ?? 0}
+                    onChange={(e) => {
+                      const val = parseArabicNumber(e.target.value);
+                      setSettings({
+                        ...settings,
+                        bundleDiscount: val,
+                        // تفعيل العرض تلقائياً بمجرد إدخال قيمة الخصم
+                        bundleEnabled: val > 0 ? true : settings.bundleEnabled,
+                      });
+                    }}
+                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors bg-white font-mono"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-zinc-700">
-                  رسالة العرض للعميل (اختياري — تظهر في السلة)
+                  رسالة العرض للعميل (تظهر في السلة وعند إضافة منتج)
                 </label>
                 <input
                   type="text"
-                  placeholder="مثلاً: ضيف قطعة كمان ووفّر 100 ج.م! 🔥"
+                  placeholder="مثلاً: 🔥 عرض خاص: اختار أي 2 تيشيرت بـ 800 ج.م فقط! ✦ لفترة محدودة"
                   value={settings.bundleMessage || ""}
                   onChange={(e) => setSettings({ ...settings, bundleMessage: e.target.value })}
                   className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
@@ -1375,15 +1390,15 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
               </div>
 
               {/* Live Preview */}
-              {settings.bundleEnabled && (settings.bundleDiscount || 0) > 0 && (
+              {settings.bundleEnabled && (parseArabicNumber(settings.bundleDiscount) > 0) && (
                 <div className="bg-white rounded-2xl p-5 border border-emerald-200 space-y-2.5">
                   <div className="flex items-center gap-2 text-xs font-black text-emerald-700 mb-3">
                     <Sparkles size={14} />
-                    معاينة حية للعرض
+                    معاينة حية للعرض (يطبق تلقائياً في السلة وصفحة الدفع)
                   </div>
                   {[1, 2, 3, 4].map((multiplier) => {
-                    const qty = (settings.bundleQuantity || 2) * multiplier;
-                    const discount = (settings.bundleDiscount || 0) * multiplier;
+                    const qty = (parseArabicNumber(settings.bundleQuantity) || 2) * multiplier;
+                    const discount = parseArabicNumber(settings.bundleDiscount) * multiplier;
                     return (
                       <div key={multiplier} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-emerald-50">
                         <span className="font-bold text-zinc-700">
@@ -1418,14 +1433,14 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                 <button
                   type="button"
                   onClick={() => setSettings({ ...settings, announcementEnabled: !settings.announcementEnabled })}
-                  className={`flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer ${
+                  className={`flex items-center justify-center gap-2.5 px-6 py-3 rounded-2xl font-black text-xs transition-all shadow-md cursor-pointer ${
                     settings.announcementEnabled
-                      ? "bg-zinc-900 hover:bg-zinc-800 text-white"
-                      : "bg-zinc-200 hover:bg-zinc-300 text-zinc-600"
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25 ring-2 ring-emerald-400"
+                      : "bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 shadow-sm"
                   }`}
                 >
                   <Power size={15} />
-                  {settings.announcementEnabled ? "الشريط: مفعّل 🟢" : "الشريط: موقف ⚪"}
+                  <span>{settings.announcementEnabled ? "الشريط: مفعّل وشغال 🟢" : "الشريط: متوقف — اضغط هنا للتفعيل ⚪"}</span>
                 </button>
               </div>
 
@@ -1435,9 +1450,16 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
                 </label>
                 <input
                   type="text"
-                  placeholder="مثلاً: 🔥 خصم 20% على جميع المنتجات لفترة محدودة!"
+                  placeholder="مثلاً: 🔥 عرض خاص: اختار أي 2 تيشيرت بـ 800 ج.م فقط! ✦ لفترة محدودة"
                   value={settings.announcementText || ""}
-                  onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    setSettings({
+                      ...settings,
+                      announcementText: text,
+                      announcementEnabled: text.trim().length > 0 ? true : settings.announcementEnabled,
+                    });
+                  }}
                   className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900 transition-colors"
                 />
               </div>

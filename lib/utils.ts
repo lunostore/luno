@@ -5,6 +5,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Safely parses any number or string, converting Eastern Arabic numerals (٠-٩) to Western (0-9).
+ */
+export function parseArabicNumber(val: any): number {
+  if (typeof val === "number") return isNaN(val) ? 0 : val;
+  if (!val && val !== 0) return 0;
+  const str = String(val)
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .trim();
+  const num = parseFloat(str);
+  return isNaN(num) ? 0 : num;
+}
+
 export function formatPrice(price: number, currency = "EGP"): string {
   return new Intl.NumberFormat("en-EG", {
     style: "currency",

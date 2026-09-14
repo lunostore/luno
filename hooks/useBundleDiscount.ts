@@ -2,6 +2,7 @@
 
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
 import { useCart } from "@/features/cart/CartProvider";
+import { parseArabicNumber } from "@/lib/utils";
 
 /**
  * Hook لحساب خصم الحزم (Bundle Discount) بناءً على إعدادات الأدمن ومحتويات السلة.
@@ -14,13 +15,16 @@ export function useBundleDiscount() {
   const { settings } = useSiteSettings();
   const { totalItems, totalPrice } = useCart();
 
-  const bundleEnabled = settings?.bundleEnabled ?? false;
-  const bundleQty = settings?.bundleQuantity ?? 2;
-  const discountPerBundle = settings?.bundleDiscount ?? 0;
-  const bundleMessage = settings?.bundleMessage || "";
+  const rawEnabled = settings?.bundleEnabled;
+  const discountPerBundle = parseArabicNumber(settings?.bundleDiscount);
+  const bundleQty = Math.max(2, parseArabicNumber(settings?.bundleQuantity) || 2);
+  const bundleMessage = settings?.bundleMessage?.trim() || "";
+
+  // العرض مفعّل إذا كان bundleEnabled = true، أو إذا وضع الأدمن خصماً أكبر من 0
+  const bundleEnabled = rawEnabled === true || (rawEnabled !== false && discountPerBundle > 0);
 
   // عدد الحزم الكاملة (أزواج)
-  const completedBundles = bundleEnabled && bundleQty > 0
+  const completedBundles = bundleEnabled && bundleQty > 0 && discountPerBundle > 0
     ? Math.floor(totalItems / bundleQty)
     : 0;
 
@@ -38,6 +42,9 @@ export function useBundleDiscount() {
     && totalItems > 0
     && (totalItems % bundleQty) !== 0;
 
+  // هل العميل حصل على خصم حالياً؟
+  const hasDiscount = totalDiscount > 0;
+
   // السعر النهائي بعد الخصم (بدون شحن)
   const finalPrice = Math.max(0, totalPrice - totalDiscount);
 
@@ -49,6 +56,7 @@ export function useBundleDiscount() {
     totalDiscount,
     remainingForNext,
     showUpsell,
+    hasDiscount,
     finalPrice,
     bundleMessage,
   };

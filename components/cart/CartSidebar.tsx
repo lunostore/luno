@@ -97,6 +97,68 @@ export function CartSidebar() {
                 </div>
               ) : (
                 <>
+                  {/* ── Bundle Offer Banners at Top ── */}
+                  <AnimatePresence>
+                    {/* State 1: When user has applied discount */}
+                    {totalDiscount > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/60 p-3 flex items-center justify-between shadow-sm"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                            <Gift size={16} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-emerald-900 dark:text-emerald-100">
+                              تم تطبيق خصم العرض! 🎉
+                            </p>
+                            <p className="text-[11px] text-emerald-700 dark:text-emerald-300 font-bold">
+                              وفّرت {formatPrice(totalDiscount)} على طلبك تلقائياً
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800 shadow-sm">
+                          -{formatPrice(totalDiscount)}
+                        </span>
+                      </motion.div>
+                    )}
+
+                    {/* State 2: When user needs more items for next discount (e.g. has 1 item) */}
+                    {showUpsell && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 p-3.5 shadow-sm"
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Gift size={16} className="text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-emerald-900 dark:text-emerald-100 leading-relaxed">
+                              {bundleMessage || `🔥 ضيف ${remainingForNext === 1 ? "قطعة كمان" : `${remainingForNext} قطع كمان`} ووفّر ${formatPrice(discountPerBundle)}!`}
+                            </p>
+                            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">
+                              اطلب {bundleQty} قطع واحصل على الخصم فوراً في السلة وعند الدفع!
+                            </p>
+                            <button
+                              type="button"
+                              onClick={handleBrowseMore}
+                              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Sparkles size={11} />
+                              تصفح المنتجات لاختيار القطعة الثانية
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {items.map((item, index) => {
                     const pId = item.product?.id || `item-${index}`;
                     const pSize = item.selectedSize || "قياسي";
@@ -137,37 +199,6 @@ export function CartSidebar() {
                       </motion.div>
                     );
                   })}
-
-                  {/* ── Upsell Banner ── */}
-                  <AnimatePresence>
-                    {showUpsell && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="relative overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 p-3.5"
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center flex-shrink-0">
-                            <Gift size={16} className="text-emerald-600 dark:text-emerald-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-200 leading-relaxed">
-                              {bundleMessage || `ضيف ${remainingForNext === 1 ? "قطعة كمان" : `${remainingForNext} قطع كمان`} ووفّر ${formatPrice(discountPerBundle)}! 🔥`}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={handleBrowseMore}
-                              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
-                            >
-                              <Sparkles size={11} />
-                              تصفح المنتجات
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </>
               )}
             </div>

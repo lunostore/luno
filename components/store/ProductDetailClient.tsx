@@ -11,6 +11,7 @@ import * as gtag from "@/lib/analytics/gtag";
 import { useCart } from "@/features/cart/CartProvider";
 import { useWishlist } from "@/features/wishlist/WishlistProvider";
 import { useTheme } from "@/features/theme/ThemeProvider";
+import { useBundleDiscount } from "@/hooks/useBundleDiscount";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
 import type { Product, ProductVariant } from "@/types/product";
 import { Spinner } from "@/components/ui/Spinner";
@@ -24,6 +25,7 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
   const { toggleWishlist, isInWishlist, wishlist, toggleWishlistDrawer } = useWishlist();
   const { theme, toggleTheme } = useTheme();
   const { addItem, openCart, totalItems, toggleCart } = useCart();
+  const { bundleEnabled, discountPerBundle, bundleQty } = useBundleDiscount();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -270,7 +272,23 @@ export default function ProductDetailClient({ overrideSlug, onClose }: { overrid
     });
     await new Promise((r) => setTimeout(r, 400));
     setAdding(false);
-    toast.success(`تمت إضافة ${product.name} إلى السلة بنجاح!`);
+
+    const newTotalItems = totalItems + quantity;
+    if (bundleEnabled && discountPerBundle > 0) {
+      if (newTotalItems % bundleQty === 0) {
+        const saved = (newTotalItems / bundleQty) * discountPerBundle;
+        toast.success(`تمت الإضافة للسلة! 🎉 مبروك، تم تطبيق خصم العرض وفرت ${formatPrice(saved)}!`, { duration: 4000 });
+      } else {
+        const remaining = bundleQty - (newTotalItems % bundleQty);
+        toast.success(
+          `تمت الإضافة للسلة! 🔥 ضيف ${remaining === 1 ? "قطعة كمان" : `${remaining} قطع`} واستفد من خصم ${formatPrice(discountPerBundle)}!`,
+          { duration: 4000 }
+        );
+      }
+    } else {
+      toast.success(`تمت إضافة ${product.name} إلى السلة بنجاح!`);
+    }
+
     openCart();
   };
 
