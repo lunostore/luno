@@ -8,6 +8,7 @@ import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { MaintenanceGuard } from "@/components/layout/MaintenanceGuard";
 import { ProductModalProvider } from "@/features/product-modal/ProductModalProvider";
 import { LUNOChatWidget } from "@/components/chat/LUNOChatWidget";
+import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 
 export default function StoreLayout({
   children,
@@ -18,6 +19,7 @@ export default function StoreLayout({
     <MaintenanceGuard>
       <ProductModalProvider>
         <VisitorTracker />
+        <AnnouncementBar />
         <Header />
         <CartSidebar />
         <WishlistSidebar />

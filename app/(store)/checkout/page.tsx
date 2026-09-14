@@ -20,8 +20,10 @@ import {
   ArrowRight,
   Copy,
   Check,
+  Gift,
 } from "lucide-react";
 import { useCart } from "@/features/cart/CartProvider";
+import { useBundleDiscount } from "@/hooks/useBundleDiscount";
 import { useSiteSettings } from "@/features/settings/SiteSettingsProvider";
 import { createOrder, getShippingRates, validateStockAvailability } from "@/lib/firebase/firestore";
 import { formatPrice } from "@/lib/utils";
@@ -40,6 +42,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart, isHydrated } = useCart();
   const { settings: siteSettings } = useSiteSettings();
+  const { totalDiscount, bundleEnabled } = useBundleDiscount();
 
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -155,7 +158,8 @@ export default function CheckoutPage() {
     (r) => r.nameAr === selectedGovernorate || r.nameEn === selectedGovernorate
   );
   const currentShippingCost = activeRateObj?.price ?? 50;
-  const finalOrderTotal = totalPrice + currentShippingCost;
+  const appliedBundleDiscount = bundleEnabled ? totalDiscount : 0;
+  const finalOrderTotal = totalPrice - appliedBundleDiscount + currentShippingCost;
   const onlineNumberDisplay =
     onlineMethod === "vodafone_cash" ? vodafoneNumber : instapayUsername;
 
@@ -208,6 +212,7 @@ export default function CheckoutPage() {
         items: orderItems,
         subtotal: totalPrice,
         shippingCost: currentShippingCost,
+        bundleDiscount: appliedBundleDiscount > 0 ? appliedBundleDiscount : undefined,
         total: finalOrderTotal,
       };
 
@@ -596,6 +601,15 @@ export default function CheckoutPage() {
                     <span className="text-gray-500">المجموع الفرعي</span>
                     <span className="font-bold">{formatPrice(totalPrice)}</span>
                   </div>
+                  {appliedBundleDiscount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                        <Gift size={13} />
+                        خصم العرض
+                      </span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">- {formatPrice(appliedBundleDiscount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-gray-500 flex items-center gap-1">
                       <Truck size={13} className="text-amber-500" />

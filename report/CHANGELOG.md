@@ -4,6 +4,25 @@ This document lists all modifications, fixes, and improvements applied to the **
 
 ---
 
+## 📅 September 2026
+
+### 🎯 Ad Campaign Radar, Funnel Telemetry, Date Range Filtering & Vercel Build Optimization (09 Sep 2026)
+* **Ad Campaign Radar & Attribution Tracking**: Built full-spectrum UTM tracking engine (`utm_campaign`, `utm_source`, `utm_medium`, `utm_content`) connecting external ads (TikTok, Instagram, Facebook, Snapchat, Google) directly to specific products, real click visits, and completed purchases.
+* **Instant Campaign URL Builder Modal**: Interactive popup in `/admin/analytics` enabling admin to pick any store product, define campaign names, select advertising platforms with 1-click buttons, and instantly copy or preview the tracking URL.
+* **Furthest Funnel Stage Recording (Non-Degrading State)**: Resolved checkout drop-off visibility. If a visitor reaches `/checkout` and later browses back to products or home, their highest achieved funnel stage remains permanently flagged as `Checkout 🛒💳` in Firestore and the live sessions table.
+* **Checkout Abandonment Telemetry**: Dedicated analysis tab measuring checkout entries, completed orders, and abandoned sessions with drop rate percentages and immediate drill-down filtering.
+* **Comprehensive Date Range Filter Engine**: Added calendar range selection (Start/End Date) plus quick presets (`All Time`, `Today`, `Yesterday`, `Last 7 Days`, `Last 30 Days`, `This Month`) recalculating visits, pageviews, and device metrics on the fly.
+* **Responsive Daily Trend Chart Overhaul**: Fixed RTL horizontal overflow where chart bars spilled outside their card boundaries. Implemented `min-w-0`, `overflow-hidden`, smooth horizontal scroll area (`overflow-x-auto`), aesthetic 2-line Arabic date labels, and interactive amber hover states.
+* **Admin Overview Quick Widgets**: Added top-level Ad Campaign and Checkout Abandonment indicator widgets on the primary `/admin` dashboard.
+* **Vercel Build Zero-Error Compliance**:
+  * Fixed JSX unescaped quote error (`react/no-unescaped-entities`) in `admin/analytics/page.tsx`.
+  * Fixed `prefer-const` in `lib/firebase/firestore.ts`.
+  * Fixed TypeScript return type mismatch in `VisitorTracker.tsx`.
+  * Removed unused variables (`LayoutGrid`, `startTransition`) in `admin/products/page.tsx`.
+  * Replaced `<img>` in chat widget with Next.js `<Image>` and sanitized all TypeScript `any` types.
+
+---
+
 ## 📅 August 2026
 
 ### 🛍️ 3D Shopflex Product Card Replication & Mobile Performance (23 Aug 2026)

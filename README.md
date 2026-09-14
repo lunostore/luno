@@ -222,13 +222,19 @@ git push -u origin main
 - ✅ Checkout with Vodafone Cash / InstaPay
 - ✅ Order confirmation page
 
-### Admin
-- ✅ Secure admin login (Firebase Auth)
-- ✅ Dashboard with stats
-- ✅ Product CRUD with Cloudinary multi-upload
-- ✅ Order management with status pipeline
-- ✅ Customer list
-- ✅ Category management
+### Admin & Intelligence
+- ✅ Secure admin login (Firebase Auth & Session cookies)
+- ✅ Real-time dashboard with KPIs & revenue analytics
+- ✅ Ad Campaign Radar & UTM attribution tracking per product
+- ✅ Campaign URL Builder modal (TikTok, Instagram, Facebook, Google, Snapchat)
+- ✅ Furthest funnel stage tracking (browse → product → cart → checkout → order)
+- ✅ Checkout abandonment telemetry with direct visitor drill-down
+- ✅ Date range historical filter engine with calendar picker & quick presets
+- ✅ Responsive daily visitor trend charts (overflow-contained, 0-overlap)
+- ✅ Product CRUD with Cloudinary multi-upload & custom sort order manager
+- ✅ Order management pipeline with status workflows & Excel export
+- ✅ Customer CRM & LTV engine
+- ✅ Category management & 8 store configuration hubs
 
 ### Technical
 - ✅ TypeScript throughout

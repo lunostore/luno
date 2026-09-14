@@ -40,6 +40,7 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   shippingCost?: number;
+  bundleDiscount?: number;  // قيمة خصم الحزمة المطبقة على هذا الطلب
   total: number;
   status: OrderStatus;
   createdAt: Timestamp | Date;
@@ -67,6 +68,7 @@ export interface CreateOrderInput {
   items: OrderItem[];
   subtotal: number;
   shippingCost?: number;
+  bundleDiscount?: number;  // قيمة خصم الحزمة المطبقة على هذا الطلب
   total: number;
 }
 

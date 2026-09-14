@@ -695,6 +695,16 @@ export interface SiteSettings {
 
   // Custom Size Charts Management
   sizeCharts?: CustomSizeChart[];
+
+  // ─── Bundle Discount System (عروض خصم الكميات) ─────────
+  bundleEnabled?: boolean;        // تفعيل/تعطيل نظام خصم الحزم
+  bundleQuantity?: number;        // عدد القطع المطلوبة للعرض (مثلاً: 2)
+  bundleDiscount?: number;        // مبلغ الخصم لكل حزمة (مثلاً: 100 ج.م)
+  bundleMessage?: string;         // رسالة العرض (مثلاً: "اشتري قطعتين ووفر 100 ج.م!")
+
+  // ─── Announcement Bar (شريط الإعلانات المتحرك) ─────────
+  announcementEnabled?: boolean;  // تفعيل/تعطيل شريط الإعلانات
+  announcementText?: string;      // نص الشريط المتحرك
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {

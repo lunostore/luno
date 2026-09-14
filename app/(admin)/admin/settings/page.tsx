@@ -22,6 +22,8 @@ import {
   Ruler,
   Plus,
   ExternalLink,
+  Gift,
+  Megaphone,
 } from "lucide-react";
 
 import { getSiteSettings, updateSiteSettings, type SiteSettings } from "@/lib/firebase/firestore";
@@ -39,7 +41,8 @@ type SettingsTab =
   | "policies"
   | "copy"
   | "payments"
-  | "social";
+  | "social"
+  | "offers";
 
 function AdminSettingsContent() {
   const searchParams = useSearchParams();
@@ -142,6 +145,12 @@ Shipping & Delivery
 We aim to ship all orders within 1–2 business days. Delivery takes 2–5 business days.`,
     shippingPolicyText: DEFAULT_SHIPPING_POLICY_TEXT,
     sizeCharts: [],
+    bundleEnabled: false,
+    bundleQuantity: 2,
+    bundleDiscount: 0,
+    bundleMessage: "",
+    announcementEnabled: false,
+    announcementText: "",
   });
 
   useEffect(() => {
@@ -155,6 +164,12 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
             heroImagesDark: data.heroImagesDark || [],
             introImages: data.introImages || [],
             sizeCharts: data.sizeCharts || [],
+            bundleEnabled: data.bundleEnabled ?? false,
+            bundleQuantity: data.bundleQuantity ?? 2,
+            bundleDiscount: data.bundleDiscount ?? 0,
+            bundleMessage: data.bundleMessage ?? "",
+            announcementEnabled: data.announcementEnabled ?? false,
+            announcementText: data.announcementText ?? "",
           }));
         }
       })
@@ -251,6 +266,7 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
     copy: { title: "نصوص وعناوين المتجر", subtitle: "تعديل اسم المتجر وشعارات الهيرو والفوتر", icon: Type },
     payments: { title: "بيانات الدفع والتواصل", subtitle: "تعديل رقم فودافون كاش ويوزر انستا باي وأرقام الدعم", icon: CreditCard },
     social: { title: "روابط التواصل الاجتماعي", subtitle: "تعديل حسابات إنستجرام وتيك توك وفيسبوك", icon: Share2 },
+    offers: { title: "العروض والإعلانات", subtitle: "إعداد خصم الحزم وشريط الإعلانات المتحرك", icon: Gift },
   };
 
   const currentTabInfo = TAB_DETAILS[activeTab] || TAB_DETAILS["maintenance"];
@@ -1281,6 +1297,177 @@ We aim to ship all orders within 1–2 business days. Delivery takes 2–5 busin
           </div>
         )}
 
+        {/* 9. OFFERS & ANNOUNCEMENTS TAB */}
+        {activeTab === "offers" && (
+          <div className="space-y-6">
+
+            {/* ── Bundle Discount Section ── */}
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-6 sm:p-8 shadow-sm border border-emerald-100 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-200/60 pb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                    <Gift size={20} />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-base text-zinc-900 tracking-tight">
+                      نظام خصم الحزم (Bundle Discount)
+                    </h2>
+                    <p className="text-zinc-500 text-xs mt-0.5">
+                      حدد عدد القطع ومبلغ الخصم — الخصم يتضاعف تلقائياً مع كل حزمة إضافية
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, bundleEnabled: !settings.bundleEnabled })}
+                  className={`flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer ${
+                    settings.bundleEnabled
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                      : "bg-zinc-200 hover:bg-zinc-300 text-zinc-600"
+                  }`}
+                >
+                  <Power size={15} />
+                  {settings.bundleEnabled ? "العرض: مفعّل 🟢" : "العرض: موقف ⚪"}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-zinc-700">
+                    عدد القطع المطلوبة للعرض (مثلاً: 2)
+                  </label>
+                  <input
+                    type="number"
+                    min="2"
+                    max="20"
+                    value={settings.bundleQuantity || 2}
+                    onChange={(e) => setSettings({ ...settings, bundleQuantity: Math.max(2, parseInt(e.target.value) || 2) })}
+                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-zinc-700">
+                    مبلغ الخصم لكل حزمة (ج.م)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value={settings.bundleDiscount || 0}
+                    onChange={(e) => setSettings({ ...settings, bundleDiscount: Math.max(0, parseInt(e.target.value) || 0) })}
+                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-zinc-700">
+                  رسالة العرض للعميل (اختياري — تظهر في السلة)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثلاً: ضيف قطعة كمان ووفّر 100 ج.م! 🔥"
+                  value={settings.bundleMessage || ""}
+                  onChange={(e) => setSettings({ ...settings, bundleMessage: e.target.value })}
+                  className="w-full px-4 py-3 border border-emerald-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors bg-white"
+                />
+              </div>
+
+              {/* Live Preview */}
+              {settings.bundleEnabled && (settings.bundleDiscount || 0) > 0 && (
+                <div className="bg-white rounded-2xl p-5 border border-emerald-200 space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs font-black text-emerald-700 mb-3">
+                    <Sparkles size={14} />
+                    معاينة حية للعرض
+                  </div>
+                  {[1, 2, 3, 4].map((multiplier) => {
+                    const qty = (settings.bundleQuantity || 2) * multiplier;
+                    const discount = (settings.bundleDiscount || 0) * multiplier;
+                    return (
+                      <div key={multiplier} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-emerald-50">
+                        <span className="font-bold text-zinc-700">
+                          {qty} قطع{qty > 2 ? "ة" : "تين"}
+                        </span>
+                        <span className="font-black text-emerald-600">
+                          خصم {discount} ج.م
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ── Announcement Bar Section ── */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-zinc-100 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700">
+                    <Megaphone size={20} />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-base text-zinc-900 tracking-tight">
+                      شريط الإعلانات المتحرك (Announcement Bar)
+                    </h2>
+                    <p className="text-zinc-500 text-xs mt-0.5">
+                      شريط متحرك أعلى الموقع يدعم الوضع الفاتح والداكن
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, announcementEnabled: !settings.announcementEnabled })}
+                  className={`flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer ${
+                    settings.announcementEnabled
+                      ? "bg-zinc-900 hover:bg-zinc-800 text-white"
+                      : "bg-zinc-200 hover:bg-zinc-300 text-zinc-600"
+                  }`}
+                >
+                  <Power size={15} />
+                  {settings.announcementEnabled ? "الشريط: مفعّل 🟢" : "الشريط: موقف ⚪"}
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-zinc-700">
+                  نص الإعلان المتحرك
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثلاً: 🔥 خصم 20% على جميع المنتجات لفترة محدودة!"
+                  value={settings.announcementText || ""}
+                  onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-zinc-900 transition-colors"
+                />
+              </div>
+
+              {/* Live Preview */}
+              {settings.announcementEnabled && settings.announcementText && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-black text-zinc-700">
+                    <Sparkles size={14} />
+                    معاينة حية
+                  </div>
+                  {/* Light Mode Preview */}
+                  <div className="rounded-xl overflow-hidden border border-zinc-200">
+                    <div className="text-[9px] font-bold text-zinc-400 px-3 py-1 bg-zinc-50">الوضع الفاتح (Light)</div>
+                    <div className="bg-black text-white px-4 py-2 text-[11px] font-bold tracking-wide text-center overflow-hidden whitespace-nowrap">
+                      {settings.announcementText}     ✦     {settings.announcementText}
+                    </div>
+                  </div>
+                  {/* Dark Mode Preview */}
+                  <div className="rounded-xl overflow-hidden border border-zinc-200">
+                    <div className="text-[9px] font-bold text-zinc-400 px-3 py-1 bg-zinc-50">الوضع الداكن (Dark)</div>
+                    <div className="bg-white text-black border-t border-zinc-200 px-4 py-2 text-[11px] font-bold tracking-wide text-center overflow-hidden whitespace-nowrap">
+                      {settings.announcementText}     ✦     {settings.announcementText}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {/* Global Save Button at Bottom */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200/60">
           <button
